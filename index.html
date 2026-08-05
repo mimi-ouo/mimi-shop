@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>米米小舖</title>
+  <title>即時圖片牆 (管理員權限控制版)</title>
   <style>
     :root {
       --bg-color: #36393f;
@@ -26,27 +26,48 @@
     .header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
       margin-bottom: 20px;
-      gap: 15px;
-      flex-wrap: wrap;
+      gap: 20px;
     }
 
-    .header h2 {
+    /* 左側標題與紅框說明區組合 */
+    .title-left {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .title-left h2 {
       margin: 0;
+      white-space: nowrap;
+      line-height: 1.4;
     }
 
-    /* 說明欄樣式 */
+    /* 說明欄樣式（固定於紅框處，支援自主/自動換行） */
     .info-badge {
-      display: inline-flex;
-      align-items: center;
+      display: flex;
+      align-items: flex-start;
       gap: 6px;
       background-color: #202225;
       border: 1px solid #4f545c;
       color: #b9bbbe;
-      padding: 6px 14px;
-      border-radius: 20px;
+      padding: 8px 12px;
+      border-radius: 8px;
       font-size: 13px;
+      line-height: 1.5;
+      width: 100%;
+      max-width: 420px; /* 固定紅框區塊最大寬度 */
+      min-height: 38px;
+      box-sizing: border-box;
+      word-break: break-word; /* 文字過長時自動換行 */
+      white-space: pre-wrap;   /* 支援換行符號 */
+    }
+
+    .info-badge .editable-text {
+      flex: 1;
+      outline: none;
     }
 
     /* 登入區控制 */
@@ -202,13 +223,14 @@
 </head>
 <body>
 
-  <!-- 頂部列：標題、可編輯說明區塊、登入區 -->
+  <!-- 頂部列：左側標題與紅框說明區、右側登入區 -->
   <div class="header">
-    <h2>⭐ 米米小舖 ⭐</h2>
-
-    <div class="info-badge">
-      <span class="info-icon">ℹ️</span>
-      <span class="editable-text" id="siteDescription" contenteditable="false">載入中...</span>
+    <div class="title-left">
+      <h2>⭐ 米米小舖 ⭐</h2>
+      <div class="info-badge">
+        <span class="info-icon">ℹ️</span>
+        <span class="editable-text" id="siteDescription" contenteditable="false">載入中...</span>
+      </div>
     </div>
 
     <div class="auth-box" id="authBox">
@@ -223,14 +245,14 @@
     <button class="tab-btn active" data-category="general">🏠 家具</button>
     <button class="tab-btn" data-category="memes">🧸 熊熊</button>
     <button class="tab-btn" data-category="design">💍 戒指(限男)</button>
-    <button class="tab-btn" data-category="design">💍 戒指(限女)</button>
-    <button class="tab-btn" data-category="photos">🌱 作物(限男)</button>
-    <button class="tab-btn" data-category="photos">🌱 作物(限女)</button>
+    <button class="tab-btn" data-category="photos">💍 戒指(限女)</button>
+    <button class="tab-btn" data-category="crops_m">🌱 作物(限男)</button>
+    <button class="tab-btn" data-category="crops_f">🌱 作物(限女)</button>
   </div>
   
   <!-- 上傳區 (僅管理員可見) -->
   <div class="drop-zone" id="dropZone">
-    <p style="font-size: 16px; margin-bottom: 8px;">💡 當前分頁：<b id="currentTabName">綜合討論</b>（Ctrl + V 貼上圖片 / 拖曳上傳）</p>
+    <p style="font-size: 16px; margin-bottom: 8px;">💡 當前分頁：<b id="currentTabName">家具</b>（Ctrl + V 貼上圖片 / 拖曳上傳）</p>
     <p id="status" style="color: var(--accent-color); margin: 0; font-weight: bold;"></p>
   </div>
 
@@ -277,17 +299,11 @@
       }
     });
 
+    // 編輯完成點擊外部 (blur) 自動儲存
     descElem.addEventListener('blur', () => {
       if (!isAdmin) return;
       const newDesc = descElem.innerText.trim();
       set(descRef, newDesc);
-    });
-
-    descElem.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        descElem.blur();
-      }
     });
 
     // 2. 登入狀態監聽
