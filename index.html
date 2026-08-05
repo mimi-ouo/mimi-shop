@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>⭐ 米米小舖 ⭐</title>
+  <title>⭐ 米米小舖-Club MStar ⭐</title>
   <style>
     :root {
       --bg-color: #36393f;
@@ -152,14 +152,16 @@
       border-color: var(--accent-color);
     }
 
-    /* 圖片網格 */
+    /* 圖片網格：改為 auto-fill 並以固定 120px 排列 */
     .gallery {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fill, 120px);
+      gap: 12px;
     }
 
+    /* 圖片卡片：寬度固定 120px */
     .img-card {
+      width: 120px;
       background-color: var(--card-bg);
       border-radius: 8px;
       overflow: hidden;
@@ -169,41 +171,38 @@
       position: relative;
     }
 
+    /* 圖片容器：高寬固定 120px */
     .img-wrapper {
-      width: 100%;
-      padding-top: 100%;
+      width: 120px;
+      height: 120px;
       position: relative;
       background-color: #202225;
     }
 
     .img-wrapper img {
-      position: absolute;
-      top: 0;
-      left: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
 
-    /* 右上角數量/售出下拉選單 */
+    /* 右上角數量/售出下拉選單（微調適應 120px 尺寸） */
     .status-select {
       position: absolute;
-      top: 8px;
-      right: 8px;
+      top: 4px;
+      right: 4px;
       z-index: 10;
       background-color: rgba(32, 34, 37, 0.85);
       color: #fff;
       border: 1px solid #4f545c;
       border-radius: 4px;
-      padding: 3px 6px;
-      font-size: 12px;
+      padding: 1px 2px;
+      font-size: 10px;
       font-weight: bold;
       cursor: pointer;
       outline: none;
       backdrop-filter: blur(4px);
     }
 
-    /* 當選擇「售出」時切換背景與文字為紅色 */
     .status-select.is-sold {
       background-color: rgba(237, 66, 69, 0.9);
       border-color: var(--danger-color);
@@ -220,22 +219,22 @@
       font-weight: bold;
     }
 
-    /* 刪除按鈕 (移至左上角，避免蓋到右上角的選單) */
+    /* 刪除按鈕 (左上角，尺寸微調) */
     .delete-btn {
       position: absolute;
-      top: 8px;
-      left: 8px;
+      top: 4px;
+      left: 4px;
       background-color: rgba(0, 0, 0, 0.6);
       color: #fff;
       border: none;
-      width: 28px;
-      height: 28px;
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
       cursor: pointer;
       display: none;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
+      font-size: 12px;
       z-index: 10;
     }
 
@@ -244,18 +243,20 @@
     }
 
     .img-info {
-      padding: 8px 12px;
-      font-size: 13px;
+      padding: 4px 6px;
+      font-size: 11px;
       color: #b9bbbe;
       background-color: #2f3136;
+      text-align: center;
     }
 
     .editable-text {
       outline: none;
-      padding: 2px 6px;
+      padding: 1px 2px;
       border-radius: 4px;
       color: #ffffff;
       word-break: break-all;
+      display: block;
     }
 
     /* 登入後可編輯的視覺提示 */
@@ -276,9 +277,9 @@
   <!-- 頂部列：左側標題與紅框說明區、右側登入區 -->
   <div class="header">
     <div class="title-left">
-      <h2>⭐ 米米小舖-Club MSTar ⭐</h2>
+      <h2>⭐ 米米小舖 ⭐</h2>
       <div class="info-badge">
-        <span class="info-icon">ℹ️</span>
+        <span class="info-icon">📕</span>
         <span class="editable-text" id="siteDescription" contenteditable="false">載入中...</span>
       </div>
     </div>
@@ -435,9 +436,9 @@
     function generateSelectOptions(currentVal) {
       let options = '';
       for (let i = 1; i <= 10; i++) {
-        const valStr = `數量: ${i}`;
-        const selected = (currentVal === valStr || (!currentVal && i === 1)) ? 'selected' : '';
-        options += `<option value="${valStr}" ${selected}>數量: ${i}</option>`;
+        const valStr = `${i}`;
+        const selected = (currentVal === valStr || currentVal === `數量: ${i}` || (!currentVal && i === 1)) ? 'selected' : '';
+        options += `<option value="${valStr}" ${selected}>${i}</option>`;
       }
       const soldSelected = (currentVal === '售出') ? 'selected' : '';
       options += `<option value="售出" class="sold-option" ${soldSelected}>售出</option>`;
@@ -462,13 +463,12 @@
         card.id = `card-${key}`;
 
         const textValue = data.caption || getDefaultTimeStr();
-        const statusValue = data.quantity || '數量: 1';
+        const statusValue = data.quantity || '1';
         const isSoldClass = statusValue === '售出' ? 'is-sold' : '';
 
         card.innerHTML = `
           <button class="delete-btn" title="刪除圖片">✕</button>
           <div class="img-wrapper">
-            <!-- 右上角數量/售出下拉選單 -->
             <select class="status-select ${isSoldClass}" id="select-${key}" ${isAdmin ? '' : 'disabled'}>
               ${generateSelectOptions(statusValue)}
             </select>
@@ -527,7 +527,7 @@
         // 即時更新數量/售出下拉選單
         const targetSelectElem = document.getElementById(`select-${key}`);
         if (targetSelectElem) {
-          const newStatus = data.quantity || '數量: 1';
+          const newStatus = data.quantity || '1';
           targetSelectElem.value = newStatus;
           if (newStatus === '售出') {
             targetSelectElem.classList.add('is-sold');
@@ -566,7 +566,7 @@
         push(ref(db, `images/${currentCategory}`), {
           url: e.target.result,
           caption: getDefaultTimeStr(),
-          quantity: '數量: 1',
+          quantity: '1',
           timestamp: Date.now()
         });
         status.innerText = "發送成功！";
