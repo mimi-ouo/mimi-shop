@@ -245,6 +245,7 @@
       display: grid;
       grid-template-columns: repeat(auto-fill, 120px);
       gap: 12px;
+      align-items: start;
     }
 
     .img-card {
@@ -320,8 +321,9 @@
 
     .delete-btn:hover { background-color: var(--danger-color); }
 
+    /* 圖片下方內容區域 */
     .img-info {
-      padding: 4px 6px;
+      padding: 6px;
       font-size: 11px;
       color: #b9bbbe;
       background-color: #2f3136;
@@ -330,15 +332,55 @@
 
     .editable-text {
       outline: none;
-      padding: 1px 2px;
+      padding: 2px 4px;
       border-radius: 4px;
       color: #ffffff;
       word-break: break-all;
       display: block;
     }
 
-    .is-admin .editable-text { background: rgba(0, 0, 0, 0.2); cursor: text; }
-    .is-admin .editable-text:hover { border: 1px #4f545c solid; }
+    /* 🔒 圖片下方專屬備註欄（位在圖片正下方，僅管理員可見） */
+    .admin-note-box {
+      display: none;
+      background-color: #202225;
+      border-top: 1px solid #4f545c;
+      padding: 6px;
+      font-size: 10px;
+      text-align: left;
+    }
+
+    .is-admin .admin-note-box {
+      display: block; /* 管理員登入時顯示在圖片下方 */
+    }
+
+    .admin-note-label {
+      color: #57F287;
+      font-weight: bold;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .admin-note-text {
+      outline: none;
+      color: #dcddde;
+      word-break: break-all;
+      display: block;
+      padding: 2px;
+      border-radius: 3px;
+      min-height: 14px;
+    }
+
+    .is-admin .editable-text, .is-admin .admin-note-text { 
+      background: rgba(0, 0, 0, 0.2); 
+      cursor: text; 
+    }
+    
+    .is-admin .editable-text:hover, .is-admin .admin-note-text:hover { 
+      border: 1px #4f545c solid; 
+    }
+    
     .is-admin .img-card:hover .delete-btn { display: flex; }
   </style>
 </head>
@@ -540,7 +582,7 @@
         const delBtn = itemDiv.querySelector('.del-sub-btn');
         delBtn.addEventListener('click', (e) => {
           e.stopPropagation();
-          if (confirm(`確定要移除「${item.name}」選項嗎？\n（防護機制：舊有的圖片會安全保留在資料庫中）`)) {
+          if (confirm(`確定要移除「${item.name}」選項嗎？\n（舊有的圖片會安全保留在資料庫中）`)) {
             remove(ref(db, `settings/menus/subMenus/${groupKey}/${subKey}`));
           }
         });
@@ -549,7 +591,7 @@
       });
     }
 
-    // 新增子選單：自動切換至新發佈的分頁
+    // 新增子選單
     document.querySelectorAll('.add-sub-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
         if (!isAdmin) return;
@@ -558,15 +600,12 @@
         if (name && name.trim() !== '') {
           const newSubKey = 'sub_' + Date.now();
           
-          // 1. 寫入資料庫
           await update(ref(db, `settings/menus/subMenus/${groupKey}/${newSubKey}`), { name: name.trim() });
           
-          // 2. 更新樣式高亮狀態
           document.querySelectorAll('.tab-btn, .dropdown-item').forEach(b => b.classList.remove('active'));
           const parentBtn = btn.closest('.dropdown').querySelector('.tab-btn');
           if (parentBtn) parentBtn.classList.add('active');
 
-          // 3. 立即顯示新項目並切換
           updateCurrentTabDisplay(name.trim());
           switchCategory(newSubKey);
         }
@@ -602,7 +641,7 @@
       }
     });
 
-    // 3. Auth 狀態管理
+    // 3. Auth 權限狀態管理
     onAuthStateChanged(auth, (user) => {
       const authBox = document.getElementById('authBox');
       const dropZone = document.getElementById('dropZone');
@@ -678,7 +717,7 @@
       }
     }
 
-    // 4. 切換並讀取分頁圖片
+    // 4. 切換與讀取分頁圖片
     function renderStatusElement(key, rawStatusValue) {
       const statusValue = formatStatusValue(rawStatusValue);
       const isSoldClass = statusValue.includes('售出') ? 'is-sold' : '';
@@ -707,6 +746,7 @@
 
         const textValue = data.caption || getDefaultTimeStr();
         const statusValue = data.quantity || '數量: 1';
+        const noteValue = data.note || '';
 
         card.innerHTML = `
           <button class="delete-btn" title="刪除圖片">✕</button>
@@ -717,10 +757,16 @@
           <div class="img-info">
             <span class="editable-text" contenteditable="${isAdmin}" id="text-${key}">${textValue}</span>
           </div>
+          <!-- 🔒 圖片下方獨立備註區（僅管理員可見） -->
+          <div class="admin-note-box">
+            <div class="admin-note-label">🔒 備註</div>
+            <span class="admin-note-text" contenteditable="${isAdmin}" id="note-${key}">${noteValue}</span>
+          </div>
         `;
 
         gallery.prepend(card);
 
+        // 修改數量狀態
         const badgeElem = card.querySelector(`#badge-${key}`);
         if (badgeElem) {
           badgeElem.addEventListener('blur', () => {
@@ -732,6 +778,7 @@
           });
         }
 
+        // 刪除圖片
         const deleteBtn = card.querySelector('.delete-btn');
         deleteBtn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -740,6 +787,7 @@
           }
         });
 
+        // 修改圖片公開文字
         const editableElem = card.querySelector('.editable-text');
         editableElem.addEventListener('blur', () => {
           if (!isAdmin) return;
@@ -748,17 +796,35 @@
         editableElem.addEventListener('keydown', (e) => {
           if (e.key === 'Enter') { e.preventDefault(); editableElem.blur(); }
         });
+
+        // 🔒 修改圖片私人備註文字
+        const noteElem = card.querySelector('.admin-note-text');
+        noteElem.addEventListener('blur', () => {
+          if (!isAdmin) return;
+          update(ref(db, `images/${currentCategory}/${key}`), { note: noteElem.innerText.trim() });
+        });
+        noteElem.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); noteElem.blur(); }
+        });
       });
 
       onChildChanged(activeRef, (snapshot) => {
         const key = snapshot.key;
         const data = snapshot.val();
         
+        // 更新公開說明
         const targetTextElem = document.getElementById(`text-${key}`);
         if (targetTextElem && document.activeElement !== targetTextElem) {
           targetTextElem.innerText = data.caption || '';
         }
 
+        // 🔒 更新私人備註
+        const targetNoteElem = document.getElementById(`note-${key}`);
+        if (targetNoteElem && document.activeElement !== targetNoteElem) {
+          targetNoteElem.innerText = data.note || '';
+        }
+
+        // 更新狀態標籤
         const newStatus = formatStatusValue(data.quantity);
         const targetBadgeElem = document.getElementById(`badge-${key}`);
         if (targetBadgeElem && document.activeElement !== targetBadgeElem) {
@@ -791,6 +857,7 @@
           url: e.target.result,
           caption: getDefaultTimeStr(),
           quantity: '數量: 1',
+          note: '', // 預設新增空白私人備註
           timestamp: Date.now()
         });
         status.innerText = "發送成功！";
