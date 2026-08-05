@@ -184,7 +184,7 @@
       object-fit: cover;
     }
 
-    /* 右上角數量/售出標籤 (通用基礎樣式) */
+    /* 右上角數量/售出標籤 */
     .status-select, .status-badge {
       position: absolute;
       top: 4px;
@@ -194,8 +194,8 @@
       color: #fff;
       border: 1px solid #4f545c;
       border-radius: 4px;
-      padding: 1px 4px;
-      font-size: 10px;
+      padding: 1px 3px;
+      font-size: 9px;
       font-weight: bold;
       backdrop-filter: blur(4px);
     }
@@ -289,7 +289,7 @@
     <div class="title-left">
       <h2>⭐ 米米小舖 ⭐</h2>
       <div class="info-badge">
-        <span class="info-icon">📕</span>
+        <span class="info-icon">ℹ️</span>
         <span class="editable-text" id="siteDescription" contenteditable="false">載入中...</span>
       </div>
     </div>
@@ -350,6 +350,14 @@
 
     function getDefaultTimeStr() {
       return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // 將資料庫數值統整轉換為標準格式（如："數量: 1"）
+    function formatStatusValue(val) {
+      if (!val) return '數量: 1';
+      if (val === '售出') return '售出';
+      if (val.startsWith('數量:')) return val;
+      return `數量: ${val}`;
     }
 
     // 1. 說明欄即時同步與編輯
@@ -442,21 +450,23 @@
       }
     }
 
-    // 生成數量選單 HTML (1~10 與 售出)
+    // 生成數量選單 HTML ("數量: 1" ~ "數量: 10" 與 "售出")
     function generateSelectOptions(currentVal) {
+      const formattedVal = formatStatusValue(currentVal);
       let options = '';
       for (let i = 1; i <= 10; i++) {
-        const valStr = `${i}`;
-        const selected = (currentVal === valStr || currentVal === `數量: ${i}` || (!currentVal && i === 1)) ? 'selected' : '';
-        options += `<option value="${valStr}" ${selected}>${i}</option>`;
+        const valStr = `數量: ${i}`;
+        const selected = (formattedVal === valStr) ? 'selected' : '';
+        options += `<option value="${valStr}" ${selected}>數量: ${i}</option>`;
       }
-      const soldSelected = (currentVal === '售出') ? 'selected' : '';
+      const soldSelected = (formattedVal === '售出') ? 'selected' : '';
       options += `<option value="售出" class="sold-option" ${soldSelected}>售出</option>`;
       return options;
     }
 
-    // 根據權限渲染右上角狀態（管理員為 select，訪客為 span 標籤）
-    function renderStatusElement(key, statusValue) {
+    // 根據權限渲染右上角狀態
+    function renderStatusElement(key, rawStatusValue) {
+      const statusValue = formatStatusValue(rawStatusValue);
       const isSoldClass = statusValue === '售出' ? 'is-sold' : '';
       if (isAdmin) {
         return `
@@ -491,7 +501,7 @@
         card.id = `card-${key}`;
 
         const textValue = data.caption || getDefaultTimeStr();
-        const statusValue = data.quantity || '1';
+        const statusValue = data.quantity || '數量: 1';
 
         card.innerHTML = `
           <button class="delete-btn" title="刪除圖片">✕</button>
@@ -553,7 +563,7 @@
         }
 
         // 即時更新數量/售出狀態
-        const newStatus = data.quantity || '1';
+        const newStatus = formatStatusValue(data.quantity);
         if (isAdmin) {
           const targetSelectElem = document.getElementById(`select-${key}`);
           if (targetSelectElem) {
@@ -606,7 +616,7 @@
         push(ref(db, `images/${currentCategory}`), {
           url: e.target.result,
           caption: getDefaultTimeStr(),
-          quantity: '1',
+          quantity: '數量: 1',
           timestamp: Date.now()
         });
         status.innerText = "發送成功！";
