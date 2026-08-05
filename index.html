@@ -22,7 +22,7 @@
       padding: 20px;
     }
 
-    /* 頂部列：標題、說明區塊與登入區 */
+    /* 頂部列 */
     .header {
       display: flex;
       justify-content: space-between;
@@ -375,7 +375,7 @@
       <span class="tab-text" id="tab-title-memes" contenteditable="false">🧸 熊熊</span>
     </button>
 
-    <!-- 戒指 (下拉選單連結新分頁) -->
+    <!-- 戒指 (下拉選單) -->
     <div class="dropdown">
       <button class="tab-btn" id="ringParentBtn">
         <span class="tab-text" id="tab-title-ringGroup" contenteditable="false">💍 戒指</span>
@@ -386,7 +386,7 @@
       </div>
     </div>
 
-    <!-- 作物 (下拉選單連結新分頁) -->
+    <!-- 作物 (下拉選單) -->
     <div class="dropdown">
       <button class="tab-btn" id="cropParentBtn">
         <span class="tab-text" id="tab-title-cropGroup" contenteditable="false">🌱 作物</span>
@@ -432,7 +432,6 @@
     let activeRef = null;
     let isAdmin = false;
 
-    // 預設分類與 Firebase 圖片目錄對應 (SubKey 對應 images/{subKey})
     const defaultCategories = {
       tabNames: {
         general: "🏠 家具",
@@ -489,7 +488,6 @@
       const tabNames = Object.assign({}, defaultCategories.tabNames, data.tabNames || {});
       const subMenus = Object.assign({}, defaultCategories.subMenus, data.subMenus || {});
 
-      // 更新主選單名稱
       Object.keys(tabNames).forEach(cat => {
         const textElem = document.getElementById(`tab-title-${cat}`);
         if (textElem && document.activeElement !== textElem) {
@@ -497,7 +495,6 @@
         }
       });
 
-      // 動態渲染子選單並連結分頁
       renderSubMenu('ringGroup', subMenus.ringGroup || {}, 'ringSubMenu');
       renderSubMenu('cropGroup', subMenus.cropGroup || {}, 'cropSubMenu');
     });
@@ -518,7 +515,6 @@
           <button class="del-sub-btn" title="僅隱藏選單，圖片保留">✕</button>
         `;
 
-        // 點擊下拉子項目：切換至對應分頁圖片庫
         itemDiv.addEventListener('click', (e) => {
           if (e.target.classList.contains('del-sub-btn') || document.activeElement === itemDiv.querySelector('.tab-text')) return;
           
@@ -529,7 +525,7 @@
           if (parentBtn) parentBtn.classList.add('active');
 
           updateCurrentTabDisplay(item.name);
-          switchCategory(subKey); // 連結至 images/{subKey}
+          switchCategory(subKey);
         });
 
         const textSpan = itemDiv.querySelector('.tab-text');
@@ -541,11 +537,10 @@
           if (e.key === 'Enter') { e.preventDefault(); textSpan.blur(); }
         });
 
-        // 刪除選單選項（舊有圖片安全保留於資料庫）
         const delBtn = itemDiv.querySelector('.del-sub-btn');
         delBtn.addEventListener('click', (e) => {
           e.stopPropagation();
-          if (confirm(`確定要移除「${item.name}」選項嗎？\n（舊有的圖片會安全保留在資料庫中）`)) {
+          if (confirm(`確定要移除「${item.name}」選項嗎？\n（防護機制：舊有的圖片會安全保留在資料庫中）`)) {
             remove(ref(db, `settings/menus/subMenus/${groupKey}/${subKey}`));
           }
         });
@@ -554,20 +549,30 @@
       });
     }
 
-    // 動態新增子選單分頁
+    // 新增子選單：自動切換至新發佈的分頁
     document.querySelectorAll('.add-sub-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
         if (!isAdmin) return;
         const groupKey = btn.getAttribute('data-group');
         const name = prompt("請輸入新增的分頁名稱：");
-        if (name) {
+        if (name && name.trim() !== '') {
           const newSubKey = 'sub_' + Date.now();
-          update(ref(db, `settings/menus/subMenus/${groupKey}/${newSubKey}`), { name: name });
+          
+          // 1. 寫入資料庫
+          await update(ref(db, `settings/menus/subMenus/${groupKey}/${newSubKey}`), { name: name.trim() });
+          
+          // 2. 更新樣式高亮狀態
+          document.querySelectorAll('.tab-btn, .dropdown-item').forEach(b => b.classList.remove('active'));
+          const parentBtn = btn.closest('.dropdown').querySelector('.tab-btn');
+          if (parentBtn) parentBtn.classList.add('active');
+
+          // 3. 立即顯示新項目並切換
+          updateCurrentTabDisplay(name.trim());
+          switchCategory(newSubKey);
         }
       });
     });
 
-    // 靜態主選單編輯綁定
     ['general', 'memes', 'ringGroup', 'cropGroup'].forEach(cat => {
       const textSpan = document.getElementById(`tab-title-${cat}`);
       if (!textSpan) return;
@@ -582,7 +587,6 @@
       });
     });
 
-    // 靜態分頁切換 (家具, 熊熊)
     ['general', 'memes'].forEach(cat => {
       const btn = document.querySelector(`[data-category="${cat}"]`);
       if (btn) {
@@ -598,7 +602,7 @@
       }
     });
 
-    // 3. Auth 權限狀態管理
+    // 3. Auth 狀態管理
     onAuthStateChanged(auth, (user) => {
       const authBox = document.getElementById('authBox');
       const dropZone = document.getElementById('dropZone');
@@ -674,7 +678,7 @@
       }
     }
 
-    // 4. 切換與讀取分頁圖片（獨立路徑 `images/${newCategory}`）
+    // 4. 切換並讀取分頁圖片
     function renderStatusElement(key, rawStatusValue) {
       const statusValue = formatStatusValue(rawStatusValue);
       const isSoldClass = statusValue.includes('售出') ? 'is-sold' : '';
@@ -717,7 +721,6 @@
 
         gallery.prepend(card);
 
-        // 數量狀態修改
         const badgeElem = card.querySelector(`#badge-${key}`);
         if (badgeElem) {
           badgeElem.addEventListener('blur', () => {
@@ -729,7 +732,6 @@
           });
         }
 
-        // 刪除圖片
         const deleteBtn = card.querySelector('.delete-btn');
         deleteBtn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -738,7 +740,6 @@
           }
         });
 
-        // 圖片說明修改
         const editableElem = card.querySelector('.editable-text');
         editableElem.addEventListener('blur', () => {
           if (!isAdmin) return;
@@ -777,7 +778,7 @@
       });
     }
 
-    // 圖片上傳 (貼上與拖曳)
+    // 圖片上傳
     function handleImageFile(file) {
       if (!isAdmin || !file || !file.type.startsWith('image/')) return;
 
