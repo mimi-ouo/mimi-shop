@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>即時圖片牆 (管理員權限控制版)</title>
+  <style>
+    :root {
+      --bg-color: #36393f;
+      --card-bg: #2f3136;
+      --text-color: #dcddde;
+      --accent-color: #5865f2;
+      --danger-color: #ed4245;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* 頂部列：標題與登入區 */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .auth-box {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .auth-box input {
+      padding: 6px 10px;
+      border-radius: 4px;
+      border: 1px solid #4f545c;
+      background: #202225;
+      color: #fff;
+    }
+
+    .auth-btn {
+      background: var(--accent-color);
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    /* 分頁選單 */
+    .tabs-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #4f545c;
+      padding-bottom: 10px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: var(--card-bg);
+      color: var(--text-color);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--accent-color);
+      color: #fff;
+      font-weight: bold;
+    }
+
+    /* 上傳區 (預設隱藏，登入後顯示) */
+    .drop-zone {
+      border: 2px dashed #4f545c;
+      background: var(--card-bg);
+      padding: 25px;
+      text-align: center;
+      border-radius: 8px;
+      margin-bottom: 25px;
+      display: none; /* 預設不給訪客上傳 */
+    }
+    
+    .drop-zone.dragover {
+      background: #393c43;
+      border-color: var(--accent-color);
+    }
+
+    /* 圖片網格 */
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .img-card {
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .img-wrapper {
+      width: 100%;
+      padding-top: 100%;
+      position: relative;
+      background-color: #202225;
+    }
+
+    .img-wrapper img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* 刪除按鈕 (預設隱藏) */
+    .delete-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      border: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none; /* 由 JS 依身份控制是否顯示 */
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      z-index: 10;
+    }
+
+    .delete-btn:hover {
+      background-color: var(--danger-color);
+    }
+
+    .img-info {
+      padding: 8px 12px;
+      font-size: 13px;
+      color: #b9bbbe;
+      background-color: #2f3136;
+    }
+
+    .editable-text {
+      outline: none;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #ffffff;
+      width: 100%;
+      word-break: break-all;
+    }
+
+    /* 登入後可編輯的視覺提示 */
+    .is-admin .editable-text {
+      background: rgba(0, 0, 0, 0.2);
+      cursor: text;
+    }
+    .is-admin .editable-text:hover {
+      border: 1px #4f545c solid;
+    }
+    .is-admin .img-card:hover .delete-btn {
+      display: flex; /* 管理員滑鼠移入時顯示刪除鍵 */
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h2>📸 即時圖片相簿牆</h2>
+    
+    <!-- 管理員登入控制區 -->
+    <div class="auth-box" id="authBox">
+      <input type="email" id="emailInput" placeholder="管理員 Email">
+      <input type="password" id="passwordInput" placeholder="密碼">
+      <button class="auth-btn" id="loginBtn">登入</button>
+    </div>
+  </div>
+
+  <!-- 分頁選單 -->
+  <div class="tabs-container">
+    <button class="tab-btn active" data-category="general">💬 綜合討論</button>
+    <button class="tab-btn" data-category="memes">🤣 迷因梗圖</button>
+    <button class="tab-btn" data-category="design">🎨 設計素材</button>
+    <button class="tab-btn" data-category="photos">📷 隨手攝影</button>
+  </div>
+  
+  <!-- 上傳區 (僅管理員可見) -->
+  <div class="drop-zone" id="dropZone">
+    <p style="font-size: 16px; margin-bottom: 8px;">💡 當前分頁：<b id="currentTabName">綜合討論</b>（Ctrl + V 貼上圖片 / 拖曳上傳）</p>
+    <p id="status" style="color: var(--accent-color); margin: 0; font-weight: bold;"></p>
+  </div>
+
+  <div class="gallery" id="gallery"></div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getDatabase, ref, push, update, remove, onChildAdded, onChildChanged, onChildRemoved, off } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    // 請填入你的 Firebase 完整設定 (包含 apiKey 與 authDomain)
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    let currentCategory = 'general';
+    let activeRef = null;
+    let isAdmin = false; // 是否具備管理權限
+
+    function getDefaultTimeStr() {
+      return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // 1. 登入狀態監聽
+    onAuthStateChanged(auth, (user) => {
+      const authBox = document.getElementById('authBox');
+      const dropZone = document.getElementById('dropZone');
+
+      if (user) {
+        isAdmin = true;
+        document.body.classList.add('is-admin');
+        dropZone.style.display = 'block'; // 顯示上傳區
+        
+        authBox.innerHTML = `
+          <span style="color:#57F287; font-size:14px;">已登入管理員</span>
+          <button class="auth-btn" id="logoutBtn" style="background:#4f545c">登出</button>
+        `;
+        document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
+      } else {
+        isAdmin = false;
+        document.body.classList.remove('is-admin');
+        dropZone.style.display = 'none'; // 隱藏上傳區
+        
+        authBox.innerHTML = `
+          <input type="email" id="emailInput" placeholder="管理員 Email">
+          <input type="password" id="passwordInput" placeholder="密碼">
+          <button class="auth-btn" id="loginBtn">登入</button>
+        `;
+        document.getElementById('loginBtn').addEventListener('click', handleLogin);
+      }
+      
+      // 重新載入當前分頁以套用權限狀態
+      switchCategory(currentCategory);
+    });
+
+    // 登入處理
+    async function handleLogin() {
+      const email = document.getElementById('emailInput').value;
+      const password = document.getElementById('passwordInput').value;
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (err) {
+        alert('登入失敗：' + err.message);
+      }
+    }
+
+    // 2. 切換與綁定資料庫
+    function switchCategory(newCategory) {
+      if (activeRef) off(activeRef);
+
+      currentCategory = newCategory;
+      activeRef = ref(db, `images/${currentCategory}`);
+      document.getElementById('gallery').innerHTML = '';
+
+      onChildAdded(activeRef, (snapshot) => {
+        const key = snapshot.key;
+        const data = snapshot.val();
+        const gallery = document.getElementById('gallery');
+
+        const card = document.createElement('div');
+        card.className = 'img-card';
+        card.id = `card-${key}`;
+
+        const textValue = data.caption || getDefaultTimeStr();
+
+        card.innerHTML = `
+          <button class="delete-btn" title="刪除圖片">✕</button>
+          <div class="img-wrapper">
+            <img src="${data.url}" loading="lazy" alt="uploaded image" />
+          </div>
+          <div class="img-info">
+            <span class="editable-text" contenteditable="${isAdmin}" id="text-${key}">${textValue}</span>
+          </div>
+        `;
+
+        gallery.prepend(card);
+
+        // 刪除按鈕
+        const deleteBtn = card.querySelector('.delete-btn');
+        deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (isAdmin && confirm('確定要刪除這張圖片嗎？')) {
+            remove(ref(db, `images/${currentCategory}/${key}`));
+          }
+        });
+
+        // 編輯文字
+        const editableElem = card.querySelector('.editable-text');
+        editableElem.addEventListener('blur', () => {
+          if (!isAdmin) return;
+          const newText = editableElem.innerText.trim();
+          update(ref(db, `images/${currentCategory}/${key}`), { caption: newText });
+        });
+
+        editableElem.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            editableElem.blur();
+          }
+        });
+      });
+
+      onChildChanged(activeRef, (snapshot) => {
+        const key = snapshot.key;
+        const data = snapshot.val();
+        const targetTextElem = document.getElementById(`text-${key}`);
+        if (targetTextElem && document.activeElement !== targetTextElem) {
+          targetTextElem.innerText = data.caption || '';
+        }
+      });
+
+      onChildRemoved(activeRef, (snapshot) => {
+        const key = snapshot.key;
+        const cardElem = document.getElementById(`card-${key}`);
+        if (cardElem) cardElem.remove();
+      });
+    }
+
+    // 分頁切換
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('currentTabName').innerText = btn.innerText.replace(/^[^\s]+\s/, '');
+        switchCategory(btn.getAttribute('data-category'));
+      });
+    });
+
+    // 圖片上傳邏輯 (僅管理員觸發)
+    function handleImageFile(file) {
+      if (!isAdmin || !file || !file.type.startsWith('image/')) return;
+
+      const status = document.getElementById('status');
+      status.innerText = "正在發送圖片...";
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        push(ref(db, `images/${currentCategory}`), {
+          url: e.target.result,
+          caption: getDefaultTimeStr(),
+          timestamp: Date.now()
+        });
+        status.innerText = "發送成功！";
+        setTimeout(() => status.innerText = "", 1500);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // 貼上與拖曳事件
+    document.addEventListener('paste', (e) => {
+      if (!isAdmin || document.activeElement.isContentEditable) return;
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (let item of items) {
+        if (item.type.includes('image')) {
+          handleImageFile(item.getAsFile());
+          break;
+        }
+      }
+    });
+
+    const dropZone = document.getElementById('dropZone');
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (isAdmin && e.dataTransfer.files.length > 0) {
+        handleImageFile(e.dataTransfer.files[0]);
+      }
+    });
+  </script>
+</body>
+</html>
