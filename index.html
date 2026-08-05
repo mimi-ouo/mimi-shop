@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>⭐ 米米小舖-Club MStar ⭐</title>
+  <title>即時圖片牆 (管理員權限控制版)</title>
   <style>
     :root {
       --bg-color: #36393f;
@@ -55,10 +55,10 @@
       color: #b9bbbe;
       padding: 8px 12px;
       border-radius: 8px;
-      font-size: 12px;
+      font-size: 13px;
       line-height: 1.5;
       width: 100%;
-      max-width: 280px;
+      max-width: 420px;
       min-height: 38px;
       box-sizing: border-box;
       word-break: break-word;
@@ -152,14 +152,14 @@
       border-color: var(--accent-color);
     }
 
-    /* 圖片網格：改為 auto-fill 並以固定 120px 排列 */
+    /* 圖片網格：固定 120px */
     .gallery {
       display: grid;
       grid-template-columns: repeat(auto-fill, 120px);
       gap: 12px;
     }
 
-    /* 圖片卡片：寬度固定 120px */
+    /* 圖片卡片：固定 120px */
     .img-card {
       width: 120px;
       background-color: var(--card-bg);
@@ -171,7 +171,6 @@
       position: relative;
     }
 
-    /* 圖片容器：高寬固定 120px */
     .img-wrapper {
       width: 120px;
       height: 120px;
@@ -185,8 +184,8 @@
       object-fit: cover;
     }
 
-    /* 右上角數量/售出下拉選單（微調適應 120px 尺寸） */
-    .status-select {
+    /* 右上角數量/售出標籤 (通用基礎樣式) */
+    .status-select, .status-badge {
       position: absolute;
       top: 4px;
       right: 4px;
@@ -195,15 +194,26 @@
       color: #fff;
       border: 1px solid #4f545c;
       border-radius: 4px;
-      padding: 1px 2px;
+      padding: 1px 4px;
       font-size: 10px;
       font-weight: bold;
-      cursor: pointer;
-      outline: none;
       backdrop-filter: blur(4px);
     }
 
-    .status-select.is-sold {
+    /* 管理員顯示下拉選單 */
+    .status-select {
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* 訪客模式顯示純文字標籤 */
+    .status-badge {
+      display: inline-block;
+      pointer-events: none;
+    }
+
+    /* 售出狀態的紅色樣式 */
+    .status-select.is-sold, .status-badge.is-sold {
       background-color: rgba(237, 66, 69, 0.9);
       border-color: var(--danger-color);
       color: #ffffff;
@@ -219,7 +229,7 @@
       font-weight: bold;
     }
 
-    /* 刪除按鈕 (左上角，尺寸微調) */
+    /* 刪除按鈕 (左上角) */
     .delete-btn {
       position: absolute;
       top: 4px;
@@ -279,7 +289,7 @@
     <div class="title-left">
       <h2>⭐ 米米小舖 ⭐</h2>
       <div class="info-badge">
-        <span class="info-icon">📕</span>
+        <span class="info-icon">ℹ️</span>
         <span class="editable-text" id="siteDescription" contenteditable="false">載入中...</span>
       </div>
     </div>
@@ -445,6 +455,24 @@
       return options;
     }
 
+    // 根據權限渲染右上角狀態（管理員為 select，訪客為 span 標籤）
+    function renderStatusElement(key, statusValue) {
+      const isSoldClass = statusValue === '售出' ? 'is-sold' : '';
+      if (isAdmin) {
+        return `
+          <select class="status-select ${isSoldClass}" id="select-${key}">
+            ${generateSelectOptions(statusValue)}
+          </select>
+        `;
+      } else {
+        return `
+          <span class="status-badge ${isSoldClass}" id="badge-${key}">
+            ${statusValue}
+          </span>
+        `;
+      }
+    }
+
     // 3. 圖片分頁監聽
     function switchCategory(newCategory) {
       if (activeRef) off(activeRef);
@@ -464,14 +492,11 @@
 
         const textValue = data.caption || getDefaultTimeStr();
         const statusValue = data.quantity || '1';
-        const isSoldClass = statusValue === '售出' ? 'is-sold' : '';
 
         card.innerHTML = `
           <button class="delete-btn" title="刪除圖片">✕</button>
           <div class="img-wrapper">
-            <select class="status-select ${isSoldClass}" id="select-${key}" ${isAdmin ? '' : 'disabled'}>
-              ${generateSelectOptions(statusValue)}
-            </select>
+            ${renderStatusElement(key, statusValue)}
             <img src="${data.url}" loading="lazy" alt="uploaded image" />
           </div>
           <div class="img-info">
@@ -481,13 +506,16 @@
 
         gallery.prepend(card);
 
-        // 監聽下拉選單切換
-        const selectElem = card.querySelector(`#select-${key}`);
-        selectElem.addEventListener('change', (e) => {
-          if (!isAdmin) return;
-          const selectedVal = e.target.value;
-          update(ref(db, `images/${currentCategory}/${key}`), { quantity: selectedVal });
-        });
+        // 管理員模式下綁定下拉選單切換事件
+        if (isAdmin) {
+          const selectElem = card.querySelector(`#select-${key}`);
+          if (selectElem) {
+            selectElem.addEventListener('change', (e) => {
+              const selectedVal = e.target.value;
+              update(ref(db, `images/${currentCategory}/${key}`), { quantity: selectedVal });
+            });
+          }
+        }
 
         // 刪除按鈕
         const deleteBtn = card.querySelector('.delete-btn');
@@ -524,15 +552,27 @@
           targetTextElem.innerText = data.caption || '';
         }
 
-        // 即時更新數量/售出下拉選單
-        const targetSelectElem = document.getElementById(`select-${key}`);
-        if (targetSelectElem) {
-          const newStatus = data.quantity || '1';
-          targetSelectElem.value = newStatus;
-          if (newStatus === '售出') {
-            targetSelectElem.classList.add('is-sold');
-          } else {
-            targetSelectElem.classList.remove('is-sold');
+        // 即時更新數量/售出狀態
+        const newStatus = data.quantity || '1';
+        if (isAdmin) {
+          const targetSelectElem = document.getElementById(`select-${key}`);
+          if (targetSelectElem) {
+            targetSelectElem.value = newStatus;
+            if (newStatus === '售出') {
+              targetSelectElem.classList.add('is-sold');
+            } else {
+              targetSelectElem.classList.remove('is-sold');
+            }
+          }
+        } else {
+          const targetBadgeElem = document.getElementById(`badge-${key}`);
+          if (targetBadgeElem) {
+            targetBadgeElem.innerText = newStatus;
+            if (newStatus === '售出') {
+              targetBadgeElem.classList.add('is-sold');
+            } else {
+              targetBadgeElem.classList.remove('is-sold');
+            }
           }
         }
       });
