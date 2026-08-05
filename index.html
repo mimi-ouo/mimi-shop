@@ -107,30 +107,29 @@
       cursor: pointer;
     }
 
-    /* 分頁導覽列 */
+    /* 下拉選單與分頁導覽列 */
     .tabs-container {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       margin-bottom: 20px;
       border-bottom: 2px solid #4f545c;
       padding-bottom: 10px;
-      overflow-x: visible;
+      flex-wrap: wrap;
     }
 
-    .tab-btn {
+    .tab-btn, .dropdown-toggle {
       background: var(--card-bg);
       color: var(--text-color);
       border: none;
-      padding: 8px 16px;
+      padding: 8px 14px;
       border-radius: 6px;
-      font-size: 15px;
+      font-size: 14px;
       cursor: pointer;
       transition: all 0.2s;
       display: flex;
       align-items: center;
       gap: 6px;
       white-space: nowrap;
-      position: relative;
     }
 
     .tab-btn.active {
@@ -139,23 +138,6 @@
       font-weight: bold;
     }
 
-    .tab-text {
-      outline: none;
-      border-radius: 4px;
-      padding: 2px 4px;
-    }
-
-    .arrow-btn {
-      font-size: 12px;
-      opacity: 0.8;
-      user-select: none;
-      pointer-events: none;
-    }
-
-    .is-admin .tab-text { cursor: text; }
-    .is-admin .tab-text:hover { background: rgba(255, 255, 255, 0.15); }
-
-    /* 下拉選單結構 */
     .dropdown {
       position: relative;
       display: inline-block;
@@ -166,63 +148,42 @@
       position: absolute;
       top: 100%;
       left: 0;
-      background-color: #202225;
-      min-width: 160px;
+      background-color: #2f3136;
+      min-width: 150px;
       box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
       border-radius: 6px;
       z-index: 100;
-      padding: 6px 0;
       margin-top: 4px;
+      padding: 4px 0;
       border: 1px solid #4f545c;
     }
 
-    .dropdown:hover .dropdown-menu { display: block; }
+    .dropdown:hover .dropdown-menu {
+      display: block;
+    }
 
     .dropdown-item {
-      padding: 6px 12px;
+      padding: 8px 14px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
       color: var(--text-color);
       cursor: pointer;
-      font-size: 14px;
-    }
-
-    .dropdown-item:hover, .dropdown-item.active {
-      background-color: var(--accent-color);
-      color: white;
-      font-weight: bold;
-    }
-
-    .del-sub-btn {
-      background: none;
-      border: none;
-      color: #8e9297;
-      cursor: pointer;
-      font-size: 12px;
-      padding: 2px 6px;
-      border-radius: 50%;
-      display: none;
-    }
-
-    .dropdown-item:hover .del-sub-btn { color: #fff; }
-    .is-admin .del-sub-btn { display: inline-block; }
-
-    .add-sub-btn {
-      width: 100%;
-      text-align: left;
-      background: none;
-      border: none;
-      border-top: 1px solid #4f545c;
-      color: #57F287;
-      padding: 8px 12px;
-      cursor: pointer;
       font-size: 13px;
-      display: none;
     }
 
-    .is-admin .add-sub-btn { display: block; }
-    .add-sub-btn:hover { background-color: #2f3136; }
+    .dropdown-item:hover {
+      background-color: var(--accent-color);
+      color: #fff;
+    }
+
+    .tab-text {
+      outline: none;
+      border-radius: 4px;
+      padding: 2px 4px;
+    }
+
+    .is-admin .tab-text { cursor: text; }
+    .is-admin .tab-text:hover { background: rgba(255, 255, 255, 0.15); }
 
     /* 上傳區 */
     .drop-zone {
@@ -339,7 +300,7 @@
       display: block;
     }
 
-    /* 🔒 圖片下方專屬備註欄（位在圖片正下方，僅管理員可見） */
+    /* 🔒 圖片下方獨立備註欄（僅管理員可見） */
     .admin-note-box {
       display: none;
       background-color: #202225;
@@ -350,7 +311,7 @@
     }
 
     .is-admin .admin-note-box {
-      display: block; /* 管理員登入時顯示在圖片下方 */
+      display: block;
     }
 
     .admin-note-label {
@@ -407,35 +368,45 @@
     </div>
   </div>
 
-  <!-- 分頁導覽列 -->
+  <!-- 下拉選單與分頁導覽列 -->
   <div class="tabs-container" id="tabsContainer">
+    <!-- 單一分頁：家具 -->
     <button class="tab-btn active" data-category="general">
       <span class="tab-text" id="tab-title-general" contenteditable="false">🏠 家具</span>
     </button>
     
+    <!-- 單一分頁：熊熊 -->
     <button class="tab-btn" data-category="memes">
       <span class="tab-text" id="tab-title-memes" contenteditable="false">🧸 熊熊</span>
     </button>
 
-    <!-- 戒指 (下拉選單) -->
+    <!-- 下拉選單：戒指 -->
     <div class="dropdown">
-      <button class="tab-btn" id="ringParentBtn">
-        <span class="tab-text" id="tab-title-ringGroup" contenteditable="false">💍 戒指</span>
-        <span class="arrow-btn">▾</span>
+      <button class="dropdown-toggle">
+        <span class="tab-text" id="tab-title-ring_group" contenteditable="false">💍 戒指</span> ▾
       </button>
-      <div class="dropdown-menu" id="ringSubMenu">
-        <button class="add-sub-btn" data-group="ringGroup">➕ 新增子項目</button>
+      <div class="dropdown-menu">
+        <div class="dropdown-item tab-btn" data-category="ring_male">
+          <span class="tab-text" id="tab-title-ring_male" contenteditable="false">👦 限男</span>
+        </div>
+        <div class="dropdown-item tab-btn" data-category="ring_female">
+          <span class="tab-text" id="tab-title-ring_female" contenteditable="false">👧 限女</span>
+        </div>
       </div>
     </div>
 
-    <!-- 作物 (下拉選單) -->
+    <!-- 下拉選單：作物 -->
     <div class="dropdown">
-      <button class="tab-btn" id="cropParentBtn">
-        <span class="tab-text" id="tab-title-cropGroup" contenteditable="false">🌱 作物</span>
-        <span class="arrow-btn">▾</span>
+      <button class="dropdown-toggle">
+        <span class="tab-text" id="tab-title-crop_group" contenteditable="false">🌱 作物</span> ▾
       </button>
-      <div class="dropdown-menu" id="cropSubMenu">
-        <button class="add-sub-btn" data-group="cropGroup">➕ 新增子項目</button>
+      <div class="dropdown-menu">
+        <div class="dropdown-item tab-btn" data-category="crop_male">
+          <span class="tab-text" id="tab-title-crop_male" contenteditable="false">👦 限男</span>
+        </div>
+        <div class="dropdown-item tab-btn" data-category="crop_female">
+          <span class="tab-text" id="tab-title-crop_female" contenteditable="false">👧 限女</span>
+        </div>
       </div>
     </div>
   </div>
@@ -475,22 +446,14 @@
     let isAdmin = false;
 
     const defaultCategories = {
-      tabNames: {
-        general: "🏠 家具",
-        memes: "🧸 熊熊",
-        ringGroup: "💍 戒指",
-        cropGroup: "🌱 作物"
-      },
-      subMenus: {
-        ringGroup: {
-          design: { name: "💍 戒指(限男)" },
-          photos: { name: "💍 戒指(限女)" }
-        },
-        cropGroup: {
-          crops_m: { name: "🌱 作物(限男)" },
-          crops_f: { name: "🌱 作物(限女)" }
-        }
-      }
+      general: "🏠 家具",
+      memes: "🧸 熊熊",
+      ring_group: "💍 戒指",
+      ring_male: "👦 限男",
+      ring_female: "👧 限女",
+      crop_group: "🌱 作物",
+      crop_male: "👦 限男",
+      crop_female: "👧 限女"
     };
 
     function getDefaultTimeStr() {
@@ -523,12 +486,11 @@
       set(descRef, descElem.innerText.trim());
     });
 
-    // 2. 選單與子選單即時同步
-    const menuRef = ref(db, 'settings/menus');
+    // 2. 分頁標題同步
+    const menuRef = ref(db, 'settings/menus/tabNames');
     onValue(menuRef, (snapshot) => {
       const data = snapshot.val() || {};
-      const tabNames = Object.assign({}, defaultCategories.tabNames, data.tabNames || {});
-      const subMenus = Object.assign({}, defaultCategories.subMenus, data.subMenus || {});
+      const tabNames = Object.assign({}, defaultCategories, data);
 
       Object.keys(tabNames).forEach(cat => {
         const textElem = document.getElementById(`tab-title-${cat}`);
@@ -536,106 +498,40 @@
           textElem.innerText = tabNames[cat];
         }
       });
-
-      renderSubMenu('ringGroup', subMenus.ringGroup || {}, 'ringSubMenu');
-      renderSubMenu('cropGroup', subMenus.cropGroup || {}, 'cropSubMenu');
     });
 
-    function renderSubMenu(groupKey, subData, containerId) {
-      const container = document.getElementById(containerId);
-      const addBtn = container.querySelector('.add-sub-btn');
-      
-      container.querySelectorAll('.dropdown-item').forEach(el => el.remove());
+    // 綁定各分頁標題編輯與點擊事件
+    Object.keys(defaultCategories).forEach(cat => {
+      const textSpan = document.getElementById(`tab-title-${cat}`);
+      const btn = document.querySelector(`[data-category="${cat}"]`);
 
-      Object.keys(subData).forEach(subKey => {
-        const item = subData[subKey];
-        const itemDiv = document.createElement('div');
-        itemDiv.className = `dropdown-item ${currentCategory === subKey ? 'active' : ''}`;
-        
-        itemDiv.innerHTML = `
-          <span class="tab-text" id="sub-${subKey}" contenteditable="${isAdmin}">${item.name}</span>
-          <button class="del-sub-btn" title="僅隱藏選單，圖片保留">✕</button>
-        `;
-
-        itemDiv.addEventListener('click', (e) => {
-          if (e.target.classList.contains('del-sub-btn') || document.activeElement === itemDiv.querySelector('.tab-text')) return;
-          
-          document.querySelectorAll('.tab-btn, .dropdown-item').forEach(b => b.classList.remove('active'));
-          itemDiv.classList.add('active');
-          
-          const parentBtn = container.closest('.dropdown').querySelector('.tab-btn');
-          if (parentBtn) parentBtn.classList.add('active');
-
-          updateCurrentTabDisplay(item.name);
-          switchCategory(subKey);
-        });
-
-        const textSpan = itemDiv.querySelector('.tab-text');
+      if (textSpan) {
         textSpan.addEventListener('blur', () => {
           if (!isAdmin) return;
-          update(ref(db, `settings/menus/subMenus/${groupKey}/${subKey}`), { name: textSpan.innerText.trim() });
+          update(ref(db, `settings/menus/tabNames`), { [cat]: textSpan.innerText.trim() });
         });
+
         textSpan.addEventListener('keydown', (e) => {
           if (e.key === 'Enter') { e.preventDefault(); textSpan.blur(); }
         });
+      }
 
-        const delBtn = itemDiv.querySelector('.del-sub-btn');
-        delBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (confirm(`確定要移除「${item.name}」選項嗎？\n（舊有的圖片會安全保留在資料庫中）`)) {
-            remove(ref(db, `settings/menus/subMenus/${groupKey}/${subKey}`));
-          }
-        });
-
-        container.insertBefore(itemDiv, addBtn);
-      });
-    }
-
-    // 新增子選單
-    document.querySelectorAll('.add-sub-btn').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        if (!isAdmin) return;
-        const groupKey = btn.getAttribute('data-group');
-        const name = prompt("請輸入新增的分頁名稱：");
-        if (name && name.trim() !== '') {
-          const newSubKey = 'sub_' + Date.now();
-          
-          await update(ref(db, `settings/menus/subMenus/${groupKey}/${newSubKey}`), { name: name.trim() });
-          
-          document.querySelectorAll('.tab-btn, .dropdown-item').forEach(b => b.classList.remove('active'));
-          const parentBtn = btn.closest('.dropdown').querySelector('.tab-btn');
-          if (parentBtn) parentBtn.classList.add('active');
-
-          updateCurrentTabDisplay(name.trim());
-          switchCategory(newSubKey);
-        }
-      });
-    });
-
-    ['general', 'memes', 'ringGroup', 'cropGroup'].forEach(cat => {
-      const textSpan = document.getElementById(`tab-title-${cat}`);
-      if (!textSpan) return;
-
-      textSpan.addEventListener('blur', () => {
-        if (!isAdmin) return;
-        update(ref(db, `settings/menus/tabNames`), { [cat]: textSpan.innerText.trim() });
-      });
-
-      textSpan.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); textSpan.blur(); }
-      });
-    });
-
-    ['general', 'memes'].forEach(cat => {
-      const btn = document.querySelector(`[data-category="${cat}"]`);
       if (btn) {
         btn.addEventListener('click', () => {
-          const textSpan = btn.querySelector('.tab-text');
           if (document.activeElement === textSpan) return;
 
-          document.querySelectorAll('.tab-btn, .dropdown-item').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
-          updateCurrentTabDisplay(textSpan.innerText.trim());
+          
+          // 如果選中的是下拉選單子項目，計算組合名稱 (例如：💍 戒指 - 👦 限男)
+          let displayName = textSpan.innerText.trim();
+          const parentGroup = btn.closest('.dropdown');
+          if (parentGroup) {
+            const groupTitle = parentGroup.querySelector('.dropdown-toggle .tab-text').innerText.trim();
+            displayName = `${groupTitle} - ${displayName}`;
+          }
+
+          updateCurrentTabDisplay(displayName);
           switchCategory(cat);
         });
       }
@@ -757,7 +653,6 @@
           <div class="img-info">
             <span class="editable-text" contenteditable="${isAdmin}" id="text-${key}">${textValue}</span>
           </div>
-          <!-- 🔒 圖片下方獨立備註區（僅管理員可見） -->
           <div class="admin-note-box">
             <div class="admin-note-label">🔒 備註</div>
             <span class="admin-note-text" contenteditable="${isAdmin}" id="note-${key}">${noteValue}</span>
@@ -797,7 +692,7 @@
           if (e.key === 'Enter') { e.preventDefault(); editableElem.blur(); }
         });
 
-        // 🔒 修改圖片私人備註文字
+        // 修改圖片私人備註文字
         const noteElem = card.querySelector('.admin-note-text');
         noteElem.addEventListener('blur', () => {
           if (!isAdmin) return;
@@ -818,7 +713,7 @@
           targetTextElem.innerText = data.caption || '';
         }
 
-        // 🔒 更新私人備註
+        // 更新私人備註
         const targetNoteElem = document.getElementById(`note-${key}`);
         if (targetNoteElem && document.activeElement !== targetNoteElem) {
           targetNoteElem.innerText = data.note || '';
@@ -857,7 +752,7 @@
           url: e.target.result,
           caption: getDefaultTimeStr(),
           quantity: '數量: 1',
-          note: '', // 預設新增空白私人備註
+          note: '',
           timestamp: Date.now()
         });
         status.innerText = "發送成功！";
