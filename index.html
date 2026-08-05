@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>⭐ 米米小舖 ⭐</title>
+  <title>>⭐ 米米小舖 ⭐</title>
   <style>
     :root {
       --bg-color: #36393f;
@@ -58,11 +58,11 @@
       font-size: 12px;
       line-height: 1.5;
       width: 100%;
-      max-width: 280px; /* 固定紅框區塊最大寬度 */
+      max-width: 250px;
       min-height: 38px;
       box-sizing: border-box;
-      word-break: break-word; /* 文字過長時自動換行 */
-      white-space: pre-wrap;   /* 支援換行符號 */
+      word-break: break-word;
+      white-space: pre-wrap;
     }
 
     .info-badge .editable-text {
@@ -77,7 +77,14 @@
       align-items: center;
     }
 
-    .auth-box input {
+    /* 輸入框區域（點擊登入後動態顯示） */
+    .auth-inputs {
+      display: none;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .auth-inputs input {
       padding: 6px 10px;
       border-radius: 4px;
       border: 1px solid #4f545c;
@@ -90,6 +97,15 @@
       color: white;
       border: none;
       padding: 6px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .cancel-btn {
+      background: #4f545c;
+      color: white;
+      border: none;
+      padding: 6px 10px;
       border-radius: 4px;
       cursor: pointer;
     }
@@ -234,9 +250,16 @@
     </div>
 
     <div class="auth-box" id="authBox">
-      <input type="email" id="emailInput" placeholder="管理員 Email">
-      <input type="password" id="passwordInput" placeholder="密碼">
-      <button class="auth-btn" id="loginBtn">登入</button>
+      <!-- 點擊前只顯示登入按鈕 -->
+      <button class="auth-btn" id="showLoginBtn">登入</button>
+      
+      <!-- 點擊登入後顯示的輸入框區塊 -->
+      <div class="auth-inputs" id="authInputs">
+        <input type="email" id="emailInput" placeholder="管理員 Email">
+        <input type="password" id="passwordInput" placeholder="密碼">
+        <button class="auth-btn" id="loginBtn">確認</button>
+        <button class="cancel-btn" id="cancelBtn">✕</button>
+      </div>
     </div>
   </div>
 
@@ -299,7 +322,6 @@
       }
     });
 
-    // 編輯完成點擊外部 (blur) 自動儲存
     descElem.addEventListener('blur', () => {
       if (!isAdmin) return;
       const newDesc = descElem.innerText.trim();
@@ -329,15 +351,45 @@
         if (descElem) descElem.contentEditable = "false";
         
         authBox.innerHTML = `
-          <input type="email" id="emailInput" placeholder="管理員 Email">
-          <input type="password" id="passwordInput" placeholder="密碼">
-          <button class="auth-btn" id="loginBtn">登入</button>
+          <button class="auth-btn" id="showLoginBtn">登入</button>
+          <div class="auth-inputs" id="authInputs">
+            <input type="email" id="emailInput" placeholder="管理員 Email">
+            <input type="password" id="passwordInput" placeholder="密碼">
+            <button class="auth-btn" id="loginBtn">確認</button>
+            <button class="cancel-btn" id="cancelBtn">✕</button>
+          </div>
         `;
-        document.getElementById('loginBtn').addEventListener('click', handleLogin);
+        bindAuthEvents();
       }
       
       switchCategory(currentCategory);
     });
+
+    // 綁定登入與選單展開事件
+    function bindAuthEvents() {
+      const showLoginBtn = document.getElementById('showLoginBtn');
+      const authInputs = document.getElementById('authInputs');
+      const cancelBtn = document.getElementById('cancelBtn');
+      const loginBtn = document.getElementById('loginBtn');
+
+      if (showLoginBtn) {
+        showLoginBtn.addEventListener('click', () => {
+          showLoginBtn.style.display = 'none';
+          authInputs.style.display = 'flex';
+        });
+      }
+
+      if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+          authInputs.style.display = 'none';
+          showLoginBtn.style.display = 'inline-block';
+        });
+      }
+
+      if (loginBtn) {
+        loginBtn.addEventListener('click', handleLogin);
+      }
+    }
 
     async function handleLogin() {
       const email = document.getElementById('emailInput').value;
