@@ -22,23 +22,17 @@
       padding: 20px;
     }
 
-    /* 頂部列：標題與登入區 */
+    /* 頂部列：標題、說明區塊與登入區 */
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
-    }
-
-    /* 標題與說明欄組合 */
-    .title-section {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+      gap: 15px;
       flex-wrap: wrap;
     }
 
-    .title-section h2 {
+    .header h2 {
       margin: 0;
     }
 
@@ -50,11 +44,12 @@
       background-color: #202225;
       border: 1px solid #4f545c;
       color: #b9bbbe;
-      padding: 6px 12px;
+      padding: 6px 14px;
       border-radius: 20px;
       font-size: 13px;
     }
 
+    /* 登入區控制 */
     .auth-box {
       display: flex;
       gap: 10px;
@@ -189,7 +184,6 @@
       padding: 2px 6px;
       border-radius: 4px;
       color: #ffffff;
-      width: 100%;
       word-break: break-all;
     }
 
@@ -208,16 +202,15 @@
 </head>
 <body>
 
+  <!-- 頂部列：標題、可編輯說明區塊、登入區 -->
   <div class="header">
-    <h2>🏪 米米小舖</h2>
-    <!-- 新增的說明欄 -->
-      <div class="info-badge">
-        <span class="info-icon">ℹ️</span>
-        <span class="info-text">訪客僅供檢視，管理員登入後可進行拖曳/貼上上傳、編輯與刪除。</span>
-      </div>
+    <h2>⭐ 米米小舖 ⭐</h2>
+
+    <div class="info-badge">
+      <span class="info-icon">ℹ️</span>
+      <span class="editable-text" id="siteDescription" contenteditable="false">載入中...</span>
     </div>
-    
-    <!-- 管理員登入控制區 -->
+
     <div class="auth-box" id="authBox">
       <input type="email" id="emailInput" placeholder="管理員 Email">
       <input type="password" id="passwordInput" placeholder="密碼">
@@ -227,13 +220,12 @@
 
   <!-- 分頁選單 -->
   <div class="tabs-container">
-    <button class="tab-btn active" data-category="general">家具</button>
-    <button class="tab-btn" data-category="memes">花盆</button>
-    <button class="tab-btn" data-category="memes">熊熊</button>
-    <button class="tab-btn" data-category="design">戒指(限男)</button>
-    <button class="tab-btn" data-category="design">戒指(限女)</button>
-    <button class="tab-btn" data-category="photos">作物(限男)</button>
-    <button class="tab-btn" data-category="photos">作物(限女)</button>
+    <button class="tab-btn active" data-category="general">🏠 家具</button>
+    <button class="tab-btn" data-category="memes">🧸 熊熊</button>
+    <button class="tab-btn" data-category="design">💍 戒指(限男)</button>
+    <button class="tab-btn" data-category="design">💍 戒指(限女)</button>
+    <button class="tab-btn" data-category="photos">🌱 作物(限男)</button>
+    <button class="tab-btn" data-category="photos">🌱 作物(限女)</button>
   </div>
   
   <!-- 上傳區 (僅管理員可見) -->
@@ -248,9 +240,8 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getDatabase, ref, push, update, remove, onChildAdded, onChildChanged, onChildRemoved, off } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, push, update, remove, set, onValue, onChildAdded, onChildChanged, onChildRemoved, off } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // 已填入你的真實 Firebase 設定
     const firebaseConfig = {
       apiKey: "AIzaSyCVUSw-B1it_bQ2sF3pAsTI0pXcyF-Tdfg",
       authDomain: "mimishop-93214.firebaseapp.com",
@@ -274,7 +265,32 @@
       return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
 
-    // 1. 登入狀態監聽
+    // 1. 說明欄即時同步與編輯
+    const descElem = document.getElementById('siteDescription');
+    const descRef = ref(db, 'settings/description');
+
+    onValue(descRef, (snapshot) => {
+      const data = snapshot.val();
+      const defaultText = "訪客僅供檢視，管理員登入後可上傳與編輯。";
+      if (document.activeElement !== descElem) {
+        descElem.innerText = data !== null ? data : defaultText;
+      }
+    });
+
+    descElem.addEventListener('blur', () => {
+      if (!isAdmin) return;
+      const newDesc = descElem.innerText.trim();
+      set(descRef, newDesc);
+    });
+
+    descElem.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        descElem.blur();
+      }
+    });
+
+    // 2. 登入狀態監聽
     onAuthStateChanged(auth, (user) => {
       const authBox = document.getElementById('authBox');
       const dropZone = document.getElementById('dropZone');
@@ -283,6 +299,7 @@
         isAdmin = true;
         document.body.classList.add('is-admin');
         dropZone.style.display = 'block';
+        if (descElem) descElem.contentEditable = "true";
         
         authBox.innerHTML = `
           <span style="color:#57F287; font-size:14px;">已登入管理員</span>
@@ -293,6 +310,7 @@
         isAdmin = false;
         document.body.classList.remove('is-admin');
         dropZone.style.display = 'none';
+        if (descElem) descElem.contentEditable = "false";
         
         authBox.innerHTML = `
           <input type="email" id="emailInput" placeholder="管理員 Email">
@@ -305,7 +323,6 @@
       switchCategory(currentCategory);
     });
 
-    // 登入處理
     async function handleLogin() {
       const email = document.getElementById('emailInput').value;
       const password = document.getElementById('passwordInput').value;
@@ -316,7 +333,7 @@
       }
     }
 
-    // 2. 切換與綁定資料庫
+    // 3. 圖片分頁監聽
     function switchCategory(newCategory) {
       if (activeRef) off(activeRef);
 
@@ -347,7 +364,6 @@
 
         gallery.prepend(card);
 
-        // 刪除按鈕
         const deleteBtn = card.querySelector('.delete-btn');
         deleteBtn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -356,7 +372,6 @@
           }
         });
 
-        // 編輯文字
         const editableElem = card.querySelector('.editable-text');
         editableElem.addEventListener('blur', () => {
           if (!isAdmin) return;
@@ -388,7 +403,7 @@
       });
     }
 
-    // 分頁切換
+    // 分頁切換點擊
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -398,7 +413,7 @@
       });
     });
 
-    // 圖片上傳邏輯 (僅管理員觸發)
+    // 圖片上傳邏輯
     function handleImageFile(file) {
       if (!isAdmin || !file || !file.type.startsWith('image/')) return;
 
@@ -418,7 +433,7 @@
       reader.readAsDataURL(file);
     }
 
-    // 貼上與拖曳事件
+    // 剪貼簿與拖曳事件
     document.addEventListener('paste', (e) => {
       if (!isAdmin || document.activeElement.isContentEditable) return;
       const items = e.clipboardData?.items;
