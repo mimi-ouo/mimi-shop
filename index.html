@@ -88,7 +88,7 @@
       text-align: center;
       border-radius: 8px;
       margin-bottom: 25px;
-      display: none; /* 預設不給訪客上傳 */
+      display: none;
     }
     
     .drop-zone.dragover {
@@ -141,7 +141,7 @@
       height: 28px;
       border-radius: 50%;
       cursor: pointer;
-      display: none; /* 由 JS 依身份控制是否顯示 */
+      display: none;
       align-items: center;
       justify-content: center;
       font-size: 14px;
@@ -177,7 +177,7 @@
       border: 1px #4f545c solid;
     }
     .is-admin .img-card:hover .delete-btn {
-      display: flex; /* 管理員滑鼠移入時顯示刪除鍵 */
+      display: flex;
     }
   </style>
 </head>
@@ -216,12 +216,16 @@
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getDatabase, ref, push, update, remove, onChildAdded, onChildChanged, onChildRemoved, off } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // 請填入你的 Firebase 完整設定 (包含 apiKey 與 authDomain)
+    // 已填入你的真實 Firebase 設定
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-      projectId: "YOUR_PROJECT_ID"
+      apiKey: "AIzaSyCVUSw-B1it_bQ2sF3pAsTI0pXcyF-Tdfg",
+      authDomain: "mimishop-93214.firebaseapp.com",
+      databaseURL: "https://mimishop-93214-default-rtdb.firebaseio.com",
+      projectId: "mimishop-93214",
+      storageBucket: "mimishop-93214.firebasestorage.app",
+      messagingSenderId: "953118400447",
+      appId: "1:953118400447:web:3a0e2fc6c4d2b65425cb0a",
+      measurementId: "G-0EDJDFNFWF"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -230,7 +234,7 @@
 
     let currentCategory = 'general';
     let activeRef = null;
-    let isAdmin = false; // 是否具備管理權限
+    let isAdmin = false;
 
     function getDefaultTimeStr() {
       return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -244,7 +248,7 @@
       if (user) {
         isAdmin = true;
         document.body.classList.add('is-admin');
-        dropZone.style.display = 'block'; // 顯示上傳區
+        dropZone.style.display = 'block';
         
         authBox.innerHTML = `
           <span style="color:#57F287; font-size:14px;">已登入管理員</span>
@@ -254,7 +258,7 @@
       } else {
         isAdmin = false;
         document.body.classList.remove('is-admin');
-        dropZone.style.display = 'none'; // 隱藏上傳區
+        dropZone.style.display = 'none';
         
         authBox.innerHTML = `
           <input type="email" id="emailInput" placeholder="管理員 Email">
@@ -264,7 +268,6 @@
         document.getElementById('loginBtn').addEventListener('click', handleLogin);
       }
       
-      // 重新載入當前分頁以套用權限狀態
       switchCategory(currentCategory);
     });
 
