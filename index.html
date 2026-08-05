@@ -45,7 +45,7 @@
       line-height: 1.4;
     }
 
-    /* 說明欄樣式（固定於紅框處，支援自主/自動換行） */
+    /* 說明欄樣式 */
     .info-badge {
       display: flex;
       align-items: flex-start;
@@ -77,7 +77,6 @@
       align-items: center;
     }
 
-    /* 輸入框區域（點擊登入後動態顯示） */
     .auth-inputs {
       display: none;
       gap: 8px;
@@ -186,11 +185,46 @@
       object-fit: cover;
     }
 
-    /* 刪除按鈕 (預設隱藏) */
-    .delete-btn {
+    /* 右上角數量/售出下拉選單 */
+    .status-select {
       position: absolute;
       top: 8px;
       right: 8px;
+      z-index: 10;
+      background-color: rgba(32, 34, 37, 0.85);
+      color: #fff;
+      border: 1px solid #4f545c;
+      border-radius: 4px;
+      padding: 3px 6px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      outline: none;
+      backdrop-filter: blur(4px);
+    }
+
+    /* 當選擇「售出」時切換背景與文字為紅色 */
+    .status-select.is-sold {
+      background-color: rgba(237, 66, 69, 0.9);
+      border-color: var(--danger-color);
+      color: #ffffff;
+    }
+
+    .status-select option {
+      background-color: #202225;
+      color: #fff;
+    }
+
+    .status-select option.sold-option {
+      color: #ed4245;
+      font-weight: bold;
+    }
+
+    /* 刪除按鈕 (移至左上角，避免蓋到右上角的選單) */
+    .delete-btn {
+      position: absolute;
+      top: 8px;
+      left: 8px;
       background-color: rgba(0, 0, 0, 0.6);
       color: #fff;
       border: none;
@@ -242,18 +276,15 @@
   <!-- 頂部列：左側標題與紅框說明區、右側登入區 -->
   <div class="header">
     <div class="title-left">
-      <h2>⭐ 米米小舖 ⭐</h2>
+      <h2>⭐ 米米小舖-Club MSTar ⭐</h2>
       <div class="info-badge">
-        <span class="info-icon">🪧</span>
+        <span class="info-icon">ℹ️</span>
         <span class="editable-text" id="siteDescription" contenteditable="false">載入中...</span>
       </div>
     </div>
 
     <div class="auth-box" id="authBox">
-      <!-- 點擊前只顯示登入按鈕 -->
       <button class="auth-btn" id="showLoginBtn">登入</button>
-      
-      <!-- 點擊登入後顯示的輸入框區塊 -->
       <div class="auth-inputs" id="authInputs">
         <input type="email" id="emailInput" placeholder="管理員 Email">
         <input type="password" id="passwordInput" placeholder="密碼">
@@ -365,7 +396,6 @@
       switchCategory(currentCategory);
     });
 
-    // 綁定登入與選單展開事件
     function bindAuthEvents() {
       const showLoginBtn = document.getElementById('showLoginBtn');
       const authInputs = document.getElementById('authInputs');
@@ -401,6 +431,19 @@
       }
     }
 
+    // 生成數量選單 HTML (1~10 與 售出)
+    function generateSelectOptions(currentVal) {
+      let options = '';
+      for (let i = 1; i <= 10; i++) {
+        const valStr = `數量: ${i}`;
+        const selected = (currentVal === valStr || (!currentVal && i === 1)) ? 'selected' : '';
+        options += `<option value="${valStr}" ${selected}>數量: ${i}</option>`;
+      }
+      const soldSelected = (currentVal === '售出') ? 'selected' : '';
+      options += `<option value="售出" class="sold-option" ${soldSelected}>售出</option>`;
+      return options;
+    }
+
     // 3. 圖片分頁監聽
     function switchCategory(newCategory) {
       if (activeRef) off(activeRef);
@@ -419,10 +462,16 @@
         card.id = `card-${key}`;
 
         const textValue = data.caption || getDefaultTimeStr();
+        const statusValue = data.quantity || '數量: 1';
+        const isSoldClass = statusValue === '售出' ? 'is-sold' : '';
 
         card.innerHTML = `
           <button class="delete-btn" title="刪除圖片">✕</button>
           <div class="img-wrapper">
+            <!-- 右上角數量/售出下拉選單 -->
+            <select class="status-select ${isSoldClass}" id="select-${key}" ${isAdmin ? '' : 'disabled'}>
+              ${generateSelectOptions(statusValue)}
+            </select>
             <img src="${data.url}" loading="lazy" alt="uploaded image" />
           </div>
           <div class="img-info">
@@ -432,6 +481,15 @@
 
         gallery.prepend(card);
 
+        // 監聽下拉選單切換
+        const selectElem = card.querySelector(`#select-${key}`);
+        selectElem.addEventListener('change', (e) => {
+          if (!isAdmin) return;
+          const selectedVal = e.target.value;
+          update(ref(db, `images/${currentCategory}/${key}`), { quantity: selectedVal });
+        });
+
+        // 刪除按鈕
         const deleteBtn = card.querySelector('.delete-btn');
         deleteBtn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -440,6 +498,7 @@
           }
         });
 
+        // 編輯標題
         const editableElem = card.querySelector('.editable-text');
         editableElem.addEventListener('blur', () => {
           if (!isAdmin) return;
@@ -458,9 +517,23 @@
       onChildChanged(activeRef, (snapshot) => {
         const key = snapshot.key;
         const data = snapshot.val();
+        
+        // 即時更新標題
         const targetTextElem = document.getElementById(`text-${key}`);
         if (targetTextElem && document.activeElement !== targetTextElem) {
           targetTextElem.innerText = data.caption || '';
+        }
+
+        // 即時更新數量/售出下拉選單
+        const targetSelectElem = document.getElementById(`select-${key}`);
+        if (targetSelectElem) {
+          const newStatus = data.quantity || '數量: 1';
+          targetSelectElem.value = newStatus;
+          if (newStatus === '售出') {
+            targetSelectElem.classList.add('is-sold');
+          } else {
+            targetSelectElem.classList.remove('is-sold');
+          }
         }
       });
 
@@ -493,6 +566,7 @@
         push(ref(db, `images/${currentCategory}`), {
           url: e.target.result,
           caption: getDefaultTimeStr(),
+          quantity: '數量: 1',
           timestamp: Date.now()
         });
         status.innerText = "發送成功！";
