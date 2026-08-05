@@ -31,7 +31,6 @@
       gap: 20px;
     }
 
-    /* 左側標題與說明區 */
     .title-left {
       display: flex;
       align-items: flex-start;
@@ -69,7 +68,7 @@
       outline: none;
     }
 
-    /* 登入區控制 */
+    /* 登入控制 */
     .auth-box {
       display: flex;
       gap: 10px;
@@ -118,7 +117,6 @@
       overflow-x: visible;
     }
 
-    /* 基本按鈕樣式 */
     .tab-btn {
       background: var(--card-bg);
       color: var(--text-color);
@@ -147,15 +145,10 @@
       padding: 2px 4px;
     }
 
-    .is-admin .tab-text {
-      cursor: text;
-    }
+    .is-admin .tab-text { cursor: text; }
+    .is-admin .tab-text:hover { background: rgba(255, 255, 255, 0.15); }
 
-    .is-admin .tab-text:hover {
-      background: rgba(255, 255, 255, 0.15);
-    }
-
-    /* 下拉選單樣式 */
+    /* 下拉選單結構 */
     .dropdown {
       position: relative;
       display: inline-block;
@@ -176,9 +169,7 @@
       border: 1px solid #4f545c;
     }
 
-    .dropdown:hover .dropdown-menu {
-      display: block;
-    }
+    .dropdown:hover .dropdown-menu { display: block; }
 
     .dropdown-item {
       padding: 6px 12px;
@@ -190,18 +181,12 @@
       font-size: 14px;
     }
 
-    .dropdown-item:hover {
-      background-color: var(--accent-color);
-      color: white;
-    }
-
-    .dropdown-item.active {
+    .dropdown-item:hover, .dropdown-item.active {
       background-color: var(--accent-color);
       color: white;
       font-weight: bold;
     }
 
-    /* 刪除子分類按鈕 */
     .del-sub-btn {
       background: none;
       border: none;
@@ -213,15 +198,9 @@
       display: none;
     }
 
-    .dropdown-item:hover .del-sub-btn {
-      color: #fff;
-    }
+    .dropdown-item:hover .del-sub-btn { color: #fff; }
+    .is-admin .del-sub-btn { display: inline-block; }
 
-    .is-admin .del-sub-btn {
-      display: inline-block;
-    }
-
-    /* 新增子分類按鈕 */
     .add-sub-btn {
       width: 100%;
       text-align: left;
@@ -235,13 +214,8 @@
       display: none;
     }
 
-    .is-admin .add-sub-btn {
-      display: block;
-    }
-
-    .add-sub-btn:hover {
-      background-color: #2f3136;
-    }
+    .is-admin .add-sub-btn { display: block; }
+    .add-sub-btn:hover { background-color: #2f3136; }
 
     /* 上傳區 */
     .drop-zone {
@@ -259,7 +233,7 @@
       border-color: var(--accent-color);
     }
 
-    /* 圖片畫廊區塊 */
+    /* 圖片畫廊 */
     .gallery {
       display: grid;
       grid-template-columns: repeat(auto-fill, 120px);
@@ -290,7 +264,6 @@
       object-fit: cover;
     }
 
-    /* 右上角標籤 */
     .status-badge {
       position: absolute;
       top: 4px;
@@ -320,7 +293,6 @@
       color: #ffffff;
     }
 
-    /* 刪除圖片按鈕 */
     .delete-btn {
       position: absolute;
       top: 4px;
@@ -386,7 +358,7 @@
     </div>
   </div>
 
-  <!-- 分頁導覽列 -->
+  <!-- 分頁選單區 -->
   <div class="tabs-container" id="tabsContainer">
     <button class="tab-btn active" data-category="general">
       <span class="tab-text" id="tab-title-general" contenteditable="false">🏠 家具</span>
@@ -402,7 +374,6 @@
         <span class="tab-text" id="tab-title-ringGroup" contenteditable="false">💍 戒指 ▾</span>
       </button>
       <div class="dropdown-menu" id="ringSubMenu">
-        <!-- 子選項由 JS 動態生成 -->
         <button class="add-sub-btn" data-group="ringGroup">➕ 新增子項目</button>
       </div>
     </div>
@@ -413,7 +384,6 @@
         <span class="tab-text" id="tab-title-cropGroup" contenteditable="false">🌱 作物 ▾</span>
       </button>
       <div class="dropdown-menu" id="cropSubMenu">
-        <!-- 子選項由 JS 動態生成 -->
         <button class="add-sub-btn" data-group="cropGroup">➕ 新增子項目</button>
       </div>
     </div>
@@ -421,7 +391,7 @@
   
   <!-- 上傳區 -->
   <div class="drop-zone" id="dropZone">
-    <p style="font-size: 16px; margin-bottom: 8px;">💡 當前分頁：<b id="currentTabName">家具</b>（Ctrl + V 貼上圖片 / 拖曳上傳）</p>
+    <p style="font-size: 16px; margin-bottom: 8px;">💡 當前分頁：<b id="currentTabName">🏠 家具</b>（Ctrl + V 貼上圖片 / 拖曳上傳）</p>
     <p id="status" style="color: var(--accent-color); margin: 0; font-weight: bold;"></p>
   </div>
 
@@ -453,7 +423,7 @@
     let activeRef = null;
     let isAdmin = false;
 
-    // 預設分類樹狀資料
+    // 預設分類與 Firebase 圖片目錄 Key 對應 (完全相容舊圖片)
     const defaultCategories = {
       tabNames: {
         general: "🏠 家具",
@@ -463,12 +433,12 @@
       },
       subMenus: {
         ringGroup: {
-          design: { name: "💍 限男" },
-          photos: { name: "💍 限女" }
+          design: { name: "💍 戒指(限男)" },
+          photos: { name: "💍 戒指(限女)" }
         },
         cropGroup: {
-          crops_m: { name: "🌱 限男" },
-          crops_f: { name: "🌱 限女" }
+          crops_m: { name: "🌱 作物(限男)" },
+          crops_f: { name: "🌱 作物(限女)" }
         }
       }
     };
@@ -486,7 +456,7 @@
       document.getElementById('currentTabName').innerText = currentCategoryDisplayName;
     }
 
-    // 1. 說明欄即時同步
+    // 1. 說明欄同步
     const descElem = document.getElementById('siteDescription');
     const descRef = ref(db, 'settings/description');
 
@@ -503,14 +473,14 @@
       set(descRef, descElem.innerText.trim());
     });
 
-    // 2. 選單與子選單同步監聽
+    // 2. 選單與子選單即時同步
     const menuRef = ref(db, 'settings/menus');
     onValue(menuRef, (snapshot) => {
-      const data = snapshot.val() || defaultCategories;
-      const tabNames = data.tabNames || defaultCategories.tabNames;
-      const subMenus = data.subMenus || defaultCategories.subMenus;
+      const data = snapshot.val() || {};
+      const tabNames = Object.assign({}, defaultCategories.tabNames, data.tabNames || {});
+      const subMenus = Object.assign({}, defaultCategories.subMenus, data.subMenus || {});
 
-      // 更新主選單名稱
+      // 更新主選單文字
       Object.keys(tabNames).forEach(cat => {
         const textElem = document.getElementById(`tab-title-${cat}`);
         if (textElem && document.activeElement !== textElem) {
@@ -518,7 +488,7 @@
         }
       });
 
-      // 渲染戒指與作物的子選項
+      // 渲染子選單
       renderSubMenu('ringGroup', subMenus.ringGroup || {}, 'ringSubMenu');
       renderSubMenu('cropGroup', subMenus.cropGroup || {}, 'cropSubMenu');
     });
@@ -527,7 +497,6 @@
       const container = document.getElementById(containerId);
       const addBtn = container.querySelector('.add-sub-btn');
       
-      // 清除舊項目
       container.querySelectorAll('.dropdown-item').forEach(el => el.remove());
 
       Object.keys(subData).forEach(subKey => {
@@ -537,10 +506,9 @@
         
         itemDiv.innerHTML = `
           <span class="tab-text" id="sub-${subKey}" contenteditable="${isAdmin}">${item.name}</span>
-          <button class="del-sub-btn" title="刪除子選單">✕</button>
+          <button class="del-sub-btn" title="僅隱藏選單，圖片保留">✕</button>
         `;
 
-        // 點擊選擇該子分頁
         itemDiv.addEventListener('click', (e) => {
           if (e.target.classList.contains('del-sub-btn') || document.activeElement === itemDiv.querySelector('.tab-text')) return;
           
@@ -554,7 +522,6 @@
           switchCategory(subKey);
         });
 
-        // 管理員可編輯名稱
         const textSpan = itemDiv.querySelector('.tab-text');
         textSpan.addEventListener('blur', () => {
           if (!isAdmin) return;
@@ -564,11 +531,11 @@
           if (e.key === 'Enter') { e.preventDefault(); textSpan.blur(); }
         });
 
-        // 刪除子分類
+        // 刪除選單選項（絕對不會刪除已上傳圖片）
         const delBtn = itemDiv.querySelector('.del-sub-btn');
         delBtn.addEventListener('click', (e) => {
           e.stopPropagation();
-          if (confirm(`確定要刪除子分類「${item.name}」嗎？（圖片資料不會被直接物理刪除）`)) {
+          if (confirm(`確定要移除「${item.name}」選項嗎？\n（防護機制：舊有的圖片會安全保留在資料庫中）`)) {
             remove(ref(db, `settings/menus/subMenus/${groupKey}/${subKey}`));
           }
         });
@@ -577,12 +544,12 @@
       });
     }
 
-    // 綁定「新增子項目」按鈕事件
+    // 新增子選單
     document.querySelectorAll('.add-sub-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         if (!isAdmin) return;
         const groupKey = btn.getAttribute('data-group');
-        const name = prompt("請輸入新增的分類名稱（例如：戒指(隱藏款)）：");
+        const name = prompt("請輸入新增的子分類名稱：");
         if (name) {
           const newSubKey = 'sub_' + Date.now();
           update(ref(db, `settings/menus/subMenus/${groupKey}/${newSubKey}`), { name: name });
@@ -590,7 +557,7 @@
       });
     });
 
-    // 綁定靜態主選單名稱寫入與點擊
+    // 靜態主選單名稱寫入
     ['general', 'memes', 'ringGroup', 'cropGroup'].forEach(cat => {
       const textSpan = document.getElementById(`tab-title-${cat}`);
       if (!textSpan) return;
@@ -605,11 +572,11 @@
       });
     });
 
-    // 靜態按鈕切換 (家具, 熊熊)
+    // 靜態切換 (家具, 熊熊)
     ['general', 'memes'].forEach(cat => {
       const btn = document.querySelector(`[data-category="${cat}"]`);
       if (btn) {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', () => {
           const textSpan = btn.querySelector('.tab-text');
           if (document.activeElement === textSpan) return;
 
@@ -621,7 +588,7 @@
       }
     });
 
-    // 3. 登入權限控制
+    // 3. Auth 狀態
     onAuthStateChanged(auth, (user) => {
       const authBox = document.getElementById('authBox');
       const dropZone = document.getElementById('dropZone');
@@ -697,7 +664,7 @@
       }
     }
 
-    // 4. 圖片資料讀取與操作
+    // 4. 讀取與渲染圖片庫 (依據 category Key 讀取 `images/` 目錄)
     function renderStatusElement(key, rawStatusValue) {
       const statusValue = formatStatusValue(rawStatusValue);
       const isSoldClass = statusValue.includes('售出') ? 'is-sold' : '';
@@ -740,7 +707,7 @@
 
         gallery.prepend(card);
 
-        // 標籤編輯
+        // 標籤修改
         const badgeElem = card.querySelector(`#badge-${key}`);
         if (badgeElem) {
           badgeElem.addEventListener('blur', () => {
@@ -752,7 +719,7 @@
           });
         }
 
-        // 刪除按鈕
+        // 刪除圖片 (僅此按鈕會刪除圖片)
         const deleteBtn = card.querySelector('.delete-btn');
         deleteBtn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -761,7 +728,7 @@
           }
         });
 
-        // 編輯文字說明
+        // 圖片文字說明修改
         const editableElem = card.querySelector('.editable-text');
         editableElem.addEventListener('blur', () => {
           if (!isAdmin) return;
@@ -800,7 +767,7 @@
       });
     }
 
-    // 圖片上傳 (貼上/拖曳)
+    // 圖片上傳 (貼上與拖曳)
     function handleImageFile(file) {
       if (!isAdmin || !file || !file.type.startsWith('image/')) return;
 
