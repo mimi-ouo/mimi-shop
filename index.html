@@ -412,7 +412,7 @@
   <div class="gallery" id="gallery"></div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxVrP__g-bnoVRQQrJkKLlMZDhSbFeUuTMyw6-zVRhtYkkSedoVbJXKUwN0bUyc4vs3rQ/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzNJW6IN-86zKt16YVnBQ2ZwnRMkaF22lmBVANd8CWDrHZYlMGOQrKnsnjiOBiimYk1MQ/exec";
 
     let currentCategory = 'general';
     let currentCategoryDisplayName = '🏠 家具';
@@ -560,7 +560,6 @@
     }
 
     function compareCaption(a, b) {
-      // 強制轉換為字串，避免傳入數字時因無 trim() 方法引發 TypeError
       const capA = String(a.caption || '').trim();
       const capB = String(b.caption || '').trim();
 
