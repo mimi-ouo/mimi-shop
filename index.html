@@ -445,7 +445,7 @@
     let activeRef = null;
     let isAdmin = false;
 
-    // 後備預設文字（僅當 Firebase 完全沒有資料時才作備用）
+    // 後備預設文字
     const fallbackCategories = {
       general: "🏠 家具",
       memes: "🧸 熊熊",
@@ -470,7 +470,7 @@
       document.getElementById('currentTabName').innerText = currentCategoryDisplayName;
     }
 
-    // 1. 說明欄同步（安全保護：優先使用 Firebase 現有文字）
+    // 1. 說明欄同步
     const descElem = document.getElementById('siteDescription');
     const descRef = ref(db, 'settings/description');
 
@@ -478,7 +478,6 @@
       const data = snapshot.val();
       const defaultText = "訪客僅供檢視，管理員登入後可上傳與編輯。";
       if (document.activeElement !== descElem) {
-        // 若雲端有歷史文字則保留使用，不被代碼覆蓋
         descElem.innerText = (data !== null && data !== undefined) ? data : defaultText;
       }
     });
@@ -488,12 +487,10 @@
       set(descRef, descElem.innerText.trim());
     });
 
-    // 2. 分頁標題即時同步（安全保護：優先使用 Firebase 現有文字）
+    // 2. 分頁標題即時同步
     const menuRef = ref(db, 'settings/menus/tabNames');
     onValue(menuRef, (snapshot) => {
       const data = snapshot.val() || {};
-      
-      // 比對 DOM 節點並更新為雲端現有文字
       Object.keys(fallbackCategories).forEach(cat => {
         const textElem = document.getElementById(`tab-title-${cat}`);
         if (textElem && document.activeElement !== textElem) {
@@ -618,7 +615,7 @@
       }
     }
 
-    // 4. 切換與讀取分頁圖片（即時同步資料庫內容）
+    // 4. 切換與讀取分頁圖片
     function renderStatusElement(key, rawStatusValue) {
       const statusValue = formatStatusValue(rawStatusValue);
       const isSoldClass = statusValue.includes('售出') ? 'is-sold' : '';
@@ -712,19 +709,16 @@
         const key = snapshot.key;
         const data = snapshot.val();
         
-        // 更新公開說明
         const targetTextElem = document.getElementById(`text-${key}`);
         if (targetTextElem && document.activeElement !== targetTextElem) {
           targetTextElem.innerText = data.caption || '';
         }
 
-        // 更新私人備註
         const targetNoteElem = document.getElementById(`note-${key}`);
         if (targetNoteElem && document.activeElement !== targetNoteElem) {
           targetNoteElem.innerText = data.note || '';
         }
 
-        // 更新狀態標籤
         const newStatus = formatStatusValue(data.quantity);
         const targetBadgeElem = document.getElementById(`badge-${key}`);
         if (targetBadgeElem && document.activeElement !== targetBadgeElem) {
@@ -744,26 +738,66 @@
       });
     }
 
-    // 圖片上傳
-    function handleImageFile(file) {
+    // 💡 關鍵前端自動壓縮功能（不佔用資料庫過大空間）
+    function compressImage(file, maxWidth, maxHeight, quality) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.src = URL.createObjectURL(file);
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width = Math.round((width * maxHeight) / height);
+              height = maxHeight;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // 壓縮成高評價小尺寸的 JPEG 圖片 Base64
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve(compressedDataUrl);
+        };
+        img.onerror = (error) => reject(error);
+      });
+    }
+
+    // 圖片上傳處理
+    async function handleImageFile(file) {
       if (!isAdmin || !file || !file.type.startsWith('image/')) return;
 
       const status = document.getElementById('status');
-      status.innerText = "正在發送圖片...";
+      status.innerText = "正在壓縮並上傳圖片...";
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        push(ref(db, `images/${currentCategory}`), {
-          url: e.target.result,
+      try {
+        // 壓縮寬高最大 600px，畫質 0.7（對網頁顯示足夠清晰且體積非常小）
+        const compressedBase64 = await compressImage(file, 600, 600, 0.7);
+
+        await push(ref(db, `images/${currentCategory}`), {
+          url: compressedBase64,
           caption: getDefaultTimeStr(),
           quantity: '數量: 1',
           note: '',
           timestamp: Date.now()
         });
-        status.innerText = "發送成功！";
-        setTimeout(() => status.innerText = "", 1500);
-      };
-      reader.readAsDataURL(file);
+
+        status.innerText = "發送成功！已永久保留至網頁";
+        setTimeout(() => status.innerText = "", 2000);
+      } catch (err) {
+        alert("圖片處理失敗：" + err.message);
+        status.innerText = "";
+      }
     }
 
     document.addEventListener('paste', (e) => {
