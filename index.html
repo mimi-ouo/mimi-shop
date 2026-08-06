@@ -429,6 +429,7 @@
   <div class="gallery" id="gallery"></div>
 
   <script>
+    // 請確認此處部署網址無誤（結尾須為 /exec）
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz1ZR6VzbPvHAuiacE2pb9045XmBgTp1EVRWozozLvURQGu8tAUf2umSED_xha78DFNig/exec";
 
     let currentCategory = 'general';
@@ -446,10 +447,6 @@
 
     /**
      * 圖片壓縮核心函式 (基於 Canvas)
-     * @param {string|File} source 圖片 Data URL 或 File 物件
-     * @param {number} maxWidth 最大寬度限制 (預設 400px)
-     * @param {number} quality JPEG 壓縮品質 (0.1 ~ 1.0，預設 0.75)
-     * @returns {Promise<{base64: string, dataUrl: string, mimeType: string}>}
      */
     function compressImage(source, maxWidth = 400, quality = 0.75) {
       return new Promise((resolve, reject) => {
@@ -458,7 +455,6 @@
           let width = img.width;
           let height = img.height;
 
-          // 計算等比例縮放後的尺寸
           if (width > maxWidth) {
             height = Math.round((height * maxWidth) / width);
             width = maxWidth;
@@ -471,7 +467,6 @@
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
 
-          // 統一轉為輕量化的 image/jpeg 格式
           const mimeType = 'image/jpeg';
           const dataUrl = canvas.toDataURL(mimeType, quality);
           const base64 = dataUrl.split(',')[1];
@@ -487,7 +482,6 @@
           reader.onerror = (err) => reject(err);
           reader.readAsDataURL(source);
         } else if (typeof source === 'string') {
-          // 支援外部圖片跨域調用 canvas 繪製
           img.crossOrigin = "Anonymous";
           img.src = source;
         } else {
@@ -608,7 +602,6 @@
 
           renderGallery();
 
-          // 管理員登入時，自動背景檢查並壓縮過大的舊圖片（無感同步更新至雲端）
           if (isAdmin) {
             checkAndCompressOldImages();
           }
@@ -619,7 +612,7 @@
     }
 
     /**
-     * 自動檢查舊圖，發現未壓縮的大圖（Base64 超過 150KB 或非 JPEG）即自動壓縮並同步雲端
+     * 自動檢查並壓縮舊圖（修正跨域阻擋與超長網址 Bug）
      */
     async function checkAndCompressOldImages() {
       for (let item of allData) {
@@ -631,9 +624,9 @@
         if (isBase64 && isPngOrLarge) {
           try {
             const compressed = await compressImage(item.url, 400, 0.75);
-            item.url = compressed.dataUrl; // 即時更新本地快取
+            item.url = compressed.dataUrl;
 
-            // 背景非同步覆蓋更新 Google Sheets 雲端網址
+            // 使用 POST 發送覆蓋更新，避免 GET 造成網址過長 404
             await updateItem(item.id, 'url', compressed.dataUrl);
             console.log(`[自動壓縮舊圖成功] ID: ${item.id}`);
           } catch (e) {
@@ -644,14 +637,7 @@
     }
 
     async function updateDescription(newText) {
-      try {
-        const response = await fetch(`${SCRIPT_URL}?action=updateItem&id=settings_desc&field=caption&value=${encodeURIComponent(newText)}`);
-        const result = await response.json();
-        return result.status === 'success';
-      } catch (err) {
-        console.error(err);
-        return false;
-      }
+      return await updateItem('settings_desc', 'caption', newText);
     }
 
     function renderGallery() {
@@ -840,13 +826,34 @@
       });
     }
 
+    /**
+     * 核心修正：自動判斷資料大小，選擇使用 POST 還是 GET，徹底解決 404/URL 過長問題
+     */
     async function updateItem(id, field, value) {
       try {
-        const response = await fetch(`${SCRIPT_URL}?action=updateItem&id=${id}&field=${field}&value=${encodeURIComponent(value)}`);
-        const result = await response.json();
-        return result.status === 'success';
+        const stringValue = String(value);
+        // 如果內容大於 1000 個字元（如 Base64 圖片Data），改用 POST 表單傳送
+        if (stringValue.length > 1000) {
+          const formData = new URLSearchParams();
+          formData.append('action', 'updateItem');
+          formData.append('id', id);
+          formData.append('field', field);
+          formData.append('value', stringValue);
+
+          const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: formData
+          });
+          const result = await response.json();
+          return result.status === 'success';
+        } else {
+          // 一般短文字更新使用 GET 傳送
+          const response = await fetch(`${SCRIPT_URL}?action=updateItem&id=${id}&field=${field}&value=${encodeURIComponent(stringValue)}`);
+          const result = await response.json();
+          return result.status === 'success';
+        }
       } catch (err) {
-        console.error(err);
+        console.error("更新欄位失敗:", err);
         return false;
       }
     }
@@ -857,7 +864,7 @@
     }
 
     /**
-     * 處理圖片上傳（加入前端壓縮邏輯）
+     * 處理圖片上傳
      */
     async function handleImageFile(file) {
       if (!isAdmin || !file || !file.type.startsWith('image/')) return;
@@ -865,7 +872,6 @@
       status.innerText = "正在壓縮圖片並上傳...";
 
       try {
-        // 前端即時壓縮：寬度限制為 400px，品質 75%
         const compressed = await compressImage(file, 400, 0.75);
 
         const defaultTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
