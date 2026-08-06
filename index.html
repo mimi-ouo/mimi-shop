@@ -156,30 +156,28 @@
       display: inline-block;
     }
 
-    /* 增加隱形緩衝區與延遲，避免滑鼠移開太快關閉 */
-    .dropdown-menu {
-      display: none;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      background-color: #2f3136;
-      min-width: 150px;
-      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
-      border-radius: 6px;
-      z-index: 100;
-      margin-top: 4px;
-      padding: 4px 0;
-      border: 1px solid #4f545c;
-    }
-
-    /* 擴大觸控與滑鼠感應區域，防止瞬間消失 */
+    /* 關鍵修改：增加隱形延伸區塊或 padding，讓滑鼠移過去時不會瞬間斷開 */
     .dropdown::after {
       content: '';
       position: absolute;
       top: 100%;
       left: 0;
       width: 100%;
-      height: 10px;
+      height: 10px; /* 提供緩衝高度 */
+    }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px); /* 保持一點距離搭配緩衝區 */
+      left: 0;
+      background-color: #2f3136;
+      min-width: 150px;
+      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
+      border-radius: 6px;
+      z-index: 100;
+      padding: 4px 0;
+      border: 1px solid #4f545c;
     }
 
     .dropdown:hover .dropdown-menu,
