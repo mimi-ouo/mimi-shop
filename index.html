@@ -564,7 +564,6 @@
       const capA = (a.caption || '').trim();
       const capB = (b.caption || '').trim();
 
-      // 空白字串處理（空的排最後面）
       if (!capA && !capB) return 0;
       if (!capA) return 1;
       if (!capB) return -1;
@@ -572,11 +571,11 @@
       const aHasChinese = hasChinese(capA);
       const bHasChinese = hasChinese(capB);
 
-      // 中文排前面
+      // 中文優先排在前面
       if (aHasChinese && !bHasChinese) return -1;
       if (!aHasChinese && bHasChinese) return 1;
 
-      // 同類別（皆中文或皆非中文）則依據語系由小到大排序
+      // 皆為中文或皆非中文時，由小到大排序（含數字邏輯）
       return capA.localeCompare(capB, 'zh-Hant', { numeric: true, sensitivity: 'base' });
     }
 
@@ -584,11 +583,13 @@
       const gallery = document.getElementById('gallery');
       const filtered = allData.filter(item => item.category === currentCategory);
       
-      // 自動根據「公開說明文字」進行排序
+      // 1. 自動依據公開說明文字進行排序（中文優先 -> 由小到大）
       filtered.sort(compareCaption);
 
+      // 2. 清空現有容器
       gallery.innerHTML = '';
 
+      // 3. 重新建立 DOM 元素並顯示在網頁上
       filtered.forEach((item) => {
         const card = document.createElement('div');
         card.className = 'img-card';
@@ -711,7 +712,7 @@
           originalValue = newValue;
           status.innerText = "修改成功！";
           if (field === 'caption') {
-            renderGallery(); // 修改公開說明文字後重新排序顯示
+            renderGallery(); // 修改說明文字後，立即重新排序並顯示在網頁上
           }
         } else {
           status.innerText = "儲存失敗，請重試";
@@ -763,7 +764,7 @@
         };
         
         allData.unshift(tempItem);
-        renderGallery();
+        renderGallery(); // 新增圖片後立即重新排序並顯示
 
         const formData = new URLSearchParams();
         formData.append('action', 'addItem');
