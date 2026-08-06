@@ -10,6 +10,7 @@
       --card-bg: #2f3136;
       --text-color: #dcddde;
       --accent-color: #5865f2;
+      --success-color: #57f287;
       --danger-color: #ed4245;
     }
 
@@ -46,7 +47,7 @@
 
     .info-badge {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       gap: 6px;
       background-color: #202225;
       border: 1px solid #4f545c;
@@ -56,16 +57,37 @@
       font-size: 12px;
       line-height: 1.5;
       width: 100%;
-      max-width: 280px;
-      min-height: 38px;
+      max-width: 320px;
       box-sizing: border-box;
       word-break: break-word;
-      white-space: pre-wrap;
     }
 
     .info-badge .editable-text {
       flex: 1;
       outline: none;
+    }
+
+    /* 通用儲存按鈕（僅管理員顯示） */
+    .save-btn {
+      display: none;
+      background: var(--success-color);
+      color: #000;
+      border: none;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+
+    .save-btn:hover {
+      opacity: 0.85;
+    }
+
+    .is-admin .save-btn {
+      display: inline-block;
     }
 
     /* 登入控制 */
@@ -166,6 +188,7 @@
       padding: 8px 14px;
       display: flex;
       align-items: center;
+      justify-content: space-between;
       color: var(--text-color);
       cursor: pointer;
       font-size: 13px;
@@ -204,13 +227,13 @@
     /* 圖片畫廊 */
     .gallery {
       display: grid;
-      grid-template-columns: repeat(auto-fill, 120px);
+      grid-template-columns: repeat(auto-fill, 130px);
       gap: 12px;
       align-items: start;
     }
 
     .img-card {
-      width: 120px;
+      width: 130px;
       background-color: var(--card-bg);
       border-radius: 8px;
       overflow: hidden;
@@ -221,8 +244,8 @@
     }
 
     .img-wrapper {
-      width: 120px;
-      height: 120px;
+      width: 130px;
+      height: 130px;
       position: relative;
       background-color: #202225;
     }
@@ -246,7 +269,7 @@
       font-size: 9px;
       font-weight: bold;
       backdrop-filter: blur(4px);
-      max-width: 75px;
+      max-width: 85px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -333,6 +356,25 @@
       min-height: 14px;
     }
 
+    /* 卡片底部儲存操作區 */
+    .card-actions {
+      display: none;
+      padding: 6px;
+      background-color: #202225;
+      border-top: 1px solid #4f545c;
+      text-align: center;
+    }
+
+    .is-admin .card-actions {
+      display: block;
+    }
+
+    .card-save-btn {
+      width: 100%;
+      padding: 4px 0;
+      font-size: 11px;
+    }
+
     .is-admin .editable-text, .is-admin .admin-note-text { 
       background: rgba(0, 0, 0, 0.2); 
       cursor: text; 
@@ -354,6 +396,7 @@
       <div class="info-badge">
         <span class="info-icon">📕</span>
         <span class="editable-text" id="siteDescription" contenteditable="false">載入中...</span>
+        <button class="save-btn" id="saveDescBtn" title="儲存說明">儲存</button>
       </div>
     </div>
 
@@ -373,24 +416,29 @@
     <!-- 單一分頁：家具 -->
     <button class="tab-btn active" data-category="general">
       <span class="tab-text" id="tab-title-general" contenteditable="false">🏠 家具</span>
+      <button class="save-btn save-tab-btn" data-cat="general">儲存</button>
     </button>
     
     <!-- 單一分頁：熊熊 -->
     <button class="tab-btn" data-category="memes">
       <span class="tab-text" id="tab-title-memes" contenteditable="false">🧸 熊熊</span>
+      <button class="save-btn save-tab-btn" data-cat="memes">儲存</button>
     </button>
 
     <!-- 下拉選單：戒指 -->
     <div class="dropdown">
       <button class="dropdown-toggle">
         <span class="tab-text" id="tab-title-ring_group" contenteditable="false">💍 戒指</span> ▾
+        <button class="save-btn save-tab-btn" data-cat="ring_group">儲存</button>
       </button>
       <div class="dropdown-menu">
         <div class="dropdown-item tab-btn" data-category="ring_male">
           <span class="tab-text" id="tab-title-ring_male" contenteditable="false">👦 限男</span>
+          <button class="save-btn save-tab-btn" data-cat="ring_male">儲存</button>
         </div>
         <div class="dropdown-item tab-btn" data-category="ring_female">
           <span class="tab-text" id="tab-title-ring_female" contenteditable="false">👧 限女</span>
+          <button class="save-btn save-tab-btn" data-cat="ring_female">儲存</button>
         </div>
       </div>
     </div>
@@ -399,13 +447,16 @@
     <div class="dropdown">
       <button class="dropdown-toggle">
         <span class="tab-text" id="tab-title-crop_group" contenteditable="false">🌱 作物</span> ▾
+        <button class="save-btn save-tab-btn" data-cat="crop_group">儲存</button>
       </button>
       <div class="dropdown-menu">
         <div class="dropdown-item tab-btn" data-category="crop_male">
           <span class="tab-text" id="tab-title-crop_male" contenteditable="false">👦 限男</span>
+          <button class="save-btn save-tab-btn" data-cat="crop_male">儲存</button>
         </div>
         <div class="dropdown-item tab-btn" data-category="crop_female">
           <span class="tab-text" id="tab-title-crop_female" contenteditable="false">👧 限女</span>
+          <button class="save-btn save-tab-btn" data-cat="crop_female">儲存</button>
         </div>
       </div>
     </div>
@@ -445,7 +496,6 @@
     let activeRef = null;
     let isAdmin = false;
 
-    // 後備預設文字（僅當 Firebase 完全沒有資料時才作備用）
     const fallbackCategories = {
       general: "🏠 家具",
       memes: "🧸 熊熊",
@@ -470,30 +520,28 @@
       document.getElementById('currentTabName').innerText = currentCategoryDisplayName;
     }
 
-    // 1. 說明欄同步（安全保護：優先使用 Firebase 現有文字）
+    // 1. 說明欄載入與手動儲存
     const descElem = document.getElementById('siteDescription');
     const descRef = ref(db, 'settings/description');
+    const saveDescBtn = document.getElementById('saveDescBtn');
 
     onValue(descRef, (snapshot) => {
       const data = snapshot.val();
       const defaultText = "訪客僅供檢視，管理員登入後可上傳與編輯。";
       if (document.activeElement !== descElem) {
-        // 若雲端有歷史文字則保留使用，不被代碼覆蓋
         descElem.innerText = (data !== null && data !== undefined) ? data : defaultText;
       }
     });
 
-    descElem.addEventListener('blur', () => {
+    saveDescBtn.addEventListener('click', () => {
       if (!isAdmin) return;
-      set(descRef, descElem.innerText.trim());
+      set(descRef, descElem.innerText.trim()).then(() => alert('頂部說明已成功儲存！'));
     });
 
-    // 2. 分頁標題即時同步（安全保護：優先使用 Firebase 現有文字）
+    // 2. 分頁標題同步與儲存
     const menuRef = ref(db, 'settings/menus/tabNames');
     onValue(menuRef, (snapshot) => {
       const data = snapshot.val() || {};
-      
-      // 比對 DOM 節點並更新為雲端現有文字
       Object.keys(fallbackCategories).forEach(cat => {
         const textElem = document.getElementById(`tab-title-${cat}`);
         if (textElem && document.activeElement !== textElem) {
@@ -506,24 +554,30 @@
       });
     });
 
-    // 綁定各分頁標題編輯與點擊事件
+    // 綁定儲存按鈕與切換事件
     Object.keys(fallbackCategories).forEach(cat => {
       const textSpan = document.getElementById(`tab-title-${cat}`);
       const btn = document.querySelector(`[data-category="${cat}"]`);
+      const saveBtn = document.querySelector(`.save-tab-btn[data-cat="${cat}"]`);
+
+      if (saveBtn) {
+        saveBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (!isAdmin) return;
+          update(ref(db, `settings/menus/tabNames`), { [cat]: textSpan.innerText.trim() })
+            .then(() => alert('分頁名稱已儲存！'));
+        });
+      }
 
       if (textSpan) {
-        textSpan.addEventListener('blur', () => {
-          if (!isAdmin) return;
-          update(ref(db, `settings/menus/tabNames`), { [cat]: textSpan.innerText.trim() });
-        });
-
         textSpan.addEventListener('keydown', (e) => {
           if (e.key === 'Enter') { e.preventDefault(); textSpan.blur(); }
         });
       }
 
       if (btn) {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+          if (e.target.classList.contains('save-btn')) return;
           if (document.activeElement === textSpan) return;
 
           document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -542,7 +596,7 @@
       }
     });
 
-    // 3. Auth 權限狀態管理
+    // 3. Auth 權限管理
     onAuthStateChanged(auth, (user) => {
       const authBox = document.getElementById('authBox');
       const dropZone = document.getElementById('dropZone');
@@ -618,7 +672,7 @@
       }
     }
 
-    // 4. 切換與讀取分頁圖片（即時同步資料庫內容）
+    // 4. 切換與讀取分頁圖片
     function renderStatusElement(key, rawStatusValue) {
       const statusValue = formatStatusValue(rawStatusValue);
       const isSoldClass = statusValue.includes('售出') ? 'is-sold' : '';
@@ -662,21 +716,12 @@
             <div class="admin-note-label">🔒 備註</div>
             <span class="admin-note-text" contenteditable="${isAdmin}" id="note-${key}">${noteValue}</span>
           </div>
+          <div class="card-actions">
+            <button class="save-btn card-save-btn" id="save-card-${key}">💾 儲存修改</button>
+          </div>
         `;
 
         gallery.prepend(card);
-
-        // 修改數量狀態
-        const badgeElem = card.querySelector(`#badge-${key}`);
-        if (badgeElem) {
-          badgeElem.addEventListener('blur', () => {
-            if (!isAdmin) return;
-            update(ref(db, `images/${currentCategory}/${key}`), { quantity: badgeElem.innerText.trim() });
-          });
-          badgeElem.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') { e.preventDefault(); badgeElem.blur(); }
-          });
-        }
 
         // 刪除圖片
         const deleteBtn = card.querySelector('.delete-btn');
@@ -687,24 +732,31 @@
           }
         });
 
-        // 修改圖片公開文字
-        const editableElem = card.querySelector('.editable-text');
-        editableElem.addEventListener('blur', () => {
-          if (!isAdmin) return;
-          update(ref(db, `images/${currentCategory}/${key}`), { caption: editableElem.innerText.trim() });
-        });
-        editableElem.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') { e.preventDefault(); editableElem.blur(); }
-        });
+        // 點擊「💾 儲存修改」一次更新所有該圖片對應欄位
+        const saveCardBtn = card.querySelector(`#save-card-${key}`);
+        if (saveCardBtn) {
+          saveCardBtn.addEventListener('click', () => {
+            if (!isAdmin) return;
 
-        // 修改圖片私人備註文字
-        const noteElem = card.querySelector('.admin-note-text');
-        noteElem.addEventListener('blur', () => {
-          if (!isAdmin) return;
-          update(ref(db, `images/${currentCategory}/${key}`), { note: noteElem.innerText.trim() });
-        });
-        noteElem.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') { e.preventDefault(); noteElem.blur(); }
+            const badgeElem = card.querySelector(`#badge-${key}`);
+            const editableElem = card.querySelector(`#text-${key}`);
+            const noteElem = card.querySelector(`#note-${key}`);
+
+            update(ref(db, `images/${currentCategory}/${key}`), {
+              quantity: badgeElem.innerText.trim(),
+              caption: editableElem.innerText.trim(),
+              note: noteElem.innerText.trim()
+            }).then(() => alert('圖片資訊更新成功！'));
+          });
+        }
+
+        // Enter 鍵處理（防換行）
+        [card.querySelector(`#badge-${key}`), card.querySelector(`#text-${key}`), card.querySelector(`#note-${key}`)].forEach(el => {
+          if (el) {
+            el.addEventListener('keydown', (e) => {
+              if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
+            });
+          }
         });
       });
 
@@ -712,19 +764,16 @@
         const key = snapshot.key;
         const data = snapshot.val();
         
-        // 更新公開說明
         const targetTextElem = document.getElementById(`text-${key}`);
         if (targetTextElem && document.activeElement !== targetTextElem) {
           targetTextElem.innerText = data.caption || '';
         }
 
-        // 更新私人備註
         const targetNoteElem = document.getElementById(`note-${key}`);
         if (targetNoteElem && document.activeElement !== targetNoteElem) {
           targetNoteElem.innerText = data.note || '';
         }
 
-        // 更新狀態標籤
         const newStatus = formatStatusValue(data.quantity);
         const targetBadgeElem = document.getElementById(`badge-${key}`);
         if (targetBadgeElem && document.activeElement !== targetBadgeElem) {
