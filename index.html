@@ -229,6 +229,24 @@
       transform: translateY(0);
     }
 
+    .is-admin .img-card[draggable="true"] {
+      cursor: grab;
+    }
+
+    .is-admin .img-card[draggable="true"]:active {
+      cursor: grabbing;
+    }
+
+    .img-card.dragging {
+      opacity: 0.4;
+      border: 2px dashed var(--accent-color);
+    }
+
+    .img-card.drag-over {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(88, 101, 242, 0.4);
+    }
+
     .img-wrapper {
       width: 120px;
       height: 120px;
@@ -368,7 +386,7 @@
     </div>
     <div class="info-badge">
       <span>📕</span>
-      <span class="editable-text" id="siteDescription" contenteditable="false">本人夜班，交易需另約時間，故不接急單 ｜ 交易方式：可糖可T，比值1:1 ｜ Discord：mimi_ouo ｜ 加載較慢，請耐心等待</span>
+      <span class="editable-text" id="siteDescription" contenteditable="false">本人夜班，交易需另約時間，故不接急單 ｜ 交易方式：可糖可T，比值1:1 ｜ Discord：mimi_ouo｜ 加載較慢，請耐心等待</span>
     </div>
 
     <div class="auth-box" id="authBox">
@@ -554,37 +572,10 @@
       }
     }
 
-    // 判斷字串是否含有中文字元
-    function hasChinese(str) {
-      return /[\u4e00-\u9fa5]/.test(str);
-    }
-
-    // 文字比較器：中文排前面，文字由小到大排序
-    function compareCaption(a, b) {
-      const capA = (a.caption || '').trim();
-      const capB = (b.caption || '').trim();
-
-      if (!capA && !capB) return 0;
-      if (!capA) return 1;
-      if (!capB) return -1;
-
-      const aHasChinese = hasChinese(capA);
-      const bHasChinese = hasChinese(capB);
-
-      // 一個有中文，一個沒有時，有中文的排前面
-      if (aHasChinese && !bHasChinese) return -1;
-      if (!aHasChinese && bHasChinese) return 1;
-
-      // 兩者皆有中文或皆無中文時，採用 localeCompare 由小到大排序
-      return capA.localeCompare(capB, 'zh-Hant', { numeric: true, sensitivity: 'base' });
-    }
-
     function renderGallery() {
       const gallery = document.getElementById('gallery');
       const filtered = allData.filter(item => item.category === currentCategory);
-      
-      // 依據公開說明文字 (Caption) 由小到大排序 (中文優先)
-      filtered.sort(compareCaption);
+      filtered.sort((a, b) => b.timestamp - a.timestamp);
 
       gallery.innerHTML = '';
 
@@ -593,6 +584,10 @@
         card.className = 'img-card';
         card.id = `card-${item.id}`;
         card.setAttribute('data-id', item.id);
+        
+        if (isAdmin) {
+          card.setAttribute('draggable', 'true');
+        }
 
         const currentQty = item.quantity || '數量: 1';
         const isSold = String(currentQty).includes('售出');
@@ -648,6 +643,54 @@
               deleteItem(item.id);
             }
           });
+
+          card.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', item.id);
+            setTimeout(() => card.classList.add('dragging'), 0);
+          });
+
+          card.addEventListener('dragend', () => {
+            card.classList.remove('dragging');
+            document.querySelectorAll('.img-card').forEach(c => c.classList.remove('drag-over'));
+          });
+
+          card.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            card.classList.add('drag-over');
+          });
+
+          card.addEventListener('dragleave', () => {
+            card.classList.remove('drag-over');
+          });
+
+          card.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            card.classList.remove('drag-over');
+            const draggedId = e.dataTransfer.getData('text/plain');
+            if (draggedId === item.id) return;
+
+            const draggedIndex = allData.findIndex(i => i.id === draggedId);
+            const targetIndex = allData.findIndex(i => i.id === item.id);
+
+            if (draggedIndex !== -1 && targetIndex !== -1) {
+              const [movedItem] = allData.splice(draggedIndex, 1);
+              allData.splice(targetIndex, 0, movedItem);
+
+              const currentFiltered = allData.filter(i => i.category === currentCategory);
+              let now = Date.now();
+              currentFiltered.forEach((fi, idx) => {
+                fi.timestamp = now - (idx * 1000);
+              });
+
+              renderGallery();
+
+              const status = document.getElementById('status');
+              status.innerText = "正在更新排序...";
+              await updateItem(movedItem.id, 'timestamp', movedItem.timestamp);
+              status.innerText = "排序更新成功！";
+              setTimeout(() => { status.innerText = ""; }, 1500);
+            }
+          });
         }
 
         gallery.appendChild(card);
@@ -697,12 +740,6 @@
         const newValue = el.innerText.trim();
         if (newValue === originalValue) return;
 
-        // 更新本地資料
-        const targetItem = allData.find(item => item.id === id);
-        if (targetItem) {
-          targetItem[field] = newValue;
-        }
-
         const status = document.getElementById('status');
         status.innerText = "正在儲存至雲端...";
         
@@ -710,10 +747,6 @@
         if (success) {
           originalValue = newValue;
           status.innerText = "修改成功！";
-          // 若修改的是公開說明，重新排序並渲染畫廊
-          if (field === 'caption') {
-            renderGallery();
-          }
         } else {
           status.innerText = "儲存失敗，請重試";
         }
@@ -738,8 +771,7 @@
 
     async function deleteItem(id) {
       await fetch(`${SCRIPT_URL}?action=deleteItem&id=${id}`);
-      allData = allData.filter(item => item.id !== id);
-      renderGallery();
+      document.getElementById(`card-${id}`).remove();
     }
 
     function handleImageFile(file) {
