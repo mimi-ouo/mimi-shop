@@ -253,14 +253,34 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      outline: none;
     }
 
-    .is-admin .status-badge { cursor: text; }
     .status-badge.is-sold {
       background-color: rgba(237, 66, 69, 0.9);
       border-color: var(--danger-color);
       color: #ffffff;
+    }
+
+    /* 管理員專用下拉選單 */
+    .status-select {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      z-index: 10;
+      background-color: rgba(32, 34, 37, 0.95);
+      color: #fff;
+      border: 1px solid var(--accent-color);
+      border-radius: 4px;
+      padding: 1px 2px;
+      font-size: 9px;
+      font-weight: bold;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .status-select.is-sold {
+      background-color: rgba(237, 66, 69, 0.9);
+      border-color: var(--danger-color);
     }
 
     .delete-btn {
@@ -540,12 +560,35 @@
         card.className = 'img-card';
         card.id = `card-${item.id}`;
 
-        const isSoldClass = String(item.quantity).includes('售出') ? 'is-sold' : '';
+        const currentQty = item.quantity || '數量: 1';
+        const isSold = String(currentQty).includes('售出');
+        const isSoldClass = isSold ? 'is-sold' : '';
+
+        let badgeHTML = '';
+        if (isAdmin) {
+          badgeHTML = `
+            <select class="status-select ${isSoldClass}" id="badge-${item.id}">
+              <option value="數量: 1" ${currentQty === '數量: 1' ? 'selected' : ''}>數量: 1</option>
+              <option value="數量: 2" ${currentQty === '數量: 2' ? 'selected' : ''}>數量: 2</option>
+              <option value="數量: 3" ${currentQty === '數量: 3' ? 'selected' : ''}>數量: 3</option>
+              <option value="數量: 4" ${currentQty === '數量: 4' ? 'selected' : ''}>數量: 4</option>
+              <option value="數量: 5" ${currentQty === '數量: 5' ? 'selected' : ''}>數量: 5</option>
+              <option value="數量: 6" ${currentQty === '數量: 6' ? 'selected' : ''}>數量: 6</option>
+              <option value="數量: 7" ${currentQty === '數量: 7' ? 'selected' : ''}>數量: 7</option>
+              <option value="數量: 8" ${currentQty === '數量: 8' ? 'selected' : ''}>數量: 8</option>
+              <option value="數量: 9" ${currentQty === '數量: 9' ? 'selected' : ''}>數量: 9</option>
+              <option value="數量: 10" ${currentQty === '數量: 10' ? 'selected' : ''}>數量: 10</option>
+              <option value="已售出" ${isSold ? 'selected' : ''}>已售出</option>
+            </select>
+          `;
+        } else {
+          badgeHTML = `<span class="status-badge ${isSoldClass}" id="badge-${item.id}">${currentQty}</span>`;
+        }
 
         card.innerHTML = `
           <button class="delete-btn" title="刪除圖片">✕</button>
           <div class="img-wrapper">
-            <span class="status-badge ${isSoldClass}" id="badge-${item.id}" contenteditable="${isAdmin}">${item.quantity || '數量: 1'}</span>
+            ${badgeHTML}
             <img src="${item.url}" loading="lazy" decoding="async" alt="image" />
           </div>
           <div class="img-info">
@@ -573,7 +616,29 @@
 
       if (isAdmin) {
         filtered.forEach(item => {
-          bindEditable(item.id, 'quantity', `badge-${item.id}`);
+          const selectEl = document.getElementById(`badge-${item.id}`);
+          if (selectEl) {
+            selectEl.addEventListener('change', async () => {
+              const newValue = selectEl.value;
+              const status = document.getElementById('status');
+              status.innerText = "正在儲存至雲端...";
+              
+              const success = await updateItem(item.id, 'quantity', newValue);
+              if (success) {
+                item.quantity = newValue;
+                if (newValue.includes('售出')) {
+                  selectEl.classList.add('is-sold');
+                } else {
+                  selectEl.classList.remove('is-sold');
+                }
+                status.innerText = "修改成功！";
+              } else {
+                status.innerText = "儲存失敗，請重試";
+              }
+              setTimeout(() => { status.innerText = ""; }, 1500);
+            });
+          }
+
           bindEditable(item.id, 'caption', `text-${item.id}`);
           bindEditable(item.id, 'note', `note-${item.id}`);
         });
