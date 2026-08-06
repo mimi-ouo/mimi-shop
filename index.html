@@ -11,7 +11,6 @@
       --text-color: #dcddde;
       --accent-color: #5865f2;
       --danger-color: #ed4245;
-      --success-color: #57F287;
     }
 
     body {
@@ -316,7 +315,7 @@
     }
 
     .admin-note-label {
-      color: var(--success-color);
+      color: #57F287;
       font-weight: bold;
       margin-bottom: 2px;
       display: flex;
@@ -371,14 +370,17 @@
 
   <!-- 下拉選單與分頁導覽列 -->
   <div class="tabs-container" id="tabsContainer">
+    <!-- 單一分頁：家具 -->
     <button class="tab-btn active" data-category="general">
       <span class="tab-text" id="tab-title-general" contenteditable="false">🏠 家具</span>
     </button>
     
+    <!-- 單一分頁：熊熊 -->
     <button class="tab-btn" data-category="memes">
       <span class="tab-text" id="tab-title-memes" contenteditable="false">🧸 熊熊</span>
     </button>
 
+    <!-- 下拉選單：戒指 -->
     <div class="dropdown">
       <button class="dropdown-toggle">
         <span class="tab-text" id="tab-title-ring_group" contenteditable="false">💍 戒指</span> ▾
@@ -393,6 +395,7 @@
       </div>
     </div>
 
+    <!-- 下拉選單：作物 -->
     <div class="dropdown">
       <button class="dropdown-toggle">
         <span class="tab-text" id="tab-title-crop_group" contenteditable="false">🌱 作物</span> ▾
@@ -421,7 +424,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getDatabase, ref, push, update, remove, set, onValue, onChildAdded, onChildChanged, onChildRemoved, off } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCVUSw-B1it_bQ2sF3pAsTI0pXcyF-Tdfg",
@@ -437,13 +439,13 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
-    const storage = getStorage(app);
 
     let currentCategory = 'general';
     let currentCategoryDisplayName = '🏠 家具';
     let activeRef = null;
     let isAdmin = false;
 
+    // 後備預設文字（僅當 Firebase 完全沒有資料時才作備用）
     const fallbackCategories = {
       general: "🏠 家具",
       memes: "🧸 熊熊",
@@ -468,7 +470,7 @@
       document.getElementById('currentTabName').innerText = currentCategoryDisplayName;
     }
 
-    // 1. 說明欄同步
+    // 1. 說明欄同步（安全保護：優先使用 Firebase 現有文字）
     const descElem = document.getElementById('siteDescription');
     const descRef = ref(db, 'settings/description');
 
@@ -476,6 +478,7 @@
       const data = snapshot.val();
       const defaultText = "訪客僅供檢視，管理員登入後可上傳與編輯。";
       if (document.activeElement !== descElem) {
+        // 若雲端有歷史文字則保留使用，不被代碼覆蓋
         descElem.innerText = (data !== null && data !== undefined) ? data : defaultText;
       }
     });
@@ -485,11 +488,12 @@
       set(descRef, descElem.innerText.trim());
     });
 
-    // 2. 分頁標題即時同步
+    // 2. 分頁標題即時同步（安全保護：優先使用 Firebase 現有文字）
     const menuRef = ref(db, 'settings/menus/tabNames');
     onValue(menuRef, (snapshot) => {
       const data = snapshot.val() || {};
       
+      // 比對 DOM 節點並更新為雲端現有文字
       Object.keys(fallbackCategories).forEach(cat => {
         const textElem = document.getElementById(`tab-title-${cat}`);
         if (textElem && document.activeElement !== textElem) {
@@ -502,6 +506,7 @@
       });
     });
 
+    // 綁定各分頁標題編輯與點擊事件
     Object.keys(fallbackCategories).forEach(cat => {
       const textSpan = document.getElementById(`tab-title-${cat}`);
       const btn = document.querySelector(`[data-category="${cat}"]`);
@@ -554,7 +559,7 @@
         if (descElem) descElem.contentEditable = "true";
         
         authBox.innerHTML = `
-          <span style="color:var(--success-color); font-size:14px;">已登入管理員</span>
+          <span style="color:#57F287; font-size:14px;">已登入管理員</span>
           <button class="auth-btn" id="logoutBtn" style="background:#4f545c">登出</button>
         `;
         document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
@@ -613,7 +618,7 @@
       }
     }
 
-    // 4. 切換與讀取分頁圖片
+    // 4. 切換與讀取分頁圖片（即時同步資料庫內容）
     function renderStatusElement(key, rawStatusValue) {
       const statusValue = formatStatusValue(rawStatusValue);
       const isSoldClass = statusValue.includes('售出') ? 'is-sold' : '';
@@ -661,6 +666,7 @@
 
         gallery.prepend(card);
 
+        // 修改數量狀態
         const badgeElem = card.querySelector(`#badge-${key}`);
         if (badgeElem) {
           badgeElem.addEventListener('blur', () => {
@@ -672,6 +678,7 @@
           });
         }
 
+        // 刪除圖片
         const deleteBtn = card.querySelector('.delete-btn');
         deleteBtn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -680,6 +687,7 @@
           }
         });
 
+        // 修改圖片公開文字
         const editableElem = card.querySelector('.editable-text');
         editableElem.addEventListener('blur', () => {
           if (!isAdmin) return;
@@ -689,6 +697,7 @@
           if (e.key === 'Enter') { e.preventDefault(); editableElem.blur(); }
         });
 
+        // 修改圖片私人備註文字
         const noteElem = card.querySelector('.admin-note-text');
         noteElem.addEventListener('blur', () => {
           if (!isAdmin) return;
@@ -703,16 +712,19 @@
         const key = snapshot.key;
         const data = snapshot.val();
         
+        // 更新公開說明
         const targetTextElem = document.getElementById(`text-${key}`);
         if (targetTextElem && document.activeElement !== targetTextElem) {
           targetTextElem.innerText = data.caption || '';
         }
 
+        // 更新私人備註
         const targetNoteElem = document.getElementById(`note-${key}`);
         if (targetNoteElem && document.activeElement !== targetNoteElem) {
           targetNoteElem.innerText = data.note || '';
         }
 
+        // 更新狀態標籤
         const newStatus = formatStatusValue(data.quantity);
         const targetBadgeElem = document.getElementById(`badge-${key}`);
         if (targetBadgeElem && document.activeElement !== targetBadgeElem) {
@@ -732,38 +744,26 @@
       });
     }
 
-    // 5. 圖片上傳（透過 Firebase Storage 雲端永久儲存）
-    async function handleImageFile(file) {
+    // 圖片上傳
+    function handleImageFile(file) {
       if (!isAdmin || !file || !file.type.startsWith('image/')) return;
 
       const status = document.getElementById('status');
-      status.innerText = "正在上傳至雲端...";
+      status.innerText = "正在發送圖片...";
 
-      try {
-        const filePath = `images/${currentCategory}/${Date.now()}_${file.name}`;
-        const fileRef = storageRef(storage, filePath);
-
-        // 1. 上傳檔案至 Firebase Storage
-        await uploadBytes(fileRef, file);
-
-        // 2. 取得雲端下載網址
-        const downloadUrl = await getDownloadURL(fileRef);
-
-        // 3. 寫入 Realtime Database 進行同步廣播
+      const reader = new FileReader();
+      reader.onload = function(e) {
         push(ref(db, `images/${currentCategory}`), {
-          url: downloadUrl,
+          url: e.target.result,
           caption: getDefaultTimeStr(),
           quantity: '數量: 1',
           note: '',
           timestamp: Date.now()
         });
-
-        status.innerText = "上傳成功！";
+        status.innerText = "發送成功！";
         setTimeout(() => status.innerText = "", 1500);
-      } catch (error) {
-        alert("上傳失敗：" + error.message);
-        status.innerText = "";
-      }
+      };
+      reader.readAsDataURL(file);
     }
 
     document.addEventListener('paste', (e) => {
