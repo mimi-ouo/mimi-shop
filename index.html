@@ -122,22 +122,6 @@
       cursor: pointer;
     }
 
-    .compress-all-btn {
-      background: #fee75c;
-      color: #202225;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      display: none;
-      margin-left: 10px;
-    }
-
-    .is-admin .compress-all-btn {
-      display: inline-block;
-    }
-
     .tabs-container {
       display: flex;
       gap: 8px;
@@ -382,7 +366,6 @@
   <div class="header">
     <div class="title-center">
       <h2>⭐ 米米小舖 ⭐</h2>
-      <button class="compress-all-btn" id="compressAllBtn">⚡ 批次壓縮所有舊圖片</button>
     </div>
     <div class="info-badge">
       <span>📕</span>
@@ -429,7 +412,7 @@
   <div class="gallery" id="gallery"></div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzT8j_pLOBLmlVeAIwCJ-xmXK6jCuj4LdiN_XnXFY2TyU8nnYrkpoWkhZE17svwDpO3jQ/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz1ZR6VzbPvHAuiacE2pb9045XmBgTp1EVRWozozLvURQGu8tAUf2umSED_xha78/exec";
 
     let currentCategory = 'general';
     let currentCategoryDisplayName = '🏠 家具';
@@ -442,7 +425,6 @@
       initAuthUI();
       setupTabs();
       fetchData();
-      setupBatchCompress();
     });
 
     function initAuthUI() {
@@ -841,42 +823,6 @@
         }
       };
       reader.readAsDataURL(file);
-    }
-
-    // 批次壓縮所有舊圖片邏輯
-    function setupBatchCompress() {
-      const btn = document.getElementById('compressAllBtn');
-      if (!btn) return;
-
-      btn.addEventListener('click', async () => {
-        if (!confirm(`確定要將目前的 ${allData.length} 張舊圖片通通進行高容量壓縮嗎？\n此動作將大幅加快日後的網頁載入速度！`)) return;
-
-        const status = document.getElementById('status');
-        btn.disabled = true;
-        
-        let successCount = 0;
-        for (let i = 0; i < allData.length; i++) {
-          const item = allData[i];
-          status.innerText = `正在壓縮舊圖片 (${i + 1}/${allData.length}): ${item.caption || item.id}...`;
-          
-          try {
-            const compressedUrl = await compressImage(item.url, 400, 0.8);
-            const base64Data = compressedUrl.split(',')[1];
-
-            // 覆蓋舊資料的 URL 與雲端圖片
-            await fetch(`${SCRIPT_URL}?action=updateItem&id=${item.id}&field=url&value=${encodeURIComponent(compressedUrl)}`);
-            item.url = compressedUrl;
-            successCount++;
-          } catch (e) {
-            console.error(`壓縮失敗 ${item.id}`, e);
-          }
-        }
-
-        status.innerText = `🎉 完成！已成功為 ${successCount} 張舊圖片縮小容量。`;
-        btn.disabled = false;
-        renderGallery();
-        setTimeout(() => { status.innerText = ""; }, 3000);
-      });
     }
 
     document.addEventListener('paste', (e) => {
