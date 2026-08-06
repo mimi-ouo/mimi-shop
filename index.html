@@ -221,30 +221,12 @@
       position: relative;
       opacity: 0;
       transform: translateY(10px);
-      transition: opacity 0.3s ease, transform 0.3s ease, transform 0.2s, opacity 0.2s;
+      transition: opacity 0.3s ease, transform 0.3s ease;
     }
 
     .img-card.loaded {
       opacity: 1;
       transform: translateY(0);
-    }
-
-    .is-admin .img-card[draggable="true"] {
-      cursor: grab;
-    }
-
-    .is-admin .img-card[draggable="true"]:active {
-      cursor: grabbing;
-    }
-
-    .img-card.dragging {
-      opacity: 0.4;
-      border: 2px dashed var(--accent-color);
-    }
-
-    .img-card.drag-over {
-      transform: scale(1.05);
-      box-shadow: 0 8px 20px rgba(88, 101, 242, 0.4);
     }
 
     .img-wrapper {
@@ -572,10 +554,38 @@
       }
     }
 
+    // 檢查字串是否包含中文字元
+    function hasChinese(str) {
+      return /[\u4e00-\u9fa5]/.test(str);
+    }
+
+    // 依據公開說明文字進行比較（中文排前面，由小到大排序）
+    function compareCaption(a, b) {
+      const capA = (a.caption || '').trim();
+      const capB = (b.caption || '').trim();
+
+      // 空白字串處理（空的排最後面）
+      if (!capA && !capB) return 0;
+      if (!capA) return 1;
+      if (!capB) return -1;
+
+      const aHasChinese = hasChinese(capA);
+      const bHasChinese = hasChinese(capB);
+
+      // 中文排前面
+      if (aHasChinese && !bHasChinese) return -1;
+      if (!aHasChinese && bHasChinese) return 1;
+
+      // 同類別（皆中文或皆非中文）則依據語系由小到大排序
+      return capA.localeCompare(capB, 'zh-Hant', { numeric: true, sensitivity: 'base' });
+    }
+
     function renderGallery() {
       const gallery = document.getElementById('gallery');
       const filtered = allData.filter(item => item.category === currentCategory);
-      filtered.sort((a, b) => b.timestamp - a.timestamp);
+      
+      // 自動根據「公開說明文字」進行排序
+      filtered.sort(compareCaption);
 
       gallery.innerHTML = '';
 
@@ -584,10 +594,6 @@
         card.className = 'img-card';
         card.id = `card-${item.id}`;
         card.setAttribute('data-id', item.id);
-        
-        if (isAdmin) {
-          card.setAttribute('draggable', 'true');
-        }
 
         const currentQty = item.quantity || '數量: 1';
         const isSold = String(currentQty).includes('售出');
@@ -643,54 +649,6 @@
               deleteItem(item.id);
             }
           });
-
-          card.addEventListener('dragstart', (e) => {
-            e.dataTransfer.setData('text/plain', item.id);
-            setTimeout(() => card.classList.add('dragging'), 0);
-          });
-
-          card.addEventListener('dragend', () => {
-            card.classList.remove('dragging');
-            document.querySelectorAll('.img-card').forEach(c => c.classList.remove('drag-over'));
-          });
-
-          card.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            card.classList.add('drag-over');
-          });
-
-          card.addEventListener('dragleave', () => {
-            card.classList.remove('drag-over');
-          });
-
-          card.addEventListener('drop', async (e) => {
-            e.preventDefault();
-            card.classList.remove('drag-over');
-            const draggedId = e.dataTransfer.getData('text/plain');
-            if (draggedId === item.id) return;
-
-            const draggedIndex = allData.findIndex(i => i.id === draggedId);
-            const targetIndex = allData.findIndex(i => i.id === item.id);
-
-            if (draggedIndex !== -1 && targetIndex !== -1) {
-              const [movedItem] = allData.splice(draggedIndex, 1);
-              allData.splice(targetIndex, 0, movedItem);
-
-              const currentFiltered = allData.filter(i => i.category === currentCategory);
-              let now = Date.now();
-              currentFiltered.forEach((fi, idx) => {
-                fi.timestamp = now - (idx * 1000);
-              });
-
-              renderGallery();
-
-              const status = document.getElementById('status');
-              status.innerText = "正在更新排序...";
-              await updateItem(movedItem.id, 'timestamp', movedItem.timestamp);
-              status.innerText = "排序更新成功！";
-              setTimeout(() => { status.innerText = ""; }, 1500);
-            }
-          });
         }
 
         gallery.appendChild(card);
@@ -740,6 +698,11 @@
         const newValue = el.innerText.trim();
         if (newValue === originalValue) return;
 
+        const targetItem = allData.find(item => item.id === id);
+        if (targetItem) {
+          targetItem[field] = newValue;
+        }
+
         const status = document.getElementById('status');
         status.innerText = "正在儲存至雲端...";
         
@@ -747,6 +710,9 @@
         if (success) {
           originalValue = newValue;
           status.innerText = "修改成功！";
+          if (field === 'caption') {
+            renderGallery(); // 修改公開說明文字後重新排序顯示
+          }
         } else {
           status.innerText = "儲存失敗，請重試";
         }
@@ -771,7 +737,8 @@
 
     async function deleteItem(id) {
       await fetch(`${SCRIPT_URL}?action=deleteItem&id=${id}`);
-      document.getElementById(`card-${id}`).remove();
+      allData = allData.filter(item => item.id !== id);
+      renderGallery();
     }
 
     function handleImageFile(file) {
