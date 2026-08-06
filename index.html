@@ -22,7 +22,6 @@
       padding: 20px;
     }
 
-    /* 頂部列 */
     .header {
       display: flex;
       justify-content: space-between;
@@ -57,18 +56,11 @@
       line-height: 1.5;
       width: 100%;
       max-width: 280px;
-      min-height: 38px;
       box-sizing: border-box;
       word-break: break-word;
       white-space: pre-wrap;
     }
 
-    .info-badge .editable-text {
-      flex: 1;
-      outline: none;
-    }
-
-    /* 登入控制 */
     .auth-box {
       display: flex;
       gap: 10px;
@@ -107,7 +99,6 @@
       cursor: pointer;
     }
 
-    /* 下拉選單與分頁導覽列 */
     .tabs-container {
       display: flex;
       gap: 8px;
@@ -125,7 +116,6 @@
       border-radius: 6px;
       font-size: 14px;
       cursor: pointer;
-      transition: all 0.2s;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -176,16 +166,6 @@
       color: #fff;
     }
 
-    .tab-text {
-      outline: none;
-      border-radius: 4px;
-      padding: 2px 4px;
-    }
-
-    .is-admin .tab-text { cursor: text; }
-    .is-admin .tab-text:hover { background: rgba(255, 255, 255, 0.15); }
-
-    /* 上傳區 */
     .drop-zone {
       border: 2px dashed #4f545c;
       background: var(--card-bg);
@@ -201,7 +181,6 @@
       border-color: var(--accent-color);
     }
 
-    /* 圖片畫廊 */
     .gallery {
       display: grid;
       grid-template-columns: repeat(auto-fill, 120px);
@@ -245,7 +224,6 @@
       padding: 1px 4px;
       font-size: 9px;
       font-weight: bold;
-      backdrop-filter: blur(4px);
       max-width: 75px;
       white-space: nowrap;
       overflow: hidden;
@@ -254,8 +232,6 @@
     }
 
     .is-admin .status-badge { cursor: text; }
-    .is-admin .status-badge:hover { border-color: var(--accent-color); }
-
     .status-badge.is-sold {
       background-color: rgba(237, 66, 69, 0.9);
       border-color: var(--danger-color);
@@ -282,7 +258,6 @@
 
     .delete-btn:hover { background-color: var(--danger-color); }
 
-    /* 圖片下方內容區域 */
     .img-info {
       padding: 6px;
       font-size: 11px;
@@ -300,7 +275,6 @@
       display: block;
     }
 
-    /* 🔒 圖片下方獨立備註欄（僅管理員可見） */
     .admin-note-box {
       display: none;
       background-color: #202225;
@@ -310,17 +284,12 @@
       text-align: left;
     }
 
-    .is-admin .admin-note-box {
-      display: block;
-    }
+    .is-admin .admin-note-box { display: block; }
 
     .admin-note-label {
       color: #57F287;
       font-weight: bold;
       margin-bottom: 2px;
-      display: flex;
-      align-items: center;
-      gap: 2px;
     }
 
     .admin-note-text {
@@ -338,80 +307,51 @@
       cursor: text; 
     }
     
-    .is-admin .editable-text:hover, .is-admin .admin-note-text:hover { 
-      border: 1px #4f545c solid; 
-    }
-    
     .is-admin .img-card:hover .delete-btn { display: flex; }
   </style>
 </head>
 <body>
 
-  <!-- 頂部列 -->
   <div class="header">
     <div class="title-left">
       <h2>⭐ 米米小舖 ⭐</h2>
       <div class="info-badge">
-        <span class="info-icon">📕</span>
-        <span class="editable-text" id="siteDescription" contenteditable="false">載入中...</span>
+        <span>📕</span>
+        <span>訪客僅供檢視，管理員登入後可上傳與編輯（重新整理同步試算表）。</span>
       </div>
     </div>
 
     <div class="auth-box" id="authBox">
       <button class="auth-btn" id="showLoginBtn">登入</button>
       <div class="auth-inputs" id="authInputs">
-        <input type="email" id="emailInput" placeholder="管理員 Email">
-        <input type="password" id="passwordInput" placeholder="密碼">
+        <input type="password" id="passwordInput" placeholder="管理員密碼">
         <button class="auth-btn" id="loginBtn">確認</button>
         <button class="cancel-btn" id="cancelBtn">✕</button>
       </div>
     </div>
   </div>
 
-  <!-- 下拉選單與分頁導覽列 -->
   <div class="tabs-container" id="tabsContainer">
-    <!-- 單一分頁：家具 -->
-    <button class="tab-btn active" data-category="general">
-      <span class="tab-text" id="tab-title-general" contenteditable="false">🏠 家具</span>
-    </button>
+    <button class="tab-btn active" data-category="general">🏠 家具</button>
+    <button class="tab-btn" data-category="memes">🧸 熊熊</button>
     
-    <!-- 單一分頁：熊熊 -->
-    <button class="tab-btn" data-category="memes">
-      <span class="tab-text" id="tab-title-memes" contenteditable="false">🧸 熊熊</span>
-    </button>
-
-    <!-- 下拉選單：戒指 -->
     <div class="dropdown">
-      <button class="dropdown-toggle">
-        <span class="tab-text" id="tab-title-ring_group" contenteditable="false">💍 戒指</span> ▾
-      </button>
+      <button class="dropdown-toggle">💍 戒指 ▾</button>
       <div class="dropdown-menu">
-        <div class="dropdown-item tab-btn" data-category="ring_male">
-          <span class="tab-text" id="tab-title-ring_male" contenteditable="false">👦 限男</span>
-        </div>
-        <div class="dropdown-item tab-btn" data-category="ring_female">
-          <span class="tab-text" id="tab-title-ring_female" contenteditable="false">👧 限女</span>
-        </div>
+        <div class="dropdown-item tab-btn" data-category="ring_male">👦 限男</div>
+        <div class="dropdown-item tab-btn" data-category="ring_female">👧 限女</div>
       </div>
     </div>
 
-    <!-- 下拉選單：作物 -->
     <div class="dropdown">
-      <button class="dropdown-toggle">
-        <span class="tab-text" id="tab-title-crop_group" contenteditable="false">🌱 作物</span> ▾
-      </button>
+      <button class="dropdown-toggle">🌱 作物 ▾</button>
       <div class="dropdown-menu">
-        <div class="dropdown-item tab-btn" data-category="crop_male">
-          <span class="tab-text" id="tab-title-crop_male" contenteditable="false">👦 限男</span>
-        </div>
-        <div class="dropdown-item tab-btn" data-category="crop_female">
-          <span class="tab-text" id="tab-title-crop_female" contenteditable="false">👧 限女</span>
-        </div>
+        <div class="dropdown-item tab-btn" data-category="crop_male">👦 限男</div>
+        <div class="dropdown-item tab-btn" data-category="crop_female">👧 限女</div>
       </div>
     </div>
   </div>
   
-  <!-- 上傳區 -->
   <div class="drop-zone" id="dropZone">
     <p style="font-size: 16px; margin-bottom: 8px;">💡 當前分頁：<b id="currentTabName">🏠 家具</b>（Ctrl + V 貼上圖片 / 拖曳上傳）</p>
     <p id="status" style="color: var(--accent-color); margin: 0; font-weight: bold;"></p>
@@ -419,169 +359,52 @@
 
   <div class="gallery" id="gallery"></div>
 
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getDatabase, ref, push, update, remove, set, onValue, onChildAdded, onChildChanged, onChildRemoved, off } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCVUSw-B1it_bQ2sF3pAsTI0pXcyF-Tdfg",
-      authDomain: "mimishop-93214.firebaseapp.com",
-      databaseURL: "https://mimishop-93214-default-rtdb.firebaseio.com",
-      projectId: "mimishop-93214",
-      storageBucket: "mimishop-93214.firebasestorage.app",
-      messagingSenderId: "953118400447",
-      appId: "1:953118400447:web:3a0e2fc6c4d2b65425cb0a",
-      measurementId: "G-0EDJDFNFWF"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
+  <script>
+    // 已帶入你的 Google Apps Script 網頁應用程式網址
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz1ZR6VzbPvHAuiacE2pb9045XmBgTp1EVRWozozLvURQGu8tAUf2umSED_xha78DFNig/exec";
 
     let currentCategory = 'general';
     let currentCategoryDisplayName = '🏠 家具';
-    let activeRef = null;
-    let isAdmin = false;
+    let isAdmin = localStorage.getItem('isAdmin') === 'true';
+    let allData = [];
 
-    // 後備預設文字（僅當 Firebase 完全沒有資料時才作備用）
-    const fallbackCategories = {
-      general: "🏠 家具",
-      memes: "🧸 熊熊",
-      ring_group: "💍 戒指",
-      ring_male: "👦 限男",
-      ring_female: "👧 限女",
-      crop_group: "🌱 作物",
-      crop_male: "👦 限男",
-      crop_female: "👧 限女"
-    };
+    const ADMIN_PASSWORD = "1234"; // 管理員密碼預設為 1234，可自行修改
 
-    function getDefaultTimeStr() {
-      return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }
-
-    function formatStatusValue(val) {
-      return val || '數量: 1';
-    }
-
-    function updateCurrentTabDisplay(name) {
-      currentCategoryDisplayName = name || currentCategoryDisplayName;
-      document.getElementById('currentTabName').innerText = currentCategoryDisplayName;
-    }
-
-    // 1. 說明欄同步（安全保護：優先使用 Firebase 現有文字）
-    const descElem = document.getElementById('siteDescription');
-    const descRef = ref(db, 'settings/description');
-
-    onValue(descRef, (snapshot) => {
-      const data = snapshot.val();
-      const defaultText = "訪客僅供檢視，管理員登入後可上傳與編輯。";
-      if (document.activeElement !== descElem) {
-        // 若雲端有歷史文字則保留使用，不被代碼覆蓋
-        descElem.innerText = (data !== null && data !== undefined) ? data : defaultText;
-      }
+    document.addEventListener('DOMContentLoaded', () => {
+      initAuthUI();
+      setupTabs();
+      fetchData();
     });
 
-    descElem.addEventListener('blur', () => {
-      if (!isAdmin) return;
-      set(descRef, descElem.innerText.trim());
-    });
-
-    // 2. 分頁標題即時同步（安全保護：優先使用 Firebase 現有文字）
-    const menuRef = ref(db, 'settings/menus/tabNames');
-    onValue(menuRef, (snapshot) => {
-      const data = snapshot.val() || {};
-      
-      // 比對 DOM 節點並更新為雲端現有文字
-      Object.keys(fallbackCategories).forEach(cat => {
-        const textElem = document.getElementById(`tab-title-${cat}`);
-        if (textElem && document.activeElement !== textElem) {
-          if (data[cat] !== undefined && data[cat] !== "") {
-            textElem.innerText = data[cat];
-          } else if (!textElem.innerText.trim()) {
-            textElem.innerText = fallbackCategories[cat];
-          }
-        }
-      });
-    });
-
-    // 綁定各分頁標題編輯與點擊事件
-    Object.keys(fallbackCategories).forEach(cat => {
-      const textSpan = document.getElementById(`tab-title-${cat}`);
-      const btn = document.querySelector(`[data-category="${cat}"]`);
-
-      if (textSpan) {
-        textSpan.addEventListener('blur', () => {
-          if (!isAdmin) return;
-          update(ref(db, `settings/menus/tabNames`), { [cat]: textSpan.innerText.trim() });
-        });
-
-        textSpan.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') { e.preventDefault(); textSpan.blur(); }
-        });
-      }
-
-      if (btn) {
-        btn.addEventListener('click', () => {
-          if (document.activeElement === textSpan) return;
-
-          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          
-          let displayName = textSpan.innerText.trim();
-          const parentGroup = btn.closest('.dropdown');
-          if (parentGroup) {
-            const groupTitle = parentGroup.querySelector('.dropdown-toggle .tab-text').innerText.trim();
-            displayName = `${groupTitle} - ${displayName}`;
-          }
-
-          updateCurrentTabDisplay(displayName);
-          switchCategory(cat);
-        });
-      }
-    });
-
-    // 3. Auth 權限狀態管理
-    onAuthStateChanged(auth, (user) => {
+    function initAuthUI() {
       const authBox = document.getElementById('authBox');
       const dropZone = document.getElementById('dropZone');
 
-      isAdmin = !!user;
-
-      document.querySelectorAll('.tab-text').forEach(el => {
-        el.contentEditable = isAdmin ? "true" : "false";
-      });
-
-      if (user) {
+      if (isAdmin) {
         document.body.classList.add('is-admin');
         dropZone.style.display = 'block';
-        if (descElem) descElem.contentEditable = "true";
-        
         authBox.innerHTML = `
           <span style="color:#57F287; font-size:14px;">已登入管理員</span>
           <button class="auth-btn" id="logoutBtn" style="background:#4f545c">登出</button>
         `;
-        document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+          localStorage.removeItem('isAdmin');
+          location.reload();
+        });
       } else {
         document.body.classList.remove('is-admin');
         dropZone.style.display = 'none';
-        if (descElem) descElem.contentEditable = "false";
-        
         authBox.innerHTML = `
           <button class="auth-btn" id="showLoginBtn">登入</button>
           <div class="auth-inputs" id="authInputs">
-            <input type="email" id="emailInput" placeholder="管理員 Email">
-            <input type="password" id="passwordInput" placeholder="密碼">
+            <input type="password" id="passwordInput" placeholder="管理員密碼">
             <button class="auth-btn" id="loginBtn">確認</button>
             <button class="cancel-btn" id="cancelBtn">✕</button>
           </div>
         `;
         bindAuthEvents();
       }
-      
-      switchCategory(currentCategory);
-    });
+    }
 
     function bindAuthEvents() {
       const showLoginBtn = document.getElementById('showLoginBtn');
@@ -589,179 +412,151 @@
       const cancelBtn = document.getElementById('cancelBtn');
       const loginBtn = document.getElementById('loginBtn');
 
-      if (showLoginBtn) {
-        showLoginBtn.addEventListener('click', () => {
-          showLoginBtn.style.display = 'none';
-          authInputs.style.display = 'flex';
-        });
-      }
+      showLoginBtn.addEventListener('click', () => {
+        showLoginBtn.style.display = 'none';
+        authInputs.style.display = 'flex';
+      });
 
-      if (cancelBtn) {
-        cancelBtn.addEventListener('click', () => {
-          authInputs.style.display = 'none';
-          showLoginBtn.style.display = 'inline-block';
-        });
-      }
+      cancelBtn.addEventListener('click', () => {
+        authInputs.style.display = 'none';
+        showLoginBtn.style.display = 'inline-block';
+      });
 
-      if (loginBtn) {
-        loginBtn.addEventListener('click', handleLogin);
-      }
+      loginBtn.addEventListener('click', () => {
+        const pass = document.getElementById('passwordInput').value;
+        if (pass === ADMIN_PASSWORD) {
+          localStorage.setItem('isAdmin', 'true');
+          location.reload();
+        } else {
+          alert('密碼錯誤！');
+        }
+      });
     }
 
-    async function handleLogin() {
-      const email = document.getElementById('emailInput').value;
-      const password = document.getElementById('passwordInput').value;
+    function setupTabs() {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentCategory = btn.getAttribute('data-category');
+          currentCategoryDisplayName = btn.innerText.trim();
+          document.getElementById('currentTabName').innerText = currentCategoryDisplayName;
+          renderGallery();
+        });
+      });
+    }
+
+    async function fetchData() {
       try {
-        await signInWithEmailAndPassword(auth, email, password);
+        const response = await fetch(`${SCRIPT_URL}?action=getData`);
+        const result = await response.json();
+        if (result.status === 'success') {
+          allData = result.data;
+          renderGallery();
+        }
       } catch (err) {
-        alert('登入失敗：' + err.message);
+        console.error("載入資料失敗", err);
       }
     }
 
-    // 4. 切換與讀取分頁圖片（即時同步資料庫內容）
-    function renderStatusElement(key, rawStatusValue) {
-      const statusValue = formatStatusValue(rawStatusValue);
-      const isSoldClass = statusValue.includes('售出') ? 'is-sold' : '';
-      return `
-        <span class="status-badge ${isSoldClass}" id="badge-${key}" contenteditable="${isAdmin}">
-          ${statusValue}
-        </span>
-      `;
-    }
+    function renderGallery() {
+      const gallery = document.getElementById('gallery');
+      gallery.innerHTML = '';
 
-    function switchCategory(newCategory) {
-      if (activeRef) off(activeRef);
+      const filtered = allData.filter(item => item.category === currentCategory);
+      filtered.sort((a, b) => b.timestamp - a.timestamp);
 
-      currentCategory = newCategory;
-      activeRef = ref(db, `images/${currentCategory}`);
-      document.getElementById('gallery').innerHTML = '';
-
-      onChildAdded(activeRef, (snapshot) => {
-        const key = snapshot.key;
-        const data = snapshot.val();
-        const gallery = document.getElementById('gallery');
-
+      filtered.forEach(item => {
         const card = document.createElement('div');
         card.className = 'img-card';
-        card.id = `card-${key}`;
+        card.id = `card-${item.id}`;
 
-        const textValue = data.caption || getDefaultTimeStr();
-        const statusValue = data.quantity || '數量: 1';
-        const noteValue = data.note || '';
+        const isSoldClass = String(item.quantity).includes('售出') ? 'is-sold' : '';
 
         card.innerHTML = `
           <button class="delete-btn" title="刪除圖片">✕</button>
           <div class="img-wrapper">
-            ${renderStatusElement(key, statusValue)}
-            <img src="${data.url}" loading="lazy" alt="uploaded image" />
+            <span class="status-badge ${isSoldClass}" id="badge-${item.id}" contenteditable="${isAdmin}">${item.quantity || '數量: 1'}</span>
+            <img src="${item.url}" loading="lazy" alt="image" />
           </div>
           <div class="img-info">
-            <span class="editable-text" contenteditable="${isAdmin}" id="text-${key}">${textValue}</span>
+            <span class="editable-text" contenteditable="${isAdmin}" id="text-${item.id}">${item.caption || ''}</span>
           </div>
           <div class="admin-note-box">
             <div class="admin-note-label">🔒 備註</div>
-            <span class="admin-note-text" contenteditable="${isAdmin}" id="note-${key}">${noteValue}</span>
+            <span class="admin-note-text" contenteditable="${isAdmin}" id="note-${item.id}">${item.note || ''}</span>
           </div>
         `;
 
-        gallery.prepend(card);
+        gallery.appendChild(card);
 
-        // 修改數量狀態
-        const badgeElem = card.querySelector(`#badge-${key}`);
-        if (badgeElem) {
-          badgeElem.addEventListener('blur', () => {
-            if (!isAdmin) return;
-            update(ref(db, `images/${currentCategory}/${key}`), { quantity: badgeElem.innerText.trim() });
+        if (isAdmin) {
+          card.querySelector('.delete-btn').addEventListener('click', () => {
+            if (confirm('確定要刪除這張圖片嗎？')) {
+              deleteItem(item.id);
+            }
           });
-          badgeElem.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') { e.preventDefault(); badgeElem.blur(); }
-          });
+
+          bindEditable(item.id, 'quantity', `badge-${item.id}`);
+          bindEditable(item.id, 'caption', `text-${item.id}`);
+          bindEditable(item.id, 'note', `note-${item.id}`);
         }
-
-        // 刪除圖片
-        const deleteBtn = card.querySelector('.delete-btn');
-        deleteBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (isAdmin && confirm('確定要刪除這張圖片嗎？')) {
-            remove(ref(db, `images/${currentCategory}/${key}`));
-          }
-        });
-
-        // 修改圖片公開文字
-        const editableElem = card.querySelector('.editable-text');
-        editableElem.addEventListener('blur', () => {
-          if (!isAdmin) return;
-          update(ref(db, `images/${currentCategory}/${key}`), { caption: editableElem.innerText.trim() });
-        });
-        editableElem.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') { e.preventDefault(); editableElem.blur(); }
-        });
-
-        // 修改圖片私人備註文字
-        const noteElem = card.querySelector('.admin-note-text');
-        noteElem.addEventListener('blur', () => {
-          if (!isAdmin) return;
-          update(ref(db, `images/${currentCategory}/${key}`), { note: noteElem.innerText.trim() });
-        });
-        noteElem.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') { e.preventDefault(); noteElem.blur(); }
-        });
-      });
-
-      onChildChanged(activeRef, (snapshot) => {
-        const key = snapshot.key;
-        const data = snapshot.val();
-        
-        // 更新公開說明
-        const targetTextElem = document.getElementById(`text-${key}`);
-        if (targetTextElem && document.activeElement !== targetTextElem) {
-          targetTextElem.innerText = data.caption || '';
-        }
-
-        // 更新私人備註
-        const targetNoteElem = document.getElementById(`note-${key}`);
-        if (targetNoteElem && document.activeElement !== targetNoteElem) {
-          targetNoteElem.innerText = data.note || '';
-        }
-
-        // 更新狀態標籤
-        const newStatus = formatStatusValue(data.quantity);
-        const targetBadgeElem = document.getElementById(`badge-${key}`);
-        if (targetBadgeElem && document.activeElement !== targetBadgeElem) {
-          targetBadgeElem.innerText = newStatus;
-          if (newStatus.includes('售出')) {
-            targetBadgeElem.classList.add('is-sold');
-          } else {
-            targetBadgeElem.classList.remove('is-sold');
-          }
-        }
-      });
-
-      onChildRemoved(activeRef, (snapshot) => {
-        const key = snapshot.key;
-        const cardElem = document.getElementById(`card-${key}`);
-        if (cardElem) cardElem.remove();
       });
     }
 
-    // 圖片上傳
+    function bindEditable(id, field, elementId) {
+      const el = document.getElementById(elementId);
+      el.addEventListener('blur', () => {
+        updateItem(id, field, el.innerText.trim());
+      });
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
+      });
+    }
+
+    async function updateItem(id, field, value) {
+      await fetch(`${SCRIPT_URL}?action=updateItem&id=${id}&field=${field}&value=${encodeURIComponent(value)}`);
+    }
+
+    async function deleteItem(id) {
+      await fetch(`${SCRIPT_URL}?action=deleteItem&id=${id}`);
+      document.getElementById(`card-${id}`).remove();
+    }
+
     function handleImageFile(file) {
       if (!isAdmin || !file || !file.type.startsWith('image/')) return;
-
       const status = document.getElementById('status');
-      status.innerText = "正在發送圖片...";
+      status.innerText = "正在上傳至 Google 雲端...";
 
       const reader = new FileReader();
-      reader.onload = function(e) {
-        push(ref(db, `images/${currentCategory}`), {
-          url: e.target.result,
-          caption: getDefaultTimeStr(),
-          quantity: '數量: 1',
-          note: '',
-          timestamp: Date.now()
-        });
-        status.innerText = "發送成功！";
-        setTimeout(() => status.innerText = "", 1500);
+      reader.onload = async function(e) {
+        const base64Data = e.target.result.split(',')[1];
+        const defaultTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        const formData = new URLSearchParams();
+        formData.append('action', 'addItem');
+        formData.append('category', currentCategory);
+        formData.append('caption', defaultTime);
+        formData.append('quantity', '數量: 1');
+        formData.append('note', '');
+        formData.append('mimeType', file.type);
+        formData.append('imageBase64', base64Data);
+
+        try {
+          const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: formData
+          });
+          const result = await response.json();
+          if (result.status === 'success') {
+            status.innerText = "上傳成功！";
+            fetchData();
+            setTimeout(() => status.innerText = "", 1500);
+          }
+        } catch (err) {
+          status.innerText = "上傳失敗";
+          console.error(err);
+        }
       };
       reader.readAsDataURL(file);
     }
