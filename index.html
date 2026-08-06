@@ -11,6 +11,7 @@
       --text-color: #dcddde;
       --accent-color: #5865f2;
       --danger-color: #ed4245;
+      --success-color: #57F287;
     }
 
     body {
@@ -121,6 +122,22 @@
       cursor: pointer;
     }
 
+    .compress-all-btn {
+      background: #fee75c;
+      color: #202225;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      display: none;
+      margin-left: 10px;
+    }
+
+    .is-admin .compress-all-btn {
+      display: inline-block;
+    }
+
     .tabs-container {
       display: flex;
       gap: 8px;
@@ -197,7 +214,7 @@
       margin-bottom: 25px;
       display: none;
     }
-
+    
     .drop-zone.dragover {
       background: #393c43;
       border-color: var(--accent-color);
@@ -227,24 +244,6 @@
     .img-card.loaded {
       opacity: 1;
       transform: translateY(0);
-    }
-
-    .is-admin .img-card[draggable="true"] {
-      cursor: grab;
-    }
-
-    .is-admin .img-card[draggable="true"]:active {
-      cursor: grabbing;
-    }
-
-    .img-card.dragging {
-      opacity: 0.4;
-      border: 2px dashed var(--accent-color);
-    }
-
-    .img-card.drag-over {
-      transform: scale(1.05);
-      box-shadow: 0 8px 20px rgba(88, 101, 242, 0.4);
     }
 
     .img-wrapper {
@@ -383,6 +382,7 @@
   <div class="header">
     <div class="title-center">
       <h2>⭐ 米米小舖 ⭐</h2>
+      <button class="compress-all-btn" id="compressAllBtn">⚡ 批次壓縮所有舊圖片</button>
     </div>
     <div class="info-badge">
       <span>📕</span>
@@ -429,7 +429,6 @@
   <div class="gallery" id="gallery"></div>
 
   <script>
-    // 已更新為最新部署的 Web App URL
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzT8j_pLOBLmlVeAIwCJ-xmXK6jCuj4LdiN_XnXFY2TyU8nnYrkpoWkhZE17svwDpO3jQ/exec";
 
     let currentCategory = 'general';
@@ -443,52 +442,8 @@
       initAuthUI();
       setupTabs();
       fetchData();
+      setupBatchCompress();
     });
-
-    /**
-     * 圖片壓縮核心函式 (基於 Canvas)
-     */
-    function compressImage(source, maxWidth = 400, quality = 0.75) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => {
-          let width = img.width;
-          let height = img.height;
-
-          if (width > maxWidth) {
-            height = Math.round((height * maxWidth) / width);
-            width = maxWidth;
-          }
-
-          const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-
-          const mimeType = 'image/jpeg';
-          const dataUrl = canvas.toDataURL(mimeType, quality);
-          const base64 = dataUrl.split(',')[1];
-
-          resolve({ base64, dataUrl, mimeType });
-        };
-
-        img.onerror = (err) => reject(err);
-
-        if (source instanceof File) {
-          const reader = new FileReader();
-          reader.onload = (e) => { img.src = e.target.result; };
-          reader.onerror = (err) => reject(err);
-          reader.readAsDataURL(source);
-        } else if (typeof source === 'string') {
-          img.crossOrigin = "Anonymous";
-          img.src = source;
-        } else {
-          reject(new Error("不支援的來源格式"));
-        }
-      });
-    }
 
     function initAuthUI() {
       const authBox = document.getElementById('authBox');
@@ -576,7 +531,7 @@
 
     function setupTabs() {
       document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
           document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           currentCategory = btn.getAttribute('data-category');
@@ -601,50 +556,49 @@
           }
 
           renderGallery();
-
-          if (isAdmin) {
-            checkAndCompressOldImages();
-          }
         }
       } catch (err) {
         console.error("載入資料失敗", err);
       }
     }
 
-    /**
-     * 自動檢查並壓縮舊圖（非同步安全機制）
-     */
-    async function checkAndCompressOldImages() {
-      for (let item of allData) {
-        if (!item.url) continue;
-
-        const isBase64 = item.url.startsWith('data:');
-        const isPngOrLarge = !item.url.startsWith('data:image/jpeg') || item.url.length > 200000;
-
-        if (isBase64 && isPngOrLarge) {
-          try {
-            const compressed = await compressImage(item.url, 400, 0.75);
-            item.url = compressed.dataUrl;
-
-            // 使用 POST 發送覆蓋更新，避免 GET 造成網址過長 404
-            await updateItem(item.id, 'url', compressed.dataUrl);
-            console.log(`[自動壓縮舊圖成功] ID: ${item.id}`);
-          } catch (e) {
-            console.warn(`[舊圖自動壓縮跳過/失敗] ID: ${item.id}`, e);
-          }
-        }
+    async function updateDescription(newText) {
+      try {
+        const response = await fetch(`${SCRIPT_URL}?action=updateItem&id=settings_desc&field=caption&value=${encodeURIComponent(newText)}`);
+        const result = await response.json();
+        return result.status === 'success';
+      } catch (err) {
+        console.error(err);
+        return false;
       }
     }
 
-    async function updateDescription(newText) {
-      return await updateItem('settings_desc', 'caption', newText);
+    function hasChinese(str) {
+      return /[\u4e00-\u9fa5]/.test(str);
+    }
+
+    function compareCaption(a, b) {
+      const capA = (a.caption || '').trim();
+      const capB = (b.caption || '').trim();
+
+      if (!capA && !capB) return 0;
+      if (!capA) return 1;
+      if (!capB) return -1;
+
+      const aHasChinese = hasChinese(capA);
+      const bHasChinese = hasChinese(capB);
+
+      if (aHasChinese && !bHasChinese) return -1;
+      if (!aHasChinese && bHasChinese) return 1;
+
+      return capA.localeCompare(capB, 'zh-Hant', { numeric: true, sensitivity: 'base' });
     }
 
     function renderGallery() {
       const gallery = document.getElementById('gallery');
       const filtered = allData.filter(item => item.category === currentCategory);
-      filtered.sort((a, b) => b.timestamp - a.timestamp);
-
+      
+      filtered.sort(compareCaption);
       gallery.innerHTML = '';
 
       filtered.forEach((item) => {
@@ -652,10 +606,6 @@
         card.className = 'img-card';
         card.id = `card-${item.id}`;
         card.setAttribute('data-id', item.id);
-        
-        if (isAdmin) {
-          card.setAttribute('draggable', 'true');
-        }
 
         const currentQty = item.quantity || '數量: 1';
         const isSold = String(currentQty).includes('售出');
@@ -686,7 +636,7 @@
           <button class="delete-btn" title="刪除圖片">✕</button>
           <div class="img-wrapper">
             ${badgeHTML}
-            <img src="${item.url}" alt="image" />
+            <img src="${item.url}" alt="image" loading="lazy" decoding="async" />
           </div>
           <div class="img-info">
             <span class="editable-text" contenteditable="${isAdmin}" id="text-${item.id}">${item.caption || ''}</span>
@@ -709,54 +659,6 @@
           card.querySelector('.delete-btn').addEventListener('click', () => {
             if (confirm('確定要刪除這張圖片嗎？')) {
               deleteItem(item.id);
-            }
-          });
-
-          card.addEventListener('dragstart', (e) => {
-            e.dataTransfer.setData('text/plain', item.id);
-            setTimeout(() => card.classList.add('dragging'), 0);
-          });
-
-          card.addEventListener('dragend', () => {
-            card.classList.remove('dragging');
-            document.querySelectorAll('.img-card').forEach(c => c.classList.remove('drag-over'));
-          });
-
-          card.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            card.classList.add('drag-over');
-          });
-
-          card.addEventListener('dragleave', () => {
-            card.classList.remove('drag-over');
-          });
-
-          card.addEventListener('drop', async (e) => {
-            e.preventDefault();
-            card.classList.remove('drag-over');
-            const draggedId = e.dataTransfer.getData('text/plain');
-            if (draggedId === item.id) return;
-
-            const draggedIndex = allData.findIndex(i => i.id === draggedId);
-            const targetIndex = allData.findIndex(i => i.id === item.id);
-
-            if (draggedIndex !== -1 && targetIndex !== -1) {
-              const [movedItem] = allData.splice(draggedIndex, 1);
-              allData.splice(targetIndex, 0, movedItem);
-
-              const currentFiltered = allData.filter(i => i.category === currentCategory);
-              let now = Date.now();
-              currentFiltered.forEach((fi, idx) => {
-                fi.timestamp = now - (idx * 1000);
-              });
-
-              renderGallery();
-
-              const status = document.getElementById('status');
-              status.innerText = "正在更新排序...";
-              await updateItem(movedItem.id, 'timestamp', movedItem.timestamp);
-              status.innerText = "排序更新成功！";
-              setTimeout(() => { status.innerText = ""; }, 1500);
             }
           });
         }
@@ -808,6 +710,11 @@
         const newValue = el.innerText.trim();
         if (newValue === originalValue) return;
 
+        const targetItem = allData.find(item => item.id === id);
+        if (targetItem) {
+          targetItem[field] = newValue;
+        }
+
         const status = document.getElementById('status');
         status.innerText = "正在儲存至雲端...";
         
@@ -815,6 +722,9 @@
         if (success) {
           originalValue = newValue;
           status.innerText = "修改成功！";
+          if (field === 'caption') {
+            renderGallery();
+          }
         } else {
           status.innerText = "儲存失敗，請重試";
         }
@@ -826,93 +736,147 @@
       });
     }
 
-    /**
-     * 自動判斷資料長度：長字串 (Base64) 使用 POST，短字串使用 GET
-     */
     async function updateItem(id, field, value) {
       try {
-        const stringValue = String(value);
-        if (stringValue.length > 1000) {
-          const formData = new URLSearchParams();
-          formData.append('action', 'updateItem');
-          formData.append('id', id);
-          formData.append('field', field);
-          formData.append('value', stringValue);
-
-          const response = await fetch(SCRIPT_URL, {
-            method: 'POST',
-            body: formData
-          });
-          const result = await response.json();
-          return result.status === 'success';
-        } else {
-          const response = await fetch(`${SCRIPT_URL}?action=updateItem&id=${id}&field=${field}&value=${encodeURIComponent(stringValue)}`);
-          const result = await response.json();
-          return result.status === 'success';
-        }
+        const response = await fetch(`${SCRIPT_URL}?action=updateItem&id=${id}&field=${field}&value=${encodeURIComponent(value)}`);
+        const result = await response.json();
+        return result.status === 'success';
       } catch (err) {
-        console.error("更新欄位失敗:", err);
+        console.error(err);
         return false;
       }
     }
 
     async function deleteItem(id) {
       await fetch(`${SCRIPT_URL}?action=deleteItem&id=${id}`);
-      document.getElementById(`card-${id}`).remove();
+      allData = allData.filter(item => item.id !== id);
+      renderGallery();
     }
 
-    /**
-     * 處理圖片上傳
-     */
-    async function handleImageFile(file) {
+    // Canvas 圖片壓縮通用函式
+    function compressImage(srcUrl, maxSize = 400, quality = 0.8) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxSize) {
+              height *= maxSize / width;
+              width = maxSize;
+            }
+          } else {
+            if (height > maxSize) {
+              width *= maxSize / height;
+              height = maxSize;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve(compressedDataUrl);
+        };
+        img.onerror = (e) => reject(e);
+        img.src = srcUrl;
+      });
+    }
+
+    // 上傳圖片時自動壓縮
+    function handleImageFile(file) {
       if (!isAdmin || !file || !file.type.startsWith('image/')) return;
       const status = document.getElementById('status');
-      status.innerText = "正在壓縮圖片並上傳...";
+      status.innerText = "正在縮小並上傳圖片...";
 
-      try {
-        const compressed = await compressImage(file, 400, 0.75);
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        try {
+          const compressedDataUrl = await compressImage(e.target.result, 400, 0.8);
+          const base64Data = compressedDataUrl.split(',')[1];
+          const defaultTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const tempId = 'temp_' + new Date().getTime();
 
-        const defaultTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const tempId = 'temp_' + new Date().getTime();
+          const tempItem = {
+            id: tempId,
+            category: currentCategory,
+            url: compressedDataUrl,
+            caption: defaultTime,
+            quantity: '數量: 1',
+            note: '',
+            timestamp: new Date().getTime()
+          };
+          
+          allData.unshift(tempItem);
+          renderGallery();
 
-        const tempItem = {
-          id: tempId,
-          category: currentCategory,
-          url: compressed.dataUrl,
-          caption: defaultTime,
-          quantity: '數量: 1',
-          note: '',
-          timestamp: new Date().getTime()
-        };
-        
-        allData.unshift(tempItem);
-        renderGallery();
+          const formData = new URLSearchParams();
+          formData.append('action', 'addItem');
+          formData.append('category', currentCategory);
+          formData.append('caption', defaultTime);
+          formData.append('quantity', '數量: 1');
+          formData.append('note', '');
+          formData.append('mimeType', 'image/jpeg');
+          formData.append('imageBase64', base64Data);
 
-        const formData = new URLSearchParams();
-        formData.append('action', 'addItem');
-        formData.append('category', currentCategory);
-        formData.append('caption', defaultTime);
-        formData.append('quantity', '數量: 1');
-        formData.append('note', '');
-        formData.append('mimeType', compressed.mimeType);
-        formData.append('imageBase64', compressed.base64);
-
-        const response = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          body: formData
-        });
-        
-        const result = await response.json();
-        if (result.status === 'success') {
-          status.innerText = "上傳成功！";
+          const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: formData
+          });
+          const result = await response.json();
+          if (result.status === 'success') {
+            status.innerText = "上傳成功！";
+            fetchData();
+            setTimeout(() => status.innerText = "", 1500);
+          }
+        } catch (err) {
+          status.innerText = "上傳失敗";
+          console.error(err);
           fetchData();
-          setTimeout(() => status.innerText = "", 1500);
         }
-      } catch (err) {
-        status.innerText = "上傳失敗";
-        console.error(err);
-        fetchData();
-      }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // 批次壓縮所有舊圖片邏輯
+    function setupBatchCompress() {
+      const btn = document.getElementById('compressAllBtn');
+      if (!btn) return;
+
+      btn.addEventListener('click', async () => {
+        if (!confirm(`確定要將目前的 ${allData.length} 張舊圖片通通進行高容量壓縮嗎？\n此動作將大幅加快日後的網頁載入速度！`)) return;
+
+        const status = document.getElementById('status');
+        btn.disabled = true;
+        
+        let successCount = 0;
+        for (let i = 0; i < allData.length; i++) {
+          const item = allData[i];
+          status.innerText = `正在壓縮舊圖片 (${i + 1}/${allData.length}): ${item.caption || item.id}...`;
+          
+          try {
+            const compressedUrl = await compressImage(item.url, 400, 0.8);
+            const base64Data = compressedUrl.split(',')[1];
+
+            // 覆蓋舊資料的 URL 與雲端圖片
+            await fetch(`${SCRIPT_URL}?action=updateItem&id=${item.id}&field=url&value=${encodeURIComponent(compressedUrl)}`);
+            item.url = compressedUrl;
+            successCount++;
+          } catch (e) {
+            console.error(`壓縮失敗 ${item.id}`, e);
+          }
+        }
+
+        status.innerText = `🎉 完成！已成功為 ${successCount} 張舊圖片縮小容量。`;
+        btn.disabled = false;
+        renderGallery();
+        setTimeout(() => { status.innerText = ""; }, 3000);
+      });
     }
 
     document.addEventListener('paste', (e) => {
