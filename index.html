@@ -369,7 +369,7 @@
     </div>
     <div class="info-badge">
       <span>📕</span>
-      <span class="editable-text" id="siteDescription" contenteditable="false">本人夜班，交易需另約時間，故不接急單 ｜ 交易方式：可糖可T，比值1:1 ｜ Discord：mimi_ouo｜ 加載較慢，請耐心等待</span>
+      <span class="editable-text" id="siteDescription" contenteditable="false">本人夜班，交易需另約時間，故不接急單 ｜ 交易方式：可糖可T，比值1:1 ｜ Discord：mimi_ouo</span>
     </div>
 
     <div class="auth-box" id="authBox">
@@ -424,6 +424,22 @@
     document.addEventListener('DOMContentLoaded', () => {
       initAuthUI();
       setupTabs();
+      
+      // 1. 先讀取本地快取（秒開體驗）
+      const cachedData = localStorage.getItem('mimi_gallery_cache');
+      if (cachedData) {
+        try {
+          allData = JSON.parse(cachedData);
+          renderGallery();
+        } catch (e) {
+          console.error("快取讀取失敗", e);
+        }
+      } else {
+        // 沒有快取時顯示 Loading
+        document.getElementById('gallery').innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #b9bbbe; padding: 40px;">⏳ 資料載入中，請稍候...</div>';
+      }
+
+      // 2. 背景同步最新資料
       fetchData();
     });
 
@@ -531,6 +547,9 @@
         if (result.status === 'success') {
           allData = result.data.filter(item => String(item.id) !== 'settings_desc');
           
+          // 更新 LocalStorage 快取
+          localStorage.setItem('mimi_gallery_cache', JSON.stringify(allData));
+
           const descItem = result.data.find(item => String(item.id) === 'settings_desc');
           const descElem = document.getElementById('siteDescription');
           if (descItem && descItem.caption) {
@@ -560,7 +579,6 @@
     }
 
     function compareCaption(a, b) {
-      // 強制轉換為字串，避免傳入數字時因無 trim() 方法引發 TypeError
       const capA = String(a.caption || '').trim();
       const capB = String(b.caption || '').trim();
 
@@ -583,6 +601,11 @@
       
       filtered.sort(compareCaption);
       gallery.innerHTML = '';
+
+      if (filtered.length === 0) {
+        gallery.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #72767d; padding: 30px;">尚無照片</div>';
+        return;
+      }
 
       filtered.forEach((item) => {
         const card = document.createElement('div');
@@ -659,6 +682,7 @@
               const success = await updateItem(item.id, 'quantity', newValue);
               if (success) {
                 item.quantity = newValue;
+                localStorage.setItem('mimi_gallery_cache', JSON.stringify(allData));
                 if (newValue.includes('售出')) {
                   selectEl.classList.add('is-sold');
                 } else {
@@ -696,6 +720,7 @@
         const targetItem = allData.find(item => item.id === id);
         if (targetItem) {
           targetItem[field] = newValue;
+          localStorage.setItem('mimi_gallery_cache', JSON.stringify(allData));
         }
 
         const status = document.getElementById('status');
@@ -733,6 +758,7 @@
     async function deleteItem(id) {
       await fetch(`${SCRIPT_URL}?action=deleteItem&id=${id}`);
       allData = allData.filter(item => item.id !== id);
+      localStorage.setItem('mimi_gallery_cache', JSON.stringify(allData));
       renderGallery();
     }
 
@@ -781,20 +807,6 @@
           const compressedDataUrl = await compressImage(e.target.result, 400, 0.8);
           const base64Data = compressedDataUrl.split(',')[1];
           const defaultTime = String(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-          const tempId = 'temp_' + new Date().getTime();
-
-          const tempItem = {
-            id: tempId,
-            category: currentCategory,
-            url: compressedDataUrl,
-            caption: defaultTime,
-            quantity: '數量: 1',
-            note: '',
-            timestamp: new Date().getTime()
-          };
-          
-          allData.unshift(tempItem);
-          renderGallery();
 
           const formData = new URLSearchParams();
           formData.append('action', 'addItem');
