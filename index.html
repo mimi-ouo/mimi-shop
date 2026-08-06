@@ -423,7 +423,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getDatabase, ref, push, update, remove, set, onValue, onChildAdded, onChildChanged, onChildRemoved, off } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, push, update, remove, set, onValue, off } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCVUSw-B1it_bQ2sF3pAsTI0pXcyF-Tdfg",
@@ -445,7 +445,8 @@
     let activeRef = null;
     let isAdmin = false;
 
-    const defaultCategories = {
+    // 後備預設文字
+    const fallbackCategories = {
       general: "🏠 家具",
       memes: "🧸 熊熊",
       ring_group: "💍 戒指",
@@ -469,7 +470,7 @@
       document.getElementById('currentTabName').innerText = currentCategoryDisplayName;
     }
 
-    // 1. 說明欄同步
+    // 1. 說明欄同步（自動持久化儲存）
     const descElem = document.getElementById('siteDescription');
     const descRef = ref(db, 'settings/description');
 
@@ -477,7 +478,7 @@
       const data = snapshot.val();
       const defaultText = "訪客僅供檢視，管理員登入後可上傳與編輯。";
       if (document.activeElement !== descElem) {
-        descElem.innerText = data !== null ? data : defaultText;
+        descElem.innerText = (data !== null && data !== undefined) ? data : defaultText;
       }
     });
 
@@ -486,22 +487,24 @@
       set(descRef, descElem.innerText.trim());
     });
 
-    // 2. 分頁標題同步
+    // 2. 分頁標題即時同步（自動持久化儲存）
     const menuRef = ref(db, 'settings/menus/tabNames');
     onValue(menuRef, (snapshot) => {
       const data = snapshot.val() || {};
-      const tabNames = Object.assign({}, defaultCategories, data);
-
-      Object.keys(tabNames).forEach(cat => {
+      Object.keys(fallbackCategories).forEach(cat => {
         const textElem = document.getElementById(`tab-title-${cat}`);
         if (textElem && document.activeElement !== textElem) {
-          textElem.innerText = tabNames[cat];
+          if (data[cat] !== undefined && data[cat] !== "") {
+            textElem.innerText = data[cat];
+          } else if (!textElem.innerText.trim()) {
+            textElem.innerText = fallbackCategories[cat];
+          }
         }
       });
     });
 
     // 綁定各分頁標題編輯與點擊事件
-    Object.keys(defaultCategories).forEach(cat => {
+    Object.keys(fallbackCategories).forEach(cat => {
       const textSpan = document.getElementById(`tab-title-${cat}`);
       const btn = document.querySelector(`[data-category="${cat}"]`);
 
@@ -523,7 +526,6 @@
           document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           
-          // 如果選中的是下拉選單子項目，計算組合名稱 (例如：💍 戒指 - 👦 限男)
           let displayName = textSpan.innerText.trim();
           const parentGroup = btn.closest('.dropdown');
           if (parentGroup) {
@@ -613,77 +615,56 @@
       }
     }
 
-    // 4. 切換與讀取分頁圖片
-    function renderStatusElement(key, rawStatusValue) {
-      const statusValue = formatStatusValue(rawStatusValue);
+    // 4. 切換與讀取分頁圖片（保證重新整理不遺失資料）
+    function renderCard(key, data) {
+      const textValue = data.caption || getDefaultTimeStr();
+      const statusValue = formatStatusValue(data.quantity);
+      const noteValue = data.note || '';
       const isSoldClass = statusValue.includes('售出') ? 'is-sold' : '';
-      return `
-        <span class="status-badge ${isSoldClass}" id="badge-${key}" contenteditable="${isAdmin}">
-          ${statusValue}
-        </span>
+
+      const card = document.createElement('div');
+      card.className = 'img-card';
+      card.id = `card-${key}`;
+
+      card.innerHTML = `
+        <button class="delete-btn" title="刪除圖片">✕</button>
+        <div class="img-wrapper">
+          <span class="status-badge ${isSoldClass}" id="badge-${key}" contenteditable="${isAdmin}">
+            ${statusValue}
+          </span>
+          <img src="${data.url}" loading="lazy" alt="uploaded image" />
+        </div>
+        <div class="img-info">
+          <span class="editable-text" contenteditable="${isAdmin}" id="text-${key}">${textValue}</span>
+        </div>
+        <div class="admin-note-box">
+          <div class="admin-note-label">🔒 備註</div>
+          <span class="admin-note-text" contenteditable="${isAdmin}" id="note-${key}">${noteValue}</span>
+        </div>
       `;
-    }
 
-    function switchCategory(newCategory) {
-      if (activeRef) off(activeRef);
-
-      currentCategory = newCategory;
-      activeRef = ref(db, `images/${currentCategory}`);
-      document.getElementById('gallery').innerHTML = '';
-
-      onChildAdded(activeRef, (snapshot) => {
-        const key = snapshot.key;
-        const data = snapshot.val();
-        const gallery = document.getElementById('gallery');
-
-        const card = document.createElement('div');
-        card.className = 'img-card';
-        card.id = `card-${key}`;
-
-        const textValue = data.caption || getDefaultTimeStr();
-        const statusValue = data.quantity || '數量: 1';
-        const noteValue = data.note || '';
-
-        card.innerHTML = `
-          <button class="delete-btn" title="刪除圖片">✕</button>
-          <div class="img-wrapper">
-            ${renderStatusElement(key, statusValue)}
-            <img src="${data.url}" loading="lazy" alt="uploaded image" />
-          </div>
-          <div class="img-info">
-            <span class="editable-text" contenteditable="${isAdmin}" id="text-${key}">${textValue}</span>
-          </div>
-          <div class="admin-note-box">
-            <div class="admin-note-label">🔒 備註</div>
-            <span class="admin-note-text" contenteditable="${isAdmin}" id="note-${key}">${noteValue}</span>
-          </div>
-        `;
-
-        gallery.prepend(card);
-
-        // 修改數量狀態
-        const badgeElem = card.querySelector(`#badge-${key}`);
-        if (badgeElem) {
-          badgeElem.addEventListener('blur', () => {
-            if (!isAdmin) return;
-            update(ref(db, `images/${currentCategory}/${key}`), { quantity: badgeElem.innerText.trim() });
-          });
-          badgeElem.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') { e.preventDefault(); badgeElem.blur(); }
-          });
-        }
-
-        // 刪除圖片
-        const deleteBtn = card.querySelector('.delete-btn');
-        deleteBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (isAdmin && confirm('確定要刪除這張圖片嗎？')) {
-            remove(ref(db, `images/${currentCategory}/${key}`));
-          }
+      // 綁定編輯與刪除事件
+      const badgeElem = card.querySelector(`#badge-${key}`);
+      if (badgeElem) {
+        badgeElem.addEventListener('blur', () => {
+          if (!isAdmin) return;
+          update(ref(db, `images/${currentCategory}/${key}`), { quantity: badgeElem.innerText.trim() });
         });
+        badgeElem.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); badgeElem.blur(); }
+        });
+      }
 
-        // 修改圖片公開文字
-        const editableElem = card.querySelector('.editable-text');
+      const deleteBtn = card.querySelector('.delete-btn');
+      deleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (isAdmin && confirm('確定要刪除這張圖片嗎？')) {
+          remove(ref(db, `images/${currentCategory}/${key}`));
+        }
+      });
+
+      const editableElem = card.querySelector(`#text-${key}`);
+      if (editableElem) {
         editableElem.addEventListener('blur', () => {
           if (!isAdmin) return;
           update(ref(db, `images/${currentCategory}/${key}`), { caption: editableElem.innerText.trim() });
@@ -691,9 +672,10 @@
         editableElem.addEventListener('keydown', (e) => {
           if (e.key === 'Enter') { e.preventDefault(); editableElem.blur(); }
         });
+      }
 
-        // 修改圖片私人備註文字
-        const noteElem = card.querySelector('.admin-note-text');
+      const noteElem = card.querySelector(`#note-${key}`);
+      if (noteElem) {
         noteElem.addEventListener('blur', () => {
           if (!isAdmin) return;
           update(ref(db, `images/${currentCategory}/${key}`), { note: noteElem.innerText.trim() });
@@ -701,41 +683,36 @@
         noteElem.addEventListener('keydown', (e) => {
           if (e.key === 'Enter') { e.preventDefault(); noteElem.blur(); }
         });
-      });
+      }
 
-      onChildChanged(activeRef, (snapshot) => {
-        const key = snapshot.key;
+      return card;
+    }
+
+    function switchCategory(newCategory) {
+      if (activeRef) off(activeRef);
+
+      currentCategory = newCategory;
+      activeRef = ref(db, `images/${currentCategory}`);
+      const gallery = document.getElementById('gallery');
+
+      // 使用 onValue 確保能一次性取得所有歷史圖片與編輯內容，防止重新整理消失
+      onValue(activeRef, (snapshot) => {
+        gallery.innerHTML = '';
         const data = snapshot.val();
-        
-        // 更新公開說明
-        const targetTextElem = document.getElementById(`text-${key}`);
-        if (targetTextElem && document.activeElement !== targetTextElem) {
-          targetTextElem.innerText = data.caption || '';
-        }
 
-        // 更新私人備註
-        const targetNoteElem = document.getElementById(`note-${key}`);
-        if (targetNoteElem && document.activeElement !== targetNoteElem) {
-          targetNoteElem.innerText = data.note || '';
-        }
+        if (data) {
+          // 將 key 按照時間順序排序（由新到舊顯示）
+          const keys = Object.keys(data).sort((a, b) => {
+            const timeA = data[a].timestamp || 0;
+            const timeB = data[b].timestamp || 0;
+            return timeB - timeA;
+          });
 
-        // 更新狀態標籤
-        const newStatus = formatStatusValue(data.quantity);
-        const targetBadgeElem = document.getElementById(`badge-${key}`);
-        if (targetBadgeElem && document.activeElement !== targetBadgeElem) {
-          targetBadgeElem.innerText = newStatus;
-          if (newStatus.includes('售出')) {
-            targetBadgeElem.classList.add('is-sold');
-          } else {
-            targetBadgeElem.classList.remove('is-sold');
-          }
+          keys.forEach(key => {
+            const card = renderCard(key, data[key]);
+            gallery.appendChild(card);
+          });
         }
-      });
-
-      onChildRemoved(activeRef, (snapshot) => {
-        const key = snapshot.key;
-        const cardElem = document.getElementById(`card-${key}`);
-        if (cardElem) cardElem.remove();
       });
     }
 
