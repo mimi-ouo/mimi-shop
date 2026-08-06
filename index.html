@@ -219,9 +219,14 @@
       display: flex;
       flex-direction: column;
       position: relative;
-      content-visibility: auto;
-      contain-intrinsic-size: 120px 180px;
-      transition: transform 0.2s, opacity 0.2s;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, transform 0.3s ease, transform 0.2s, opacity 0.2s;
+    }
+
+    .img-card.loaded {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .is-admin .img-card[draggable="true"] {
@@ -253,7 +258,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      pointer-events: none; /* 防止拖曳圖片本身而非卡片 */
+      pointer-events: none;
     }
 
     .status-badge {
@@ -397,7 +402,7 @@
   <div class="tabs-container" id="tabsContainer">
     <button class="tab-btn active" data-category="general">🏠 家具</button>
     <button class="tab-btn" data-category="memes">🧸 熊熊</button>
-    <button class="tab-btn" data-category="memes">🪴 花盆</button>
+    <button class="tab-btn" data-category="pot">🪴 花盆</button>
     
     <div class="dropdown">
       <button class="dropdown-toggle">💍 戒指 ▾</button>
@@ -572,9 +577,9 @@
       const filtered = allData.filter(item => item.category === currentCategory);
       filtered.sort((a, b) => b.timestamp - a.timestamp);
 
-      const fragment = document.createDocumentFragment();
+      gallery.innerHTML = '';
 
-      filtered.forEach((item, index) => {
+      filtered.forEach((item) => {
         const card = document.createElement('div');
         card.className = 'img-card';
         card.id = `card-${item.id}`;
@@ -613,7 +618,7 @@
           <button class="delete-btn" title="刪除圖片">✕</button>
           <div class="img-wrapper">
             ${badgeHTML}
-            <img src="${item.url}" loading="lazy" decoding="async" alt="image" />
+            <img src="${item.url}" alt="image" />
           </div>
           <div class="img-info">
             <span class="editable-text" contenteditable="${isAdmin}" id="text-${item.id}">${item.caption || ''}</span>
@@ -624,6 +629,14 @@
           </div>
         `;
 
+        const imgEl = card.querySelector('img');
+        imgEl.addEventListener('load', () => {
+          card.classList.add('loaded');
+        });
+        if (imgEl.complete) {
+          card.classList.add('loaded');
+        }
+
         if (isAdmin) {
           card.querySelector('.delete-btn').addEventListener('click', () => {
             if (confirm('確定要刪除這張圖片嗎？')) {
@@ -631,7 +644,6 @@
             }
           });
 
-          // 拖曳排序事件綁定
           card.addEventListener('dragstart', (e) => {
             e.dataTransfer.setData('text/plain', item.id);
             setTimeout(() => card.classList.add('dragging'), 0);
@@ -664,16 +676,14 @@
               const [movedItem] = allData.splice(draggedIndex, 1);
               allData.splice(targetIndex, 0, movedItem);
 
-              // 重新計算當前分類下所有項目的時間戳以保持順序
               const currentFiltered = allData.filter(i => i.category === currentCategory);
               let now = Date.now();
               currentFiltered.forEach((fi, idx) => {
-                fi.timestamp = now - (idx * 1000); // 越前面 timestamp 越大
+                fi.timestamp = now - (idx * 1000);
               });
 
               renderGallery();
 
-              // 同步更新雲端 timestamp
               const status = document.getElementById('status');
               status.innerText = "正在更新排序...";
               await updateItem(movedItem.id, 'timestamp', movedItem.timestamp);
@@ -683,14 +693,9 @@
           });
         }
 
-        fragment.appendChild(card);
-      });
+        gallery.appendChild(card);
 
-      gallery.innerHTML = '';
-      gallery.appendChild(fragment);
-
-      if (isAdmin) {
-        filtered.forEach(item => {
+        if (isAdmin) {
           const selectEl = document.getElementById(`badge-${item.id}`);
           if (selectEl) {
             selectEl.addEventListener('change', async () => {
@@ -716,8 +721,8 @@
 
           bindEditable(item.id, 'caption', `text-${item.id}`);
           bindEditable(item.id, 'note', `note-${item.id}`);
-        });
-      }
+        }
+      });
     }
 
     function bindEditable(id, field, elementId) {
