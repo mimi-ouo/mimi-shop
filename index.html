@@ -11,6 +11,7 @@
       --text-color: #dcddde;
       --accent-color: #5865f2;
       --danger-color: #ed4245;
+      --success-color: #57F287;
     }
 
     body {
@@ -68,11 +69,12 @@
       outline: none;
     }
 
-    /* 登入控制 */
+    /* 登入控制與按鈕 */
     .auth-box {
       display: flex;
       gap: 10px;
       align-items: center;
+      flex-wrap: wrap;
     }
 
     .auth-inputs {
@@ -96,6 +98,20 @@
       padding: 6px 14px;
       border-radius: 4px;
       cursor: pointer;
+    }
+
+    .download-btn {
+      background: #3ba55d;
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .download-btn:hover {
+      background: #2d7d46;
     }
 
     .cancel-btn {
@@ -315,7 +331,7 @@
     }
 
     .admin-note-label {
-      color: #57F287;
+      color: var(--success-color);
       font-weight: bold;
       margin-bottom: 2px;
       display: flex;
@@ -344,6 +360,10 @@
     
     .is-admin .img-card:hover .delete-btn { display: flex; }
   </style>
+
+  <!-- 引進打包壓縮檔所需套件 (JSZip & FileSaver) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 </head>
 <body>
 
@@ -353,7 +373,7 @@
       <h2>⭐ 米米小舖 ⭐</h2>
       <div class="info-badge">
         <span class="info-icon">📕</span>
-        <span class="editable-text" id="siteDescription" contenteditable="false">載入中...</span>
+        <span class="editable-text" id="siteDescription" contenteditable="false">本人夜班，交易時間需另約，故不接急單交易方式：可糖可Ｔ，比值１：１</span>
       </div>
     </div>
 
@@ -370,17 +390,14 @@
 
   <!-- 下拉選單與分頁導覽列 -->
   <div class="tabs-container" id="tabsContainer">
-    <!-- 單一分頁：家具 -->
     <button class="tab-btn active" data-category="general">
       <span class="tab-text" id="tab-title-general" contenteditable="false">🏠 家具</span>
     </button>
     
-    <!-- 單一分頁：熊熊 -->
     <button class="tab-btn" data-category="memes">
       <span class="tab-text" id="tab-title-memes" contenteditable="false">🧸 熊熊</span>
     </button>
 
-    <!-- 下拉選單：戒指 -->
     <div class="dropdown">
       <button class="dropdown-toggle">
         <span class="tab-text" id="tab-title-ring_group" contenteditable="false">💍 戒指</span> ▾
@@ -395,7 +412,6 @@
       </div>
     </div>
 
-    <!-- 下拉選單：作物 -->
     <div class="dropdown">
       <button class="dropdown-toggle">
         <span class="tab-text" id="tab-title-crop_group" contenteditable="false">🌱 作物</span> ▾
@@ -424,6 +440,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getDatabase, ref, push, update, remove, set, onValue, onChildAdded, onChildChanged, onChildRemoved, off } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCVUSw-B1it_bQ2sF3pAsTI0pXcyF-Tdfg",
@@ -439,13 +456,13 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
+    const storage = getStorage(app);
 
     let currentCategory = 'general';
     let currentCategoryDisplayName = '🏠 家具';
     let activeRef = null;
     let isAdmin = false;
 
-    // 後備預設文字
     const fallbackCategories = {
       general: "🏠 家具",
       memes: "🧸 熊熊",
@@ -491,6 +508,7 @@
     const menuRef = ref(db, 'settings/menus/tabNames');
     onValue(menuRef, (snapshot) => {
       const data = snapshot.val() || {};
+      
       Object.keys(fallbackCategories).forEach(cat => {
         const textElem = document.getElementById(`tab-title-${cat}`);
         if (textElem && document.activeElement !== textElem) {
@@ -503,7 +521,6 @@
       });
     });
 
-    // 綁定各分頁標題編輯與點擊事件
     Object.keys(fallbackCategories).forEach(cat => {
       const textSpan = document.getElementById(`tab-title-${cat}`);
       const btn = document.querySelector(`[data-category="${cat}"]`);
@@ -556,10 +573,12 @@
         if (descElem) descElem.contentEditable = "true";
         
         authBox.innerHTML = `
-          <span style="color:#57F287; font-size:14px;">已登入管理員</span>
+          <span style="color:var(--success-color); font-size:14px;">已登入管理員</span>
+          <button class="download-btn" id="downloadImgsBtn">📥 下載本頁所有圖片</button>
           <button class="auth-btn" id="logoutBtn" style="background:#4f545c">登出</button>
         `;
         document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
+        document.getElementById('downloadImgsBtn').addEventListener('click', downloadCurrentTabImages);
       } else {
         document.body.classList.remove('is-admin');
         dropZone.style.display = 'none';
@@ -663,7 +682,6 @@
 
         gallery.prepend(card);
 
-        // 修改數量狀態
         const badgeElem = card.querySelector(`#badge-${key}`);
         if (badgeElem) {
           badgeElem.addEventListener('blur', () => {
@@ -675,7 +693,6 @@
           });
         }
 
-        // 刪除圖片
         const deleteBtn = card.querySelector('.delete-btn');
         deleteBtn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -684,7 +701,6 @@
           }
         });
 
-        // 修改圖片公開文字
         const editableElem = card.querySelector('.editable-text');
         editableElem.addEventListener('blur', () => {
           if (!isAdmin) return;
@@ -694,7 +710,6 @@
           if (e.key === 'Enter') { e.preventDefault(); editableElem.blur(); }
         });
 
-        // 修改圖片私人備註文字
         const noteElem = card.querySelector('.admin-note-text');
         noteElem.addEventListener('blur', () => {
           if (!isAdmin) return;
@@ -738,64 +753,36 @@
       });
     }
 
-    // 💡 關鍵前端自動壓縮功能（不佔用資料庫過大空間）
-    function compressImage(file, maxWidth, maxHeight, quality) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.src = URL.createObjectURL(file);
-        img.onload = () => {
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height) {
-            if (width > maxWidth) {
-              height = Math.round((height * maxWidth) / width);
-              width = maxWidth;
-            }
-          } else {
-            if (height > maxHeight) {
-              width = Math.round((width * maxHeight) / height);
-              height = maxHeight;
-            }
-          }
-
-          const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-
-          // 壓縮成高評價小尺寸的 JPEG 圖片 Base64
-          const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
-          resolve(compressedDataUrl);
-        };
-        img.onerror = (error) => reject(error);
-      });
-    }
-
-    // 圖片上傳處理
+    // 5. 圖片上傳（透過 Firebase Storage 雲端儲存）
     async function handleImageFile(file) {
       if (!isAdmin || !file || !file.type.startsWith('image/')) return;
 
       const status = document.getElementById('status');
-      status.innerText = "正在壓縮並上傳圖片...";
+      status.innerText = "正在上傳至雲端...";
 
       try {
-        // 壓縮寬高最大 600px，畫質 0.7（對網頁顯示足夠清晰且體積非常小）
-        const compressedBase64 = await compressImage(file, 600, 600, 0.7);
+        const filePath = `images/${currentCategory}/${Date.now()}_${file.name}`;
+        const fileRef = storageRef(storage, filePath);
 
-        await push(ref(db, `images/${currentCategory}`), {
-          url: compressedBase64,
+        // 1. 上傳實體檔案至 Cloud Storage
+        await uploadBytes(fileRef, file);
+
+        // 2. 獲取該檔案的雲端網址
+        const downloadUrl = await getDownloadURL(fileRef);
+
+        // 3. 將網址與預設資訊推送到 Realtime Database 實現雙向即時廣播
+        push(ref(db, `images/${currentCategory}`), {
+          url: downloadUrl,
           caption: getDefaultTimeStr(),
           quantity: '數量: 1',
           note: '',
           timestamp: Date.now()
         });
 
-        status.innerText = "發送成功！已永久保留至網頁";
-        setTimeout(() => status.innerText = "", 2000);
-      } catch (err) {
-        alert("圖片處理失敗：" + err.message);
+        status.innerText = "上傳成功！";
+        setTimeout(() => status.innerText = "", 1500);
+      } catch (error) {
+        alert("上傳失敗：" + error.message);
         status.innerText = "";
       }
     }
@@ -822,6 +809,56 @@
         handleImageFile(e.dataTransfer.files[0]);
       }
     });
+
+    // 6. 🖼️ 打包下載當前分頁的所有圖片
+    async function downloadCurrentTabImages() {
+      const imgCards = document.querySelectorAll('.img-card');
+      if (imgCards.length === 0) {
+        alert('當前分頁沒有圖片可供下載！');
+        return;
+      }
+
+      const downloadBtn = document.getElementById('downloadImgsBtn');
+      const originalText = downloadBtn.innerText;
+      downloadBtn.innerText = '⏳ 正在下載圖片...';
+      downloadBtn.disabled = true;
+
+      try {
+        const zip = new JSZip();
+        const folder = zip.folder(currentCategoryDisplayName.replace(/[^\w\u4e00-\u9fa5]/g, ''));
+
+        for (let i = 0; i < imgCards.length; i++) {
+          const card = imgCards[i];
+          const imgElem = card.querySelector('img');
+          const titleElem = card.querySelector('.editable-text');
+          
+          if (imgElem && imgElem.src) {
+            const imageUrl = imgElem.src;
+            // 透過 fetch 取得雲端圖片資料（解決跨域問題並轉成 blob）
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            
+            let ext = 'png';
+            if (imageUrl.includes('.jpg') || imageUrl.includes('jpeg')) ext = 'jpg';
+            if (imageUrl.includes('.webp')) ext = 'webp';
+
+            const safeTitle = (titleElem ? titleElem.innerText.trim() : `image_${i+1}`).replace(/[/\\?%*:|"<>]/g, '_');
+            const fileName = `${i + 1}_${safeTitle}.${ext}`;
+
+            folder.file(fileName, blob);
+          }
+        }
+
+        const content = await zip.generateAsync({ type: "blob" });
+        saveAs(content, `${currentCategoryDisplayName}_圖片備份.zip`);
+
+      } catch (err) {
+        alert('下載圖片時發生錯誤：' + err.message);
+      } finally {
+        downloadBtn.innerText = originalText;
+        downloadBtn.disabled = false;
+      }
+    }
   </script>
 </body>
 </html>
