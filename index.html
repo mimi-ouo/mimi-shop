@@ -67,29 +67,6 @@
       outline: none;
     }
 
-    /* 通用儲存按鈕（僅管理員顯示） */
-    .save-btn {
-      display: none;
-      background: var(--success-color);
-      color: #000;
-      border: none;
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: bold;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: opacity 0.2s;
-    }
-
-    .save-btn:hover {
-      opacity: 0.85;
-    }
-
-    .is-admin .save-btn {
-      display: inline-block;
-    }
-
     /* 登入控制 */
     .auth-box {
       display: flex;
@@ -356,25 +333,6 @@
       min-height: 14px;
     }
 
-    /* 卡片底部儲存操作區 */
-    .card-actions {
-      display: none;
-      padding: 6px;
-      background-color: #202225;
-      border-top: 1px solid #4f545c;
-      text-align: center;
-    }
-
-    .is-admin .card-actions {
-      display: block;
-    }
-
-    .card-save-btn {
-      width: 100%;
-      padding: 4px 0;
-      font-size: 11px;
-    }
-
     .is-admin .editable-text, .is-admin .admin-note-text { 
       background: rgba(0, 0, 0, 0.2); 
       cursor: text; 
@@ -396,7 +354,6 @@
       <div class="info-badge">
         <span class="info-icon">📕</span>
         <span class="editable-text" id="siteDescription" contenteditable="false">載入中...</span>
-        <button class="save-btn" id="saveDescBtn" title="儲存說明">儲存</button>
       </div>
     </div>
 
@@ -416,29 +373,24 @@
     <!-- 單一分頁：家具 -->
     <button class="tab-btn active" data-category="general">
       <span class="tab-text" id="tab-title-general" contenteditable="false">🏠 家具</span>
-      <button class="save-btn save-tab-btn" data-cat="general">儲存</button>
     </button>
     
     <!-- 單一分頁：熊熊 -->
     <button class="tab-btn" data-category="memes">
       <span class="tab-text" id="tab-title-memes" contenteditable="false">🧸 熊熊</span>
-      <button class="save-btn save-tab-btn" data-cat="memes">儲存</button>
     </button>
 
     <!-- 下拉選單：戒指 -->
     <div class="dropdown">
       <button class="dropdown-toggle">
         <span class="tab-text" id="tab-title-ring_group" contenteditable="false">💍 戒指</span> ▾
-        <button class="save-btn save-tab-btn" data-cat="ring_group">儲存</button>
       </button>
       <div class="dropdown-menu">
         <div class="dropdown-item tab-btn" data-category="ring_male">
           <span class="tab-text" id="tab-title-ring_male" contenteditable="false">👦 限男</span>
-          <button class="save-btn save-tab-btn" data-cat="ring_male">儲存</button>
         </div>
         <div class="dropdown-item tab-btn" data-category="ring_female">
           <span class="tab-text" id="tab-title-ring_female" contenteditable="false">👧 限女</span>
-          <button class="save-btn save-tab-btn" data-cat="ring_female">儲存</button>
         </div>
       </div>
     </div>
@@ -447,16 +399,13 @@
     <div class="dropdown">
       <button class="dropdown-toggle">
         <span class="tab-text" id="tab-title-crop_group" contenteditable="false">🌱 作物</span> ▾
-        <button class="save-btn save-tab-btn" data-cat="crop_group">儲存</button>
       </button>
       <div class="dropdown-menu">
         <div class="dropdown-item tab-btn" data-category="crop_male">
           <span class="tab-text" id="tab-title-crop_male" contenteditable="false">👦 限男</span>
-          <button class="save-btn save-tab-btn" data-cat="crop_male">儲存</button>
         </div>
         <div class="dropdown-item tab-btn" data-category="crop_female">
           <span class="tab-text" id="tab-title-crop_female" contenteditable="false">👧 限女</span>
-          <button class="save-btn save-tab-btn" data-cat="crop_female">儲存</button>
         </div>
       </div>
     </div>
@@ -465,7 +414,7 @@
   <!-- 上傳區 -->
   <div class="drop-zone" id="dropZone">
     <p style="font-size: 16px; margin-bottom: 8px;">💡 當前分頁：<b id="currentTabName">🏠 家具</b>（Ctrl + V 貼上圖片 / 拖曳上傳）</p>
-    <p id="status" style="color: var(--accent-color); margin: 0; font-weight: bold;"></p>
+    <p id="status" style="color: var(--success-color); margin: 0; font-weight: bold; min-height: 20px;"></p>
   </div>
 
   <div class="gallery" id="gallery"></div>
@@ -507,6 +456,14 @@
       crop_female: "👧 限女"
     };
 
+    function showStatusSuccess() {
+      const status = document.getElementById('status');
+      if (status) {
+        status.innerText = "上傳成功";
+        setTimeout(() => { status.innerText = ""; }, 1500);
+      }
+    }
+
     function getDefaultTimeStr() {
       return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
@@ -520,10 +477,9 @@
       document.getElementById('currentTabName').innerText = currentCategoryDisplayName;
     }
 
-    // 1. 說明欄載入與手動儲存
+    // 1. 說明欄載入與自動儲存
     const descElem = document.getElementById('siteDescription');
     const descRef = ref(db, 'settings/description');
-    const saveDescBtn = document.getElementById('saveDescBtn');
 
     onValue(descRef, (snapshot) => {
       const data = snapshot.val();
@@ -533,12 +489,16 @@
       }
     });
 
-    saveDescBtn.addEventListener('click', () => {
+    descElem.addEventListener('blur', () => {
       if (!isAdmin) return;
-      set(descRef, descElem.innerText.trim()).then(() => alert('頂部說明已成功儲存！'));
+      set(descRef, descElem.innerText.trim()).then(() => showStatusSuccess());
     });
 
-    // 2. 分頁標題同步與儲存
+    descElem.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); descElem.blur(); }
+    });
+
+    // 2. 分頁標題同步與自動儲存
     const menuRef = ref(db, 'settings/menus/tabNames');
     onValue(menuRef, (snapshot) => {
       const data = snapshot.val() || {};
@@ -554,22 +514,17 @@
       });
     });
 
-    // 綁定儲存按鈕與切換事件
     Object.keys(fallbackCategories).forEach(cat => {
       const textSpan = document.getElementById(`tab-title-${cat}`);
       const btn = document.querySelector(`[data-category="${cat}"]`);
-      const saveBtn = document.querySelector(`.save-tab-btn[data-cat="${cat}"]`);
-
-      if (saveBtn) {
-        saveBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (!isAdmin) return;
-          update(ref(db, `settings/menus/tabNames`), { [cat]: textSpan.innerText.trim() })
-            .then(() => alert('分頁名稱已儲存！'));
-        });
-      }
 
       if (textSpan) {
+        textSpan.addEventListener('blur', () => {
+          if (!isAdmin) return;
+          update(ref(db, `settings/menus/tabNames`), { [cat]: textSpan.innerText.trim() })
+            .then(() => showStatusSuccess());
+        });
+
         textSpan.addEventListener('keydown', (e) => {
           if (e.key === 'Enter') { e.preventDefault(); textSpan.blur(); }
         });
@@ -577,7 +532,6 @@
 
       if (btn) {
         btn.addEventListener('click', (e) => {
-          if (e.target.classList.contains('save-btn')) return;
           if (document.activeElement === textSpan) return;
 
           document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -716,9 +670,6 @@
             <div class="admin-note-label">🔒 備註</div>
             <span class="admin-note-text" contenteditable="${isAdmin}" id="note-${key}">${noteValue}</span>
           </div>
-          <div class="card-actions">
-            <button class="save-btn card-save-btn" id="save-card-${key}">💾 儲存修改</button>
-          </div>
         `;
 
         gallery.prepend(card);
@@ -732,32 +683,29 @@
           }
         });
 
-        // 點擊「💾 儲存修改」一次更新所有該圖片對應欄位
-        const saveCardBtn = card.querySelector(`#save-card-${key}`);
-        if (saveCardBtn) {
-          saveCardBtn.addEventListener('click', () => {
+        // 自動儲存與顯示「上傳成功」
+        const bindAutoSave = (element, fieldName) => {
+          if (!element) return;
+          
+          element.addEventListener('blur', () => {
             if (!isAdmin) return;
-
-            const badgeElem = card.querySelector(`#badge-${key}`);
-            const editableElem = card.querySelector(`#text-${key}`);
-            const noteElem = card.querySelector(`#note-${key}`);
-
+            const newValue = element.innerText.trim();
             update(ref(db, `images/${currentCategory}/${key}`), {
-              quantity: badgeElem.innerText.trim(),
-              caption: editableElem.innerText.trim(),
-              note: noteElem.innerText.trim()
-            }).then(() => alert('圖片資訊更新成功！'));
+              [fieldName]: newValue
+            }).then(() => showStatusSuccess());
           });
-        }
 
-        // Enter 鍵處理（防換行）
-        [card.querySelector(`#badge-${key}`), card.querySelector(`#text-${key}`), card.querySelector(`#note-${key}`)].forEach(el => {
-          if (el) {
-            el.addEventListener('keydown', (e) => {
-              if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
-            });
-          }
-        });
+          element.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              element.blur();
+            }
+          });
+        };
+
+        bindAutoSave(card.querySelector(`#badge-${key}`), 'quantity');
+        bindAutoSave(card.querySelector(`#text-${key}`), 'caption');
+        bindAutoSave(card.querySelector(`#note-${key}`), 'note');
       });
 
       onChildChanged(activeRef, (snapshot) => {
@@ -798,7 +746,7 @@
       if (!isAdmin || !file || !file.type.startsWith('image/')) return;
 
       const status = document.getElementById('status');
-      status.innerText = "正在發送圖片...";
+      status.innerText = "正在上傳...";
 
       const reader = new FileReader();
       reader.onload = function(e) {
@@ -808,9 +756,9 @@
           quantity: '數量: 1',
           note: '',
           timestamp: Date.now()
+        }).then(() => {
+          showStatusSuccess();
         });
-        status.innerText = "發送成功！";
-        setTimeout(() => status.innerText = "", 1500);
       };
       reader.readAsDataURL(file);
     }
