@@ -380,7 +380,6 @@
     let currentCategoryDisplayName = '🏠 家具';
     let isAdmin = localStorage.getItem('isAdmin') === 'true';
     let allData = [];
-    let siteDescriptionText = "";
 
     const ADMIN_PASSWORD = "1234";
 
@@ -422,10 +421,19 @@
         bindAuthEvents();
       }
 
-      // 綁定公告欄編輯事件
-      descElem.addEventListener('blur', () => {
+      // 綁定公告欄編輯事件（等待雲端回傳成功才顯示）
+      descElem.addEventListener('blur', async () => {
         if (!isAdmin) return;
-        updateDescription(descElem.innerText);
+        const status = document.getElementById('status');
+        status.innerText = "正在儲存至雲端...";
+        
+        const success = await updateDescription(descElem.innerText);
+        if (success) {
+          status.innerText = "修改成功！";
+        } else {
+          status.innerText = "儲存失敗，請重試";
+        }
+        setTimeout(() => { status.innerText = ""; }, 1500);
       });
     }
 
@@ -476,7 +484,6 @@
         if (result.status === 'success') {
           allData = result.data.filter(item => item.id !== 'settings_desc');
           
-          // 取得公告欄內容
           const descItem = result.data.find(item => item.id === 'settings_desc');
           const descElem = document.getElementById('siteDescription');
           if (descItem && descItem.caption) {
@@ -491,7 +498,14 @@
     }
 
     async function updateDescription(newText) {
-      await fetch(`${SCRIPT_URL}?action=updateItem&id=settings_desc&field=caption&value=${encodeURIComponent(newText)}`);
+      try {
+        const response = await fetch(`${SCRIPT_URL}?action=updateItem&id=settings_desc&field=caption&value=${encodeURIComponent(newText)}`);
+        const result = await response.json();
+        return result.status === 'success';
+      } catch (err) {
+        console.error(err);
+        return false;
+      }
     }
 
     function renderGallery() {
@@ -541,8 +555,17 @@
 
     function bindEditable(id, field, elementId) {
       const el = document.getElementById(elementId);
-      el.addEventListener('blur', () => {
-        updateItem(id, field, el.innerText.trim());
+      el.addEventListener('blur', async () => {
+        const status = document.getElementById('status');
+        status.innerText = "正在儲存至雲端...";
+        
+        const success = await updateItem(id, field, el.innerText.trim());
+        if (success) {
+          status.innerText = "修改成功！";
+        } else {
+          status.innerText = "儲存失敗，請重試";
+        }
+        setTimeout(() => { status.innerText = ""; }, 1500);
       });
       el.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && field !== 'caption') { e.preventDefault(); el.blur(); }
@@ -550,7 +573,14 @@
     }
 
     async function updateItem(id, field, value) {
-      await fetch(`${SCRIPT_URL}?action=updateItem&id=${id}&field=${field}&value=${encodeURIComponent(value)}`);
+      try {
+        const response = await fetch(`${SCRIPT_URL}?action=updateItem&id=${id}&field=${field}&value=${encodeURIComponent(value)}`);
+        const result = await response.json();
+        return result.status === 'success';
+      } catch (err) {
+        console.error(err);
+        return false;
+      }
     }
 
     async function deleteItem(id) {
