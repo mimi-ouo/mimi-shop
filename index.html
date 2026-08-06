@@ -55,10 +55,24 @@
       font-size: 12px;
       line-height: 1.5;
       width: 100%;
-      max-width: 280px;
+      max-width: 320px;
       box-sizing: border-box;
       word-break: break-word;
       white-space: pre-wrap;
+    }
+
+    .info-badge .editable-text {
+      flex: 1;
+      outline: none;
+      color: #dcddde;
+    }
+
+    .is-admin .info-badge .editable-text {
+      background: rgba(0, 0, 0, 0.2);
+      cursor: text;
+      padding: 2px 4px;
+      border-radius: 4px;
+      border: 1px dashed #4f545c;
     }
 
     .auth-box {
@@ -317,7 +331,7 @@
       <h2>⭐ 米米小舖 ⭐</h2>
       <div class="info-badge">
         <span>📕</span>
-        <span>本人夜班，交易需另約時間，故不接急單<br>交易方式：可糖可T，比值1:1<br>Discord：mimi_ouo</span>
+        <span class="editable-text" id="siteDescription" contenteditable="false">本人夜班，交易需另約時間，故不接急單&#10;交易方式：可糖可T，比值1:1</span>
       </div>
     </div>
 
@@ -360,15 +374,15 @@
   <div class="gallery" id="gallery"></div>
 
   <script>
-    // 已帶入你的 Google Apps Script 網頁應用程式網址
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz1ZR6VzbPvHAuiacE2pb9045XmBgTp1EVRWozozLvURQGu8tAUf2umSED_xha78DFNig/exec";
 
     let currentCategory = 'general';
     let currentCategoryDisplayName = '🏠 家具';
     let isAdmin = localStorage.getItem('isAdmin') === 'true';
     let allData = [];
+    let siteDescriptionText = "";
 
-    const ADMIN_PASSWORD = "1j6ul42l4ji3++"; // 管理員密碼預設為 1234，可自行修改
+    const ADMIN_PASSWORD = "1234";
 
     document.addEventListener('DOMContentLoaded', () => {
       initAuthUI();
@@ -379,10 +393,12 @@
     function initAuthUI() {
       const authBox = document.getElementById('authBox');
       const dropZone = document.getElementById('dropZone');
+      const descElem = document.getElementById('siteDescription');
 
       if (isAdmin) {
         document.body.classList.add('is-admin');
         dropZone.style.display = 'block';
+        descElem.contentEditable = "true";
         authBox.innerHTML = `
           <span style="color:#57F287; font-size:14px;">已登入管理員</span>
           <button class="auth-btn" id="logoutBtn" style="background:#4f545c">登出</button>
@@ -394,6 +410,7 @@
       } else {
         document.body.classList.remove('is-admin');
         dropZone.style.display = 'none';
+        descElem.contentEditable = "false";
         authBox.innerHTML = `
           <button class="auth-btn" id="showLoginBtn">登入</button>
           <div class="auth-inputs" id="authInputs">
@@ -404,6 +421,12 @@
         `;
         bindAuthEvents();
       }
+
+      // 綁定公告欄編輯事件
+      descElem.addEventListener('blur', () => {
+        if (!isAdmin) return;
+        updateDescription(descElem.innerText);
+      });
     }
 
     function bindAuthEvents() {
@@ -451,12 +474,24 @@
         const response = await fetch(`${SCRIPT_URL}?action=getData`);
         const result = await response.json();
         if (result.status === 'success') {
-          allData = result.data;
+          allData = result.data.filter(item => item.id !== 'settings_desc');
+          
+          // 取得公告欄內容
+          const descItem = result.data.find(item => item.id === 'settings_desc');
+          const descElem = document.getElementById('siteDescription');
+          if (descItem && descItem.caption) {
+            descElem.innerText = descItem.caption;
+          }
+
           renderGallery();
         }
       } catch (err) {
         console.error("載入資料失敗", err);
       }
+    }
+
+    async function updateDescription(newText) {
+      await fetch(`${SCRIPT_URL}?action=updateItem&id=settings_desc&field=caption&value=${encodeURIComponent(newText)}`);
     }
 
     function renderGallery() {
@@ -510,7 +545,7 @@
         updateItem(id, field, el.innerText.trim());
       });
       el.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
+        if (e.key === 'Enter' && field !== 'caption') { e.preventDefault(); el.blur(); }
       });
     }
 
@@ -532,6 +567,20 @@
       reader.onload = async function(e) {
         const base64Data = e.target.result.split(',')[1];
         const defaultTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const tempId = 'temp_' + new Date().getTime();
+
+        const tempItem = {
+          id: tempId,
+          category: currentCategory,
+          url: e.target.result,
+          caption: defaultTime,
+          quantity: '數量: 1',
+          note: '',
+          timestamp: new Date().getTime()
+        };
+        
+        allData.unshift(tempItem);
+        renderGallery();
 
         const formData = new URLSearchParams();
         formData.append('action', 'addItem');
@@ -556,6 +605,7 @@
         } catch (err) {
           status.innerText = "上傳失敗";
           console.error(err);
+          fetchData();
         }
       };
       reader.readAsDataURL(file);
