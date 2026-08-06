@@ -221,6 +221,25 @@
       position: relative;
       content-visibility: auto;
       contain-intrinsic-size: 120px 180px;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+
+    .is-admin .img-card[draggable="true"] {
+      cursor: grab;
+    }
+
+    .is-admin .img-card[draggable="true"]:active {
+      cursor: grabbing;
+    }
+
+    .img-card.dragging {
+      opacity: 0.4;
+      border: 2px dashed var(--accent-color);
+    }
+
+    .img-card.drag-over {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(88, 101, 242, 0.4);
     }
 
     .img-wrapper {
@@ -234,7 +253,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      content-visibility: auto;
+      pointer-events: none; /* 防止拖曳圖片本身而非卡片 */
     }
 
     .status-badge {
@@ -261,7 +280,6 @@
       color: #ffffff;
     }
 
-    /* 管理員專用下拉選單 */
     .status-select {
       position: absolute;
       top: 4px;
@@ -555,10 +573,15 @@
 
       const fragment = document.createDocumentFragment();
 
-      filtered.forEach(item => {
+      filtered.forEach((item, index) => {
         const card = document.createElement('div');
         card.className = 'img-card';
         card.id = `card-${item.id}`;
+        card.setAttribute('data-id', item.id);
+        
+        if (isAdmin) {
+          card.setAttribute('draggable', 'true');
+        }
 
         const currentQty = item.quantity || '數量: 1';
         const isSold = String(currentQty).includes('售出');
@@ -604,6 +627,57 @@
           card.querySelector('.delete-btn').addEventListener('click', () => {
             if (confirm('確定要刪除這張圖片嗎？')) {
               deleteItem(item.id);
+            }
+          });
+
+          // 拖曳排序事件綁定
+          card.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', item.id);
+            setTimeout(() => card.classList.add('dragging'), 0);
+          });
+
+          card.addEventListener('dragend', () => {
+            card.classList.remove('dragging');
+            document.querySelectorAll('.img-card').forEach(c => c.classList.remove('drag-over'));
+          });
+
+          card.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            card.classList.add('drag-over');
+          });
+
+          card.addEventListener('dragleave', () => {
+            card.classList.remove('drag-over');
+          });
+
+          card.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            card.classList.remove('drag-over');
+            const draggedId = e.dataTransfer.getData('text/plain');
+            if (draggedId === item.id) return;
+
+            const draggedIndex = allData.findIndex(i => i.id === draggedId);
+            const targetIndex = allData.findIndex(i => i.id === item.id);
+
+            if (draggedIndex !== -1 && targetIndex !== -1) {
+              const [movedItem] = allData.splice(draggedIndex, 1);
+              allData.splice(targetIndex, 0, movedItem);
+
+              // 重新計算當前分類下所有項目的時間戳以保持順序
+              const currentFiltered = allData.filter(i => i.category === currentCategory);
+              let now = Date.now();
+              currentFiltered.forEach((fi, idx) => {
+                fi.timestamp = now - (idx * 1000); // 越前面 timestamp 越大
+              });
+
+              renderGallery();
+
+              // 同步更新雲端 timestamp
+              const status = document.getElementById('status');
+              status.innerText = "正在更新排序...";
+              await updateItem(movedItem.id, 'timestamp', movedItem.timestamp);
+              status.innerText = "排序更新成功！";
+              setTimeout(() => { status.innerText = ""; }, 1500);
             }
           });
         }
