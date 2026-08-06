@@ -24,47 +24,52 @@
 
     .header {
       display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 20px;
-      gap: 20px;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 25px;
+      position: relative;
     }
 
-    .title-left {
+    .title-center {
       display: flex;
-      align-items: flex-start;
-      gap: 16px;
-      flex: 1;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      width: 100%;
     }
 
-    .title-left h2 {
+    .title-center h2 {
       margin: 0;
-      white-space: nowrap;
+      font-size: 24px;
       line-height: 1.4;
+      white-space: nowrap;
     }
 
     .info-badge {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       gap: 6px;
       background-color: #202225;
       border: 1px solid #4f545c;
       color: #b9bbbe;
-      padding: 8px 12px;
+      padding: 6px 12px;
       border-radius: 8px;
-      font-size: 12px;
-      line-height: 1.5;
-      width: 100%;
-      max-width: 280px;
+      font-size: 13px;
+      line-height: 1.4;
+      max-width: 100%;
       box-sizing: border-box;
-      word-break: break-word;
-      white-space: pre-wrap;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .info-badge .editable-text {
-      flex: 1;
       outline: none;
       color: #dcddde;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .is-admin .info-badge .editable-text {
@@ -76,6 +81,9 @@
     }
 
     .auth-box {
+      position: absolute;
+      right: 0;
+      top: 0;
       display: flex;
       gap: 10px;
       align-items: center;
@@ -211,7 +219,6 @@
       display: flex;
       flex-direction: column;
       position: relative;
-      /* 效能優化：加速大量卡片渲染 */
       content-visibility: auto;
       contain-intrinsic-size: 120px 180px;
     }
@@ -227,7 +234,6 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      /* 提升圖片渲染效能 */
       content-visibility: auto;
     }
 
@@ -332,12 +338,12 @@
 <body>
 
   <div class="header">
-    <div class="title-left">
+    <div class="title-center">
       <h2>⭐ 米米小舖 ⭐</h2>
-      <div class="info-badge">
-        <span>📕</span>
-        <span class="editable-text" id="siteDescription" contenteditable="false">本人夜班，交易需另約時間，故不接急單　交易方式：可糖可T，比值1:1(轉帳/LINE)　Discord：mimi_ouo　首次加載可能較慢，請耐心等待</span>
-      </div>
+    </div>
+    <div class="info-badge">
+      <span>📕</span>
+      <span class="editable-text" id="siteDescription" contenteditable="false">本人夜班，交易需另約時間，故不接急單 ｜ 交易方式：可糖可T，比值1:1 ｜ Discord：mimi_ouo</span>
     </div>
 
     <div class="auth-box" id="authBox">
@@ -527,7 +533,6 @@
       const filtered = allData.filter(item => item.category === currentCategory);
       filtered.sort((a, b) => b.timestamp - a.timestamp);
 
-      // 使用 DocumentFragment 一次性渲染 DOM，大幅減少畫面重繪次數，提升顯示速度
       const fragment = document.createDocumentFragment();
 
       filtered.forEach(item => {
@@ -566,7 +571,6 @@
       gallery.innerHTML = '';
       gallery.appendChild(fragment);
 
-      // 綁定編輯事件
       if (isAdmin) {
         filtered.forEach(item => {
           bindEditable(item.id, 'quantity', `badge-${item.id}`);
