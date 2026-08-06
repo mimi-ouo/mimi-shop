@@ -10,7 +10,6 @@
       --card-bg: #2f3136;
       --text-color: #dcddde;
       --accent-color: #5865f2;
-      --success-color: #57f287;
       --danger-color: #ed4245;
     }
 
@@ -47,7 +46,7 @@
 
     .info-badge {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 6px;
       background-color: #202225;
       border: 1px solid #4f545c;
@@ -57,9 +56,11 @@
       font-size: 12px;
       line-height: 1.5;
       width: 100%;
-      max-width: 320px;
+      max-width: 280px;
+      min-height: 38px;
       box-sizing: border-box;
       word-break: break-word;
+      white-space: pre-wrap;
     }
 
     .info-badge .editable-text {
@@ -165,7 +166,6 @@
       padding: 8px 14px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
       color: var(--text-color);
       cursor: pointer;
       font-size: 13px;
@@ -204,13 +204,13 @@
     /* 圖片畫廊 */
     .gallery {
       display: grid;
-      grid-template-columns: repeat(auto-fill, 130px);
+      grid-template-columns: repeat(auto-fill, 120px);
       gap: 12px;
       align-items: start;
     }
 
     .img-card {
-      width: 130px;
+      width: 120px;
       background-color: var(--card-bg);
       border-radius: 8px;
       overflow: hidden;
@@ -221,8 +221,8 @@
     }
 
     .img-wrapper {
-      width: 130px;
-      height: 130px;
+      width: 120px;
+      height: 120px;
       position: relative;
       background-color: #202225;
     }
@@ -246,7 +246,7 @@
       font-size: 9px;
       font-weight: bold;
       backdrop-filter: blur(4px);
-      max-width: 85px;
+      max-width: 75px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -414,7 +414,7 @@
   <!-- 上傳區 -->
   <div class="drop-zone" id="dropZone">
     <p style="font-size: 16px; margin-bottom: 8px;">💡 當前分頁：<b id="currentTabName">🏠 家具</b>（Ctrl + V 貼上圖片 / 拖曳上傳）</p>
-    <p id="status" style="color: var(--success-color); margin: 0; font-weight: bold; min-height: 20px;"></p>
+    <p id="status" style="color: var(--accent-color); margin: 0; font-weight: bold;"></p>
   </div>
 
   <div class="gallery" id="gallery"></div>
@@ -445,6 +445,7 @@
     let activeRef = null;
     let isAdmin = false;
 
+    // 後備預設文字（僅當 Firebase 完全沒有資料時才作備用）
     const fallbackCategories = {
       general: "🏠 家具",
       memes: "🧸 熊熊",
@@ -455,14 +456,6 @@
       crop_male: "👦 限男",
       crop_female: "👧 限女"
     };
-
-    function showStatusSuccess() {
-      const status = document.getElementById('status');
-      if (status) {
-        status.innerText = "上傳成功";
-        setTimeout(() => { status.innerText = ""; }, 1500);
-      }
-    }
 
     function getDefaultTimeStr() {
       return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -477,7 +470,7 @@
       document.getElementById('currentTabName').innerText = currentCategoryDisplayName;
     }
 
-    // 1. 說明欄載入與自動儲存
+    // 1. 說明欄同步（安全保護：優先使用 Firebase 現有文字）
     const descElem = document.getElementById('siteDescription');
     const descRef = ref(db, 'settings/description');
 
@@ -485,23 +478,22 @@
       const data = snapshot.val();
       const defaultText = "訪客僅供檢視，管理員登入後可上傳與編輯。";
       if (document.activeElement !== descElem) {
+        // 若雲端有歷史文字則保留使用，不被代碼覆蓋
         descElem.innerText = (data !== null && data !== undefined) ? data : defaultText;
       }
     });
 
     descElem.addEventListener('blur', () => {
       if (!isAdmin) return;
-      set(descRef, descElem.innerText.trim()).then(() => showStatusSuccess());
+      set(descRef, descElem.innerText.trim());
     });
 
-    descElem.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); descElem.blur(); }
-    });
-
-    // 2. 分頁標題同步與自動儲存
+    // 2. 分頁標題即時同步（安全保護：優先使用 Firebase 現有文字）
     const menuRef = ref(db, 'settings/menus/tabNames');
     onValue(menuRef, (snapshot) => {
       const data = snapshot.val() || {};
+      
+      // 比對 DOM 節點並更新為雲端現有文字
       Object.keys(fallbackCategories).forEach(cat => {
         const textElem = document.getElementById(`tab-title-${cat}`);
         if (textElem && document.activeElement !== textElem) {
@@ -514,6 +506,7 @@
       });
     });
 
+    // 綁定各分頁標題編輯與點擊事件
     Object.keys(fallbackCategories).forEach(cat => {
       const textSpan = document.getElementById(`tab-title-${cat}`);
       const btn = document.querySelector(`[data-category="${cat}"]`);
@@ -521,8 +514,7 @@
       if (textSpan) {
         textSpan.addEventListener('blur', () => {
           if (!isAdmin) return;
-          update(ref(db, `settings/menus/tabNames`), { [cat]: textSpan.innerText.trim() })
-            .then(() => showStatusSuccess());
+          update(ref(db, `settings/menus/tabNames`), { [cat]: textSpan.innerText.trim() });
         });
 
         textSpan.addEventListener('keydown', (e) => {
@@ -531,7 +523,7 @@
       }
 
       if (btn) {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', () => {
           if (document.activeElement === textSpan) return;
 
           document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -550,7 +542,7 @@
       }
     });
 
-    // 3. Auth 權限管理
+    // 3. Auth 權限狀態管理
     onAuthStateChanged(auth, (user) => {
       const authBox = document.getElementById('authBox');
       const dropZone = document.getElementById('dropZone');
@@ -626,7 +618,7 @@
       }
     }
 
-    // 4. 切換與讀取分頁圖片
+    // 4. 切換與讀取分頁圖片（即時同步資料庫內容）
     function renderStatusElement(key, rawStatusValue) {
       const statusValue = formatStatusValue(rawStatusValue);
       const isSoldClass = statusValue.includes('售出') ? 'is-sold' : '';
@@ -674,6 +666,18 @@
 
         gallery.prepend(card);
 
+        // 修改數量狀態
+        const badgeElem = card.querySelector(`#badge-${key}`);
+        if (badgeElem) {
+          badgeElem.addEventListener('blur', () => {
+            if (!isAdmin) return;
+            update(ref(db, `images/${currentCategory}/${key}`), { quantity: badgeElem.innerText.trim() });
+          });
+          badgeElem.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); badgeElem.blur(); }
+          });
+        }
+
         // 刪除圖片
         const deleteBtn = card.querySelector('.delete-btn');
         deleteBtn.addEventListener('click', (e) => {
@@ -683,45 +687,44 @@
           }
         });
 
-        // 自動儲存與顯示「上傳成功」
-        const bindAutoSave = (element, fieldName) => {
-          if (!element) return;
-          
-          element.addEventListener('blur', () => {
-            if (!isAdmin) return;
-            const newValue = element.innerText.trim();
-            update(ref(db, `images/${currentCategory}/${key}`), {
-              [fieldName]: newValue
-            }).then(() => showStatusSuccess());
-          });
+        // 修改圖片公開文字
+        const editableElem = card.querySelector('.editable-text');
+        editableElem.addEventListener('blur', () => {
+          if (!isAdmin) return;
+          update(ref(db, `images/${currentCategory}/${key}`), { caption: editableElem.innerText.trim() });
+        });
+        editableElem.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); editableElem.blur(); }
+        });
 
-          element.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              element.blur();
-            }
-          });
-        };
-
-        bindAutoSave(card.querySelector(`#badge-${key}`), 'quantity');
-        bindAutoSave(card.querySelector(`#text-${key}`), 'caption');
-        bindAutoSave(card.querySelector(`#note-${key}`), 'note');
+        // 修改圖片私人備註文字
+        const noteElem = card.querySelector('.admin-note-text');
+        noteElem.addEventListener('blur', () => {
+          if (!isAdmin) return;
+          update(ref(db, `images/${currentCategory}/${key}`), { note: noteElem.innerText.trim() });
+        });
+        noteElem.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); noteElem.blur(); }
+        });
       });
 
       onChildChanged(activeRef, (snapshot) => {
         const key = snapshot.key;
         const data = snapshot.val();
         
+        // 更新公開說明
         const targetTextElem = document.getElementById(`text-${key}`);
         if (targetTextElem && document.activeElement !== targetTextElem) {
           targetTextElem.innerText = data.caption || '';
         }
 
+        // 更新私人備註
         const targetNoteElem = document.getElementById(`note-${key}`);
         if (targetNoteElem && document.activeElement !== targetNoteElem) {
           targetNoteElem.innerText = data.note || '';
         }
 
+        // 更新狀態標籤
         const newStatus = formatStatusValue(data.quantity);
         const targetBadgeElem = document.getElementById(`badge-${key}`);
         if (targetBadgeElem && document.activeElement !== targetBadgeElem) {
@@ -746,7 +749,7 @@
       if (!isAdmin || !file || !file.type.startsWith('image/')) return;
 
       const status = document.getElementById('status');
-      status.innerText = "正在上傳...";
+      status.innerText = "正在發送圖片...";
 
       const reader = new FileReader();
       reader.onload = function(e) {
@@ -756,9 +759,9 @@
           quantity: '數量: 1',
           note: '',
           timestamp: Date.now()
-        }).then(() => {
-          showStatusSuccess();
         });
+        status.innerText = "發送成功！";
+        setTimeout(() => status.innerText = "", 1500);
       };
       reader.readAsDataURL(file);
     }
@@ -788,3 +791,5 @@
   </script>
 </body>
 </html>
+
+⭐ 米米小舖-Club MStar ⭐
