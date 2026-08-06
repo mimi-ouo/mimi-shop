@@ -211,6 +211,9 @@
       display: flex;
       flex-direction: column;
       position: relative;
+      /* 效能優化：加速大量卡片渲染 */
+      content-visibility: auto;
+      contain-intrinsic-size: 120px 180px;
     }
 
     .img-wrapper {
@@ -224,6 +227,8 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
+      /* 提升圖片渲染效能 */
+      content-visibility: auto;
     }
 
     .status-badge {
@@ -421,14 +426,23 @@
         bindAuthEvents();
       }
 
-      // 綁定公告欄編輯事件（等待雲端回傳成功才顯示）
+      let originalDesc = "";
+      descElem.addEventListener('focus', () => {
+        if (!isAdmin) return;
+        originalDesc = descElem.innerText;
+      });
+
       descElem.addEventListener('blur', async () => {
         if (!isAdmin) return;
+        const newText = descElem.innerText;
+        if (newText === originalDesc) return;
+
         const status = document.getElementById('status');
         status.innerText = "正在儲存至雲端...";
         
-        const success = await updateDescription(descElem.innerText);
+        const success = await updateDescription(newText);
         if (success) {
+          originalDesc = newText;
           status.innerText = "修改成功！";
         } else {
           status.innerText = "儲存失敗，請重試";
@@ -510,10 +524,11 @@
 
     function renderGallery() {
       const gallery = document.getElementById('gallery');
-      gallery.innerHTML = '';
-
       const filtered = allData.filter(item => item.category === currentCategory);
       filtered.sort((a, b) => b.timestamp - a.timestamp);
+
+      // 使用 DocumentFragment 一次性渲染 DOM，大幅減少畫面重繪次數，提升顯示速度
+      const fragment = document.createDocumentFragment();
 
       filtered.forEach(item => {
         const card = document.createElement('div');
@@ -526,7 +541,7 @@
           <button class="delete-btn" title="刪除圖片">✕</button>
           <div class="img-wrapper">
             <span class="status-badge ${isSoldClass}" id="badge-${item.id}" contenteditable="${isAdmin}">${item.quantity || '數量: 1'}</span>
-            <img src="${item.url}" loading="lazy" alt="image" />
+            <img src="${item.url}" loading="lazy" decoding="async" alt="image" />
           </div>
           <div class="img-info">
             <span class="editable-text" contenteditable="${isAdmin}" id="text-${item.id}">${item.caption || ''}</span>
@@ -537,36 +552,58 @@
           </div>
         `;
 
-        gallery.appendChild(card);
-
         if (isAdmin) {
           card.querySelector('.delete-btn').addEventListener('click', () => {
             if (confirm('確定要刪除這張圖片嗎？')) {
               deleteItem(item.id);
             }
           });
+        }
 
+        fragment.appendChild(card);
+      });
+
+      gallery.innerHTML = '';
+      gallery.appendChild(fragment);
+
+      // 綁定編輯事件
+      if (isAdmin) {
+        filtered.forEach(item => {
           bindEditable(item.id, 'quantity', `badge-${item.id}`);
           bindEditable(item.id, 'caption', `text-${item.id}`);
           bindEditable(item.id, 'note', `note-${item.id}`);
-        }
-      });
+        });
+      }
     }
 
     function bindEditable(id, field, elementId) {
       const el = document.getElementById(elementId);
+      if (!el) return;
+      let originalValue = "";
+
+      el.addEventListener('focus', () => {
+        if (!isAdmin) return;
+        originalValue = el.innerText.trim();
+      });
+
       el.addEventListener('blur', async () => {
+        if (!isAdmin) return;
+        const newValue = el.innerText.trim();
+        if (newValue === originalValue) return;
+
         const status = document.getElementById('status');
         status.innerText = "正在儲存至雲端...";
         
-        const success = await updateItem(id, field, el.innerText.trim());
+        const success = await updateItem(id, field, newValue);
         if (success) {
+          originalValue = newValue;
           status.innerText = "修改成功！";
         } else {
           status.innerText = "儲存失敗，請重試";
         }
         setTimeout(() => { status.innerText = ""; }, 1500);
       });
+
       el.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && field !== 'caption') { e.preventDefault(); el.blur(); }
       });
