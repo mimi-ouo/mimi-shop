@@ -196,6 +196,46 @@
       color: #fff;
     }
 
+    /* 贈品區專屬說明區塊樣式 */
+    .gift-notice-container {
+      display: none;
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto 20px auto;
+      text-align: center;
+    }
+
+    .gift-notice-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      background-color: #202225;
+      border: 1px solid #57F287;
+      color: #b9bbbe;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.5;
+      text-align: left;
+      box-sizing: border-box;
+    }
+
+    .gift-notice-box .editable-text {
+      outline: none;
+      color: #dcddde;
+      white-space: pre-wrap;
+      word-break: break-all;
+      flex: 1;
+    }
+
+    .is-admin .gift-notice-box .editable-text {
+      background: rgba(0, 0, 0, 0.2);
+      cursor: text;
+      padding: 2px 4px;
+      border-radius: 4px;
+      border: 1px dashed #57F287;
+    }
+
     .drop-zone {
       border: 2px dashed #4f545c;
       background: var(--card-bg);
@@ -410,8 +450,17 @@
       </div>
     </div>
 
+    <button class="tab-btn" data-category="gift">🎁 贈品區</button>
   </div>
   
+  <!-- 贈品區專屬置中說明區塊 -->
+  <div class="gift-notice-container" id="giftNoticeContainer">
+    <div class="gift-notice-box">
+      <span>🎁</span>
+      <span class="editable-text" id="giftDescription" contenteditable="false">這裏是贈品區的說明文字，管理者登入後可以直接點擊編輯並自動同步至雲端！</span>
+    </div>
+  </div>
+
   <div class="drop-zone" id="dropZone">
     <p style="font-size: 16px; margin-bottom: 8px;">💡 當前分頁：<b id="currentTabName">🏠 家具</b>（Ctrl + V 貼上圖片 / 拖曳上傳）</p>
     <p id="status" style="color: var(--accent-color); margin: 0; font-weight: bold;"></p>
@@ -439,11 +488,13 @@
       const authBox = document.getElementById('authBox');
       const dropZone = document.getElementById('dropZone');
       const descElem = document.getElementById('siteDescription');
+      const giftDescElem = document.getElementById('giftDescription');
 
       if (isAdmin) {
         document.body.classList.add('is-admin');
         dropZone.style.display = 'block';
         descElem.contentEditable = "true";
+        giftDescElem.contentEditable = "true";
         authBox.innerHTML = `
           <span style="color:#57F287; font-size:14px;">已登入管理員</span>
           <button class="auth-btn" id="logoutBtn" style="background:#4f545c">登出</button>
@@ -456,6 +507,7 @@
         document.body.classList.remove('is-admin');
         dropZone.style.display = 'none';
         descElem.contentEditable = "false";
+        giftDescElem.contentEditable = "false";
         authBox.innerHTML = `
           <button class="auth-btn" id="showLoginBtn">登入</button>
           <div class="auth-inputs" id="authInputs">
@@ -467,6 +519,7 @@
         bindAuthEvents();
       }
 
+      // 綁定上方公告儲存事件
       let originalDesc = "";
       descElem.addEventListener('focus', () => {
         if (!isAdmin) return;
@@ -481,9 +534,34 @@
         const status = document.getElementById('status');
         status.innerText = "正在儲存至雲端...";
         
-        const success = await updateDescription(newText);
+        const success = await updateItemById('settings_desc', 'caption', newText);
         if (success) {
           originalDesc = newText;
+          status.innerText = "修改成功！";
+        } else {
+          status.innerText = "儲存失敗，請重試";
+        }
+        setTimeout(() => { status.innerText = ""; }, 1500);
+      });
+
+      // 綁定贈品區說明儲存事件
+      let originalGiftDesc = "";
+      giftDescElem.addEventListener('focus', () => {
+        if (!isAdmin) return;
+        originalGiftDesc = giftDescElem.innerText;
+      });
+
+      giftDescElem.addEventListener('blur', async () => {
+        if (!isAdmin) return;
+        const newText = giftDescElem.innerText;
+        if (newText === originalGiftDesc) return;
+
+        const status = document.getElementById('status');
+        status.innerText = "正在儲存至雲端...";
+        
+        const success = await updateItemById('settings_gift', 'caption', newText);
+        if (success) {
+          originalGiftDesc = newText;
           status.innerText = "修改成功！";
         } else {
           status.innerText = "儲存失敗，請重試";
@@ -527,6 +605,15 @@
           currentCategory = btn.getAttribute('data-category');
           currentCategoryDisplayName = btn.innerText.trim();
           document.getElementById('currentTabName').innerText = currentCategoryDisplayName;
+          
+          // 控制贈品區說明區塊的顯示與隱藏
+          const giftNoticeContainer = document.getElementById('giftNoticeContainer');
+          if (currentCategory === 'gift') {
+            giftNoticeContainer.style.display = 'block';
+          } else {
+            giftNoticeContainer.style.display = 'none';
+          }
+
           renderGallery();
         });
       });
@@ -537,12 +624,21 @@
         const response = await fetch(`${SCRIPT_URL}?action=getData`);
         const result = await response.json();
         if (result.status === 'success') {
-          allData = result.data.filter(item => String(item.id) !== 'settings_desc');
+          // 過濾掉系統設定資料
+          allData = result.data.filter(item => String(item.id) !== 'settings_desc' && String(item.id) !== 'settings_gift');
           
+          // 設定上方公告
           const descItem = result.data.find(item => String(item.id) === 'settings_desc');
           const descElem = document.getElementById('siteDescription');
           if (descItem && descItem.caption) {
             descElem.innerText = descItem.caption;
+          }
+
+          // 設定贈品區說明
+          const giftDescItem = result.data.find(item => String(item.id) === 'settings_gift');
+          const giftDescElem = document.getElementById('giftDescription');
+          if (giftDescItem && giftDescItem.caption) {
+            giftDescElem.innerText = giftDescItem.caption;
           }
 
           renderGallery();
@@ -552,9 +648,9 @@
       }
     }
 
-    async function updateDescription(newText) {
+    async function updateItemById(id, field, value) {
       try {
-        const response = await fetch(`${SCRIPT_URL}?action=updateItem&id=settings_desc&field=caption&value=${encodeURIComponent(newText)}`);
+        const response = await fetch(`${SCRIPT_URL}?action=updateItem&id=${id}&field=${field}&value=${encodeURIComponent(value)}`);
         const result = await response.json();
         return result.status === 'success';
       } catch (err) {
