@@ -453,7 +453,6 @@
     <button class="tab-btn" data-category="gift">🎁 贈品區</button>
   </div>
   
-  <!-- 贈品區專屬置中說明區塊 -->
   <div class="gift-notice-container" id="giftNoticeContainer">
     <div class="gift-notice-box">
       <span>🎁</span>
@@ -519,7 +518,6 @@
         bindAuthEvents();
       }
 
-      // 綁定上方公告儲存事件
       let originalDesc = "";
       descElem.addEventListener('focus', () => {
         if (!isAdmin) return;
@@ -544,7 +542,6 @@
         setTimeout(() => { status.innerText = ""; }, 1500);
       });
 
-      // 綁定贈品區說明儲存事件
       let originalGiftDesc = "";
       giftDescElem.addEventListener('focus', () => {
         if (!isAdmin) return;
@@ -606,7 +603,6 @@
           currentCategoryDisplayName = btn.innerText.trim();
           document.getElementById('currentTabName').innerText = currentCategoryDisplayName;
           
-          // 控制贈品區說明區塊的顯示與隱藏
           const giftNoticeContainer = document.getElementById('giftNoticeContainer');
           if (currentCategory === 'gift') {
             giftNoticeContainer.style.display = 'block';
@@ -624,17 +620,14 @@
         const response = await fetch(`${SCRIPT_URL}?action=getData`);
         const result = await response.json();
         if (result.status === 'success') {
-          // 過濾掉系統設定資料
           allData = result.data.filter(item => String(item.id) !== 'settings_desc' && String(item.id) !== 'settings_gift');
           
-          // 設定上方公告
           const descItem = result.data.find(item => String(item.id) === 'settings_desc');
           const descElem = document.getElementById('siteDescription');
           if (descItem && descItem.caption) {
             descElem.innerText = descItem.caption;
           }
 
-          // 設定贈品區說明
           const giftDescItem = result.data.find(item => String(item.id) === 'settings_gift');
           const giftDescElem = document.getElementById('giftDescription');
           if (giftDescItem && giftDescItem.caption) {
@@ -711,6 +704,7 @@
               <option value="數量: 8" ${currentQty === '數量: 8' ? 'selected' : ''}>數量: 8</option>
               <option value="數量: 9" ${currentQty === '數量: 9' ? 'selected' : ''}>數量: 9</option>
               <option value="數量: 10" ${currentQty === '數量: 10' ? 'selected' : ''}>數量: 10</option>
+              <option value="大量" ${currentQty === '大量' ? 'selected' : ''}>大量</option>
               <option value="已售出" ${isSold ? 'selected' : ''}>已售出</option>
             </select>
           `;
