@@ -12,6 +12,7 @@
       --accent-color: #5865f2;
       --danger-color: #ed4245;
       --success-color: #57F287;
+      --warning-color: #fee75c;
     }
 
     body {
@@ -196,7 +197,6 @@
       color: #fff;
     }
 
-    /* 贈品區專屬說明區塊樣式 */
     .gift-notice-container {
       display: none;
       width: 100%;
@@ -303,10 +303,17 @@
       padding: 1px 4px;
       font-size: 9px;
       font-weight: bold;
-      max-width: 75px;
+      max-width: 85px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+    /* 黃底樣式：暫售，待交易 */
+    .status-badge.is-pending {
+      background-color: rgba(254, 231, 92, 0.95);
+      border-color: var(--warning-color);
+      color: #000000;
     }
 
     .status-badge.is-sold {
@@ -331,9 +338,16 @@
       outline: none;
     }
 
+    .status-select.is-pending {
+      background-color: rgba(254, 231, 92, 0.95);
+      border-color: var(--warning-color);
+      color: #000000;
+    }
+
     .status-select.is-sold {
       background-color: rgba(237, 66, 69, 0.9);
       border-color: var(--danger-color);
+      color: #ffffff;
     }
 
     .delete-btn {
@@ -456,7 +470,7 @@
   <div class="gift-notice-container" id="giftNoticeContainer">
     <div class="gift-notice-box">
       <span>🎁</span>
-      <span class="editable-text" id="giftDescription" contenteditable="false">本區一律2糖/T，如有購買任一件商品，或本區滿5件，可選本區一件免費贈送</span>
+      <span class="editable-text" id="giftDescription" contenteditable="false">這裏是贈品區的說明文字，管理者登入後可以直接點擊編輯並自動同步至雲端！</span>
     </div>
   </div>
 
@@ -687,13 +701,17 @@
         card.setAttribute('data-id', item.id);
 
         const currentQty = item.quantity || '數量: 1';
+        const isPending = String(currentQty).includes('暫售');
         const isSold = String(currentQty).includes('售出');
-        const isSoldClass = isSold ? 'is-sold' : '';
+        
+        let statusClass = '';
+        if (isPending) statusClass = 'is-pending';
+        else if (isSold) statusClass = 'is-sold';
 
         let badgeHTML = '';
         if (isAdmin) {
           badgeHTML = `
-            <select class="status-select ${isSoldClass}" id="badge-${item.id}">
+            <select class="status-select ${statusClass}" id="badge-${item.id}">
               <option value="數量: 1" ${currentQty === '數量: 1' ? 'selected' : ''}>數量: 1</option>
               <option value="數量: 2" ${currentQty === '數量: 2' ? 'selected' : ''}>數量: 2</option>
               <option value="數量: 3" ${currentQty === '數量: 3' ? 'selected' : ''}>數量: 3</option>
@@ -705,12 +723,12 @@
               <option value="數量: 9" ${currentQty === '數量: 9' ? 'selected' : ''}>數量: 9</option>
               <option value="數量: 10" ${currentQty === '數量: 10' ? 'selected' : ''}>數量: 10</option>
               <option value="大量" ${currentQty === '大量' ? 'selected' : ''}>大量</option>
-              <option value="暫售" ${isSold ? 'selected' : ''}>暫售</option>
+              <option value="暫售，待交易" ${isPending ? 'selected' : ''}>暫售，待交易</option>
               <option value="已售出" ${isSold ? 'selected' : ''}>已售出</option>
             </select>
           `;
         } else {
-          badgeHTML = `<span class="status-badge ${isSoldClass}" id="badge-${item.id}">${currentQty}</span>`;
+          badgeHTML = `<span class="status-badge ${statusClass}" id="badge-${item.id}">${currentQty}</span>`;
         }
 
         card.innerHTML = `
@@ -757,10 +775,11 @@
               const success = await updateItem(item.id, 'quantity', newValue);
               if (success) {
                 item.quantity = newValue;
-                if (newValue.includes('售出')) {
+                selectEl.className = 'status-select';
+                if (newValue.includes('暫售')) {
+                  selectEl.classList.add('is-pending');
+                } else if (newValue.includes('售出')) {
                   selectEl.classList.add('is-sold');
-                } else {
-                  selectEl.classList.remove('is-sold');
                 }
                 status.innerText = "修改成功！";
               } else {
