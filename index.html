@@ -24,43 +24,48 @@
       padding: 20px;
     }
 
-    /* 將上方固定區域包裝起來並設定黏貼在頂端 */
+    /* 上方黏貼頂端區塊：三欄式排版（左側控制、中間公告、右側分頁） */
     .sticky-header-wrapper {
       position: sticky;
       top: 0;
       background-color: var(--bg-color);
       z-index: 1000;
       padding-top: 10px;
-      padding-bottom: 10px;
+      padding-bottom: 15px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
 
-    .header {
+    .header-layout {
+      display: flex;
+      align-items: flex-start;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    /* 左側直欄：標題、登入、搜尋 */
+    .left-control-panel {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      margin-bottom: 15px;
-      position: relative;
+      gap: 10px;
+      min-width: 180px;
     }
 
-    .title-center {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin-bottom: 12px;
-      width: 100%;
-    }
-
-    .title-center h2 {
+    .title-area h2 {
       margin: 0;
-      font-size: 24px;
+      font-size: 22px;
       line-height: 1.4;
       white-space: nowrap;
     }
 
+    /* 中間公告區塊：隨文字長度與寬度自動調整 */
+    .center-notice-panel {
+      flex: 1;
+      min-width: 250px;
+      max-width: 600px;
+    }
+
     .info-badge {
-      display: flex;
+      display: inline-flex;
       align-items: flex-start;
       gap: 6px;
       background-color: #202225;
@@ -70,9 +75,10 @@
       border-radius: 8px;
       font-size: 13px;
       line-height: 1.5;
-      width: 100%;
       box-sizing: border-box;
       text-align: left;
+      width: auto;
+      max-width: 100%;
     }
 
     .info-badge .editable-text {
@@ -80,7 +86,6 @@
       color: #dcddde;
       white-space: pre-wrap;
       word-break: break-all;
-      flex: 1;
     }
 
     .is-admin .info-badge .editable-text {
@@ -91,72 +96,19 @@
       border: 1px dashed #4f545c;
     }
 
-    /* 登入與搜尋區塊 */
-    .auth-search-wrapper {
-      position: absolute;
-      right: 0;
-      top: 0;
+    /* 右側分頁區塊 */
+    .right-tabs-panel {
       display: flex;
       flex-direction: column;
       gap: 8px;
       align-items: flex-end;
     }
 
-    .auth-box {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .auth-inputs {
-      display: none;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .auth-inputs input {
-      padding: 6px 10px;
-      border-radius: 4px;
-      border: 1px solid #4f545c;
-      background: #202225;
-      color: #fff;
-    }
-
-    .auth-btn {
-      background: var(--accent-color);
-      color: white;
-      border: none;
-      padding: 6px 14px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .cancel-btn {
-      background: #4f545c;
-      color: white;
-      border: none;
-      padding: 6px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .search-input {
-      padding: 6px 10px;
-      border-radius: 4px;
-      border: 1px solid #4f545c;
-      background: #202225;
-      color: #fff;
-      width: 140px;
-      font-size: 12px;
-    }
-
     .tabs-container {
       display: flex;
       gap: 8px;
-      margin-bottom: 0;
-      border-bottom: 2px solid #4f545c;
-      padding-bottom: 10px;
       flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     .tab-btn, .dropdown-toggle {
@@ -197,7 +149,7 @@
       display: none;
       position: absolute;
       top: calc(100% + 8px);
-      left: 0;
+      right: 0;
       background-color: #2f3136;
       min-width: 150px;
       box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
@@ -224,6 +176,59 @@
     .dropdown-item:hover {
       background-color: var(--accent-color);
       color: #fff;
+    }
+
+    /* 登入與搜尋相關樣式 */
+    .auth-box {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .auth-inputs {
+      display: none;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .auth-inputs input {
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid #4f545c;
+      background: #202225;
+      color: #fff;
+      width: 90px;
+      font-size: 12px;
+    }
+
+    .auth-btn {
+      background: var(--accent-color);
+      color: white;
+      border: none;
+      padding: 5px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .cancel-btn {
+      background: #4f545c;
+      color: white;
+      border: none;
+      padding: 5px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .search-input {
+      padding: 6px 10px;
+      border-radius: 4px;
+      border: 1px solid #4f545c;
+      background: #202225;
+      color: #fff;
+      width: 160px;
+      font-size: 13px;
     }
 
     .gift-notice-container {
@@ -454,22 +459,15 @@
 </head>
 <body>
 
-  <!-- 將標題與分頁群組包在黏貼區塊內 -->
+  <!-- 上方黏貼頂端區塊 -->
   <div class="sticky-header-wrapper">
-    <div class="header">
-      <div class="title-center">
-        <h2>⭐ 米米小舖 ⭐</h2>
-      </div>
-      <div class="info-badge">
-        <span>📕</span>
-        <span class="editable-text" id="siteDescription" contenteditable="false">本人夜班，交易需另約時間，故不接急單
-交易方式：可糖可T，比值1:1
-Discord：mimi_ouo
-加載較慢，請稍等，或重新整理頁面</span>
-      </div>
-
-      <!-- 登入與搜尋區塊 -->
-      <div class="auth-search-wrapper">
+    <div class="header-layout">
+      
+      <!-- 左側：標題、登入、搜尋 -->
+      <div class="left-control-panel">
+        <div class="title-area">
+          <h2>⭐ 米米小舖 ⭐</h2>
+        </div>
         <div class="auth-box" id="authBox">
           <button class="auth-btn" id="showLoginBtn">登入</button>
           <div class="auth-inputs" id="authInputs">
@@ -480,30 +478,45 @@ Discord：mimi_ouo
         </div>
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 搜尋名稱或備註...">
       </div>
-    </div>
 
-    <div class="tabs-container" id="tabsContainer">
-      <button class="tab-btn active" data-category="general">🏠 家具</button>
-      <button class="tab-btn" data-category="memes">🧸 熊熊</button>
-      <button class="tab-btn" data-category="pot">🪴 花盆</button>
-      
-      <div class="dropdown">
-        <button class="dropdown-toggle">💍 戒指 ▾</button>
-        <div class="dropdown-menu">
-          <div class="dropdown-item tab-btn" data-category="ring_male">👦 限男</div>
-          <div class="dropdown-item tab-btn" data-category="ring_female">👧 限女</div>
+      <!-- 中間：公告區塊（隨文字大小自動調整） -->
+      <div class="center-notice-panel">
+        <div class="info-badge">
+          <span>📕</span>
+          <span class="editable-text" id="siteDescription" contenteditable="false">本人夜班，交易需另約時間，故不接急單
+交易方式：可糖可T，比值1:1
+Discord：mimi_ouo
+加載較慢，請稍等，或重新整理頁面</span>
         </div>
       </div>
 
-      <div class="dropdown">
-        <button class="dropdown-toggle">🌱 作物 ▾</button>
-        <div class="dropdown-menu">
-          <div class="dropdown-item tab-btn" data-category="crop_male">👦 限男</div>
-          <div class="dropdown-item tab-btn" data-category="crop_female">👧 限女</div>
+      <!-- 右側：分頁按鈕 -->
+      <div class="right-tabs-panel">
+        <div class="tabs-container" id="tabsContainer">
+          <button class="tab-btn active" data-category="general">🏠 家具</button>
+          <button class="tab-btn" data-category="memes">🧸 熊熊</button>
+          <button class="tab-btn" data-category="pot">🪴 花盆</button>
+          
+          <div class="dropdown">
+            <button class="dropdown-toggle">💍 戒指 ▾</button>
+            <div class="dropdown-menu">
+              <div class="dropdown-item tab-btn" data-category="ring_male">👦 限男</div>
+              <div class="dropdown-item tab-btn" data-category="ring_female">👧 限女</div>
+            </div>
+          </div>
+
+          <div class="dropdown">
+            <button class="dropdown-toggle">🌱 作物 ▾</button>
+            <div class="dropdown-menu">
+              <div class="dropdown-item tab-btn" data-category="crop_male">👦 限男</div>
+              <div class="dropdown-item tab-btn" data-category="crop_female">👧 限女</div>
+            </div>
+          </div>
+
+          <button class="tab-btn" data-category="gift">🎁 贈品區</button>
         </div>
       </div>
 
-      <button class="tab-btn" data-category="gift">🎁 贈品區</button>
     </div>
   </div>
   
@@ -552,7 +565,7 @@ Discord：mimi_ouo
         descElem.contentEditable = "true";
         giftDescElem.contentEditable = "true";
         authBox.innerHTML = `
-          <span style="color:#57F287; font-size:14px;">已登入管理員</span>
+          <span style="color:#57F287; font-size:13px;">已登入管理員</span>
           <button class="auth-btn" id="logoutBtn" style="background:#4f545c">登出</button>
         `;
         document.getElementById('logoutBtn').addEventListener('click', () => {
@@ -734,7 +747,6 @@ Discord：mimi_ouo
       const gallery = document.getElementById('gallery');
       const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
 
-      // 先依當前分類篩選，再依搜尋關鍵字篩選（比對名稱或備註）
       const filtered = allData.filter(item => {
         const matchCategory = (item.category === currentCategory);
         if (!matchCategory) return false;
