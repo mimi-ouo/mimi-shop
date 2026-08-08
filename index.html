@@ -13,6 +13,8 @@
       --danger-color: #ed4245;
       --success-color: #57F287;
       --warning-color: #fee75c;
+      /* 新增粉色系變數 */
+      --pink-color: #ffb7c5;
     }
 
     body {
@@ -22,7 +24,6 @@
       max-width: 1200px;
       margin: 0 auto;
       padding: 20px;
-      /* 預留右側空間避免被懸浮分頁遮擋 */
       padding-right: 140px; 
     }
 
@@ -32,7 +33,6 @@
       }
     }
 
-    /* 上方黏貼頂端區塊 */
     .sticky-header-wrapper {
       position: sticky;
       top: 0;
@@ -44,6 +44,12 @@
     }
 
     .header-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .header-top-row {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
@@ -59,11 +65,10 @@
       flex: 1;
     }
 
-    /* 左側直欄：僅放標題 */
     .left-control-panel {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 6px;
       min-width: 140px;
     }
 
@@ -74,7 +79,12 @@
       white-space: nowrap;
     }
 
-    /* 右側控制區塊：放登入與搜尋 */
+    .discord-info {
+      font-size: 13px;
+      color: #b9bbbe;
+      white-space: nowrap;
+    }
+
     .right-control-panel {
       display: flex;
       flex-direction: column;
@@ -82,13 +92,6 @@
       align-items: flex-end;
     }
 
-    @media (max-width: 768px) {
-      .right-control-panel {
-        align-items: flex-start;
-      }
-    }
-
-    /* 中間公告區塊：隨文字長度與寬度自動調整 */
     .center-notice-panel {
       flex: 1;
       min-width: 250px;
@@ -119,15 +122,22 @@
       word-break: break-all;
     }
 
-    .is-admin .info-badge .editable-text {
-      background: rgba(0, 0, 0, 0.2);
-      cursor: text;
-      padding: 2px 4px;
-      border-radius: 4px;
-      border: 1px dashed #4f545c;
+    .header-search-row {
+      width: 100%;
+      box-sizing: border-box;
     }
 
-    /* 右側直立懸浮分頁區塊 */
+    .search-input {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #4f545c;
+      background: #202225;
+      color: #fff;
+      width: 100%;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
     .side-tabs-panel {
       position: fixed;
       right: 20px;
@@ -215,7 +225,6 @@
       color: #fff;
     }
 
-    /* 登入與搜尋相關樣式 */
     .auth-box {
       display: flex;
       gap: 8px;
@@ -259,17 +268,8 @@
       font-size: 13px;
     }
 
-    .search-input {
-      padding: 6px 10px;
-      border-radius: 4px;
-      border: 1px solid #4f545c;
-      background: #202225;
-      color: #fff;
-      width: 180px;
-      font-size: 13px;
-    }
-
-    .gift-notice-container {
+    /* 通用說明區塊 (贈品與戒指) */
+    .special-notice-container {
       display: none;
       width: 100%;
       max-width: 800px;
@@ -277,13 +277,11 @@
       text-align: center;
     }
 
-    .gift-notice-box {
+    .special-notice-box {
       display: flex;
       align-items: flex-start;
       gap: 6px;
       background-color: #202225;
-      border: 1px solid #57F287;
-      color: #b9bbbe;
       padding: 12px 16px;
       border-radius: 8px;
       font-size: 14px;
@@ -292,21 +290,26 @@
       box-sizing: border-box;
     }
 
-    .gift-notice-box .editable-text {
+    /* 贈品區樣式 (綠色) */
+    .notice-gift { border: 1px solid #57F287; color: #b9bbbe; }
+    /* 戒指區樣式 (粉色) */
+    .notice-ring { border: 1px solid var(--pink-color); color: var(--pink-color); }
+
+    .special-notice-box .editable-text {
       outline: none;
-      color: #dcddde;
       white-space: pre-wrap;
       word-break: break-all;
       flex: 1;
     }
 
-    .is-admin .gift-notice-box .editable-text {
+    .is-admin .special-notice-box .editable-text {
       background: rgba(0, 0, 0, 0.2);
       cursor: text;
       padding: 2px 4px;
       border-radius: 4px;
-      border: 1px dashed #57F287;
     }
+    .is-admin .notice-gift .editable-text { border: 1px dashed #57F287; }
+    .is-admin .notice-ring .editable-text { border: 1px dashed var(--pink-color); }
 
     .drop-zone {
       border: 2px dashed #4f545c;
@@ -526,45 +529,58 @@
   <div class="sticky-header-wrapper">
     <div class="header-layout">
       
-      <!-- 左側群組：標題與中間公告 -->
-      <div class="header-left-group">
-        <div class="left-control-panel">
-          <div class="title-area">
-            <h2>⭐ 米米小舖 ⭐</h2>
+      <div class="header-top-row">
+        <div class="header-left-group">
+          <div class="left-control-panel">
+            <div class="title-area">
+              <h2>⭐ 米米小舖 ⭐</h2>
+            </div>
+            <div class="discord-info">
+              Discord：mimi_ouo
+            </div>
+          </div>
+
+          <div class="center-notice-panel">
+            <div class="info-badge">
+              <span>📕</span>
+              <span class="editable-text" id="siteDescription" contenteditable="false">本人夜班，交易需另約時間，故不接急單
+交易方式：可糖可T，比值1:1</span>
+            </div>
           </div>
         </div>
 
-        <div class="center-notice-panel">
-          <div class="info-badge">
-            <span>📕</span>
-            <span class="editable-text" id="siteDescription" contenteditable="false">本人夜班，交易需另約時間，故不接急單
-交易方式：可糖可T，比值1:1
-Discord：mimi_ouo
-加載較慢，請稍等，或重新整理頁面</span>
+        <div class="right-control-panel">
+          <div class="auth-box" id="authBox">
+            <button class="auth-btn" id="showLoginBtn">登入</button>
+            <div class="auth-inputs" id="authInputs">
+              <input type="password" id="passwordInput" placeholder="管理員密碼">
+              <button class="auth-btn" id="loginBtn">確認</button>
+              <button class="cancel-btn" id="cancelBtn">✕</button>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- 右側控制區塊：登入與搜尋 -->
-      <div class="right-control-panel">
-        <div class="auth-box" id="authBox">
-          <button class="auth-btn" id="showLoginBtn">登入</button>
-          <div class="auth-inputs" id="authInputs">
-            <input type="password" id="passwordInput" placeholder="管理員密碼">
-            <button class="auth-btn" id="loginBtn">確認</button>
-            <button class="cancel-btn" id="cancelBtn">✕</button>
-          </div>
-        </div>
+      <div class="header-search-row">
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 搜尋名稱或備註...">
       </div>
 
     </div>
   </div>
   
-  <div class="gift-notice-container" id="giftNoticeContainer">
-    <div class="gift-notice-box">
+  <!-- 贈品區說明 -->
+  <div class="special-notice-container" id="giftNoticeContainer">
+    <div class="special-notice-box notice-gift">
       <span>🎁</span>
-      <span class="editable-text" id="giftDescription" contenteditable="false">這裏是贈品區的說明文字，管理者登入後可以直接點擊編輯並自動同步至雲端！</span>
+      <span class="editable-text" id="giftDescription" contenteditable="false">本區一律2糖，如有購買任一商品或本區滿五件，可選本區一件免費贈送</span>
+    </div>
+  </div>
+
+  <!-- 戒指區說明 (粉色系) -->
+  <div class="special-notice-container" id="ringNoticeContainer">
+    <div class="special-notice-box notice-ring">
+      <span>💍</span>
+      <span class="editable-text" id="ringDescription" contenteditable="false">情侶等級由買方負擔</span>
     </div>
   </div>
 
@@ -590,7 +606,6 @@ Discord：mimi_ouo
       setupTabs();
       fetchData();
       
-      // 綁定搜尋框事件
       document.getElementById('searchInput').addEventListener('input', renderGallery);
     });
 
@@ -599,12 +614,14 @@ Discord：mimi_ouo
       const dropZone = document.getElementById('dropZone');
       const descElem = document.getElementById('siteDescription');
       const giftDescElem = document.getElementById('giftDescription');
+      const ringDescElem = document.getElementById('ringDescription');
 
       if (isAdmin) {
         document.body.classList.add('is-admin');
         dropZone.style.display = 'block';
         descElem.contentEditable = "true";
         giftDescElem.contentEditable = "true";
+        ringDescElem.contentEditable = "true";
         authBox.innerHTML = `
           <span style="color:#57F287; font-size:13px;">已登入管理員</span>
           <button class="auth-btn" id="logoutBtn" style="background:#4f545c">登出</button>
@@ -618,6 +635,7 @@ Discord：mimi_ouo
         dropZone.style.display = 'none';
         descElem.contentEditable = "false";
         giftDescElem.contentEditable = "false";
+        ringDescElem.contentEditable = "false";
         authBox.innerHTML = `
           <button class="auth-btn" id="showLoginBtn">登入</button>
           <div class="auth-inputs" id="authInputs">
@@ -629,53 +647,24 @@ Discord：mimi_ouo
         bindAuthEvents();
       }
 
-      let originalDesc = "";
-      descElem.addEventListener('focus', () => {
-        if (!isAdmin) return;
-        originalDesc = descElem.innerText;
-      });
+      // 共用儲存邏輯 (簡化)
+      const setupBlurSave = (elem, id, field) => {
+        let originalValue = "";
+        elem.addEventListener('focus', () => { if(isAdmin) originalValue = elem.innerText; });
+        elem.addEventListener('blur', async () => {
+          if (!isAdmin || elem.innerText === originalValue) return;
+          const status = document.getElementById('status');
+          status.innerText = "正在儲存...";
+          const success = await updateItemById(id, field, elem.innerText);
+          if (success) { originalValue = elem.innerText; status.innerText = "修改成功！"; }
+          else { status.innerText = "儲存失敗"; }
+          setTimeout(() => status.innerText = "", 1500);
+        });
+      };
 
-      descElem.addEventListener('blur', async () => {
-        if (!isAdmin) return;
-        const newText = descElem.innerText;
-        if (newText === originalDesc) return;
-
-        const status = document.getElementById('status');
-        status.innerText = "正在儲存至雲端...";
-        
-        const success = await updateItemById('settings_desc', 'caption', newText);
-        if (success) {
-          originalDesc = newText;
-          status.innerText = "修改成功！";
-        } else {
-          status.innerText = "儲存失敗，請重試";
-        }
-        setTimeout(() => { status.innerText = ""; }, 1500);
-      });
-
-      let originalGiftDesc = "";
-      giftDescElem.addEventListener('focus', () => {
-        if (!isAdmin) return;
-        originalGiftDesc = giftDescElem.innerText;
-      });
-
-      giftDescElem.addEventListener('blur', async () => {
-        if (!isAdmin) return;
-        const newText = giftDescElem.innerText;
-        if (newText === originalGiftDesc) return;
-
-        const status = document.getElementById('status');
-        status.innerText = "正在儲存至雲端...";
-        
-        const success = await updateItemById('settings_gift', 'caption', newText);
-        if (success) {
-          originalGiftDesc = newText;
-          status.innerText = "修改成功！";
-        } else {
-          status.innerText = "儲存失敗，請重試";
-        }
-        setTimeout(() => { status.innerText = ""; }, 1500);
-      });
+      setupBlurSave(descElem, 'settings_desc', 'caption');
+      setupBlurSave(giftDescElem, 'settings_gift', 'caption');
+      setupBlurSave(ringDescElem, 'settings_ring', 'caption');
     }
 
     function bindAuthEvents() {
@@ -684,24 +673,13 @@ Discord：mimi_ouo
       const cancelBtn = document.getElementById('cancelBtn');
       const loginBtn = document.getElementById('loginBtn');
 
-      showLoginBtn.addEventListener('click', () => {
-        showLoginBtn.style.display = 'none';
-        authInputs.style.display = 'flex';
-      });
-
-      cancelBtn.addEventListener('click', () => {
-        authInputs.style.display = 'none';
-        showLoginBtn.style.display = 'inline-block';
-      });
-
+      showLoginBtn.addEventListener('click', () => { showLoginBtn.style.display = 'none'; authInputs.style.display = 'flex'; });
+      cancelBtn.addEventListener('click', () => { authInputs.style.display = 'none'; showLoginBtn.style.display = 'inline-block'; });
       loginBtn.addEventListener('click', () => {
-        const pass = document.getElementById('passwordInput').value;
-        if (pass === ADMIN_PASSWORD) {
+        if (document.getElementById('passwordInput').value === ADMIN_PASSWORD) {
           localStorage.setItem('isAdmin', 'true');
           location.reload();
-        } else {
-          alert('密碼錯誤！');
-        }
+        } else { alert('密碼錯誤！'); }
       });
     }
 
@@ -714,12 +692,11 @@ Discord：mimi_ouo
           currentCategoryDisplayName = btn.innerText.trim();
           document.getElementById('currentTabName').innerText = currentCategoryDisplayName;
           
-          const giftNoticeContainer = document.getElementById('giftNoticeContainer');
-          if (currentCategory === 'gift') {
-            giftNoticeContainer.style.display = 'block';
-          } else {
-            giftNoticeContainer.style.display = 'none';
-          }
+          const giftNotice = document.getElementById('giftNoticeContainer');
+          const ringNotice = document.getElementById('ringNoticeContainer');
+          
+          giftNotice.style.display = (currentCategory === 'gift') ? 'block' : 'none';
+          ringNotice.style.display = (currentCategory.includes('ring')) ? 'block' : 'none';
 
           renderGallery();
         });
@@ -731,71 +708,50 @@ Discord：mimi_ouo
         const response = await fetch(`${SCRIPT_URL}?action=getData`);
         const result = await response.json();
         if (result.status === 'success') {
-          allData = result.data.filter(item => String(item.id) !== 'settings_desc' && String(item.id) !== 'settings_gift');
+          allData = result.data.filter(item => !['settings_desc', 'settings_gift', 'settings_ring'].includes(String(item.id)));
           
-          const descItem = result.data.find(item => String(item.id) === 'settings_desc');
-          const descElem = document.getElementById('siteDescription');
-          if (descItem && descItem.caption) {
-            descElem.innerText = descItem.caption;
-          }
-
-          const giftDescItem = result.data.find(item => String(item.id) === 'settings_gift');
-          const giftDescElem = document.getElementById('giftDescription');
-          if (giftDescItem && giftDescItem.caption) {
-            giftDescElem.innerText = giftDescItem.caption;
-          }
+          const updateText = (id, elemId) => {
+            const item = result.data.find(i => String(i.id) === id);
+            if (item && item.caption) document.getElementById(elemId).innerText = item.caption;
+          };
+          updateText('settings_desc', 'siteDescription');
+          updateText('settings_gift', 'giftDescription');
+          updateText('settings_ring', 'ringDescription');
 
           renderGallery();
         }
-      } catch (err) {
-        console.error("載入資料失敗", err);
-      }
+      } catch (err) { console.error(err); }
     }
 
     async function updateItemById(id, field, value) {
       try {
         const response = await fetch(`${SCRIPT_URL}?action=updateItem&id=${id}&field=${field}&value=${encodeURIComponent(value)}`);
-        const result = await response.json();
-        return result.status === 'success';
-      } catch (err) {
-        console.error(err);
-        return false;
-      }
+        return (await response.json()).status === 'success';
+      } catch (err) { return false; }
     }
 
-    function hasChinese(str) {
-      return /[\u4e00-\u9fa5]/.test(str);
-    }
+    function hasChinese(str) { return /[\u4e00-\u9fa5]/.test(str); }
 
     function compareCaption(a, b) {
       const capA = String(a.caption || '').trim();
       const capB = String(b.caption || '').trim();
-
       if (!capA && !capB) return 0;
       if (!capA) return 1;
       if (!capB) return -1;
-
       const aHasChinese = hasChinese(capA);
       const bHasChinese = hasChinese(capB);
-
       if (aHasChinese && !bHasChinese) return -1;
       if (!aHasChinese && bHasChinese) return 1;
-
       return capA.localeCompare(capB, 'zh-Hant', { numeric: true, sensitivity: 'base' });
     }
 
     function renderGallery() {
       const gallery = document.getElementById('gallery');
       const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
-
       const filtered = allData.filter(item => {
-        const matchCategory = (item.category === currentCategory);
-        if (!matchCategory) return false;
-
+        if (item.category !== currentCategory) return false;
         if (!keyword) return true;
-        const caption = String(item.caption || '').toLowerCase();
-        const note = String(item.note || '').toLowerCase();
-        return caption.includes(keyword) || note.includes(keyword);
+        return String(item.caption || '').toLowerCase().includes(keyword) || String(item.note || '').toLowerCase().includes(keyword);
       });
       
       filtered.sort(compareCaption);
@@ -804,272 +760,19 @@ Discord：mimi_ouo
       filtered.forEach((item) => {
         const card = document.createElement('div');
         card.className = 'img-card';
-        card.id = `card-${item.id}`;
-        card.setAttribute('data-id', item.id);
-
-        const currentQty = item.quantity || '數量: 1';
-        const isPending = String(currentQty).includes('暫售');
-        const isSold = String(currentQty).includes('售出');
-        
-        let statusClass = '';
-        if (isPending) statusClass = 'is-pending';
-        else if (isSold) statusClass = 'is-sold';
-
-        let badgeHTML = '';
-        if (isAdmin) {
-          badgeHTML = `
-            <select class="status-select ${statusClass}" id="badge-${item.id}">
-              <option value="數量: 1" ${currentQty === '數量: 1' ? 'selected' : ''}>數量: 1</option>
-              <option value="數量: 2" ${currentQty === '數量: 2' ? 'selected' : ''}>數量: 2</option>
-              <option value="數量: 3" ${currentQty === '數量: 3' ? 'selected' : ''}>數量: 3</option>
-              <option value="數量: 4" ${currentQty === '數量: 4' ? 'selected' : ''}>數量: 4</option>
-              <option value="數量: 5" ${currentQty === '數量: 5' ? 'selected' : ''}>數量: 5</option>
-              <option value="數量: 6" ${currentQty === '數量: 6' ? 'selected' : ''}>數量: 6</option>
-              <option value="數量: 7" ${currentQty === '數量: 7' ? 'selected' : ''}>數量: 7</option>
-              <option value="數量: 8" ${currentQty === '數量: 8' ? 'selected' : ''}>數量: 8</option>
-              <option value="數量: 9" ${currentQty === '數量: 9' ? 'selected' : ''}>數量: 9</option>
-              <option value="數量: 10" ${currentQty === '數量: 10' ? 'selected' : ''}>數量: 10</option>
-              <option value="大量" ${currentQty === '大量' ? 'selected' : ''}>大量</option>
-              <option value="暫售，待交易" ${isPending ? 'selected' : ''}>暫售，待交易</option>
-              <option value="已售出" ${isSold ? 'selected' : ''}>已售出</option>
-            </select>
-          `;
-        } else {
-          badgeHTML = `<span class="status-badge ${statusClass}" id="badge-${item.id}">${currentQty}</span>`;
-        }
-
         card.innerHTML = `
           <button class="delete-btn" title="刪除圖片">✕</button>
           <div class="img-wrapper">
-            ${badgeHTML}
-            <img src="${item.url}" alt="image" loading="lazy" decoding="async" />
+            <span class="status-badge" id="badge-${item.id}">${item.quantity || '數量: 1'}</span>
+            <img src="${item.url}" alt="image" loading="lazy" />
           </div>
           <div class="img-info">
             <span class="editable-text" contenteditable="${isAdmin}" id="text-${item.id}">${item.caption || ''}</span>
           </div>
-          <div class="admin-note-box">
-            <div class="admin-note-label">🔒 備註</div>
-            <span class="admin-note-text" contenteditable="${isAdmin}" id="note-${item.id}">${item.note || ''}</span>
-          </div>
         `;
-
-        const imgEl = card.querySelector('img');
-        imgEl.addEventListener('load', () => {
-          card.classList.add('loaded');
-        });
-        if (imgEl.complete) {
-          card.classList.add('loaded');
-        }
-
-        if (isAdmin) {
-          card.querySelector('.delete-btn').addEventListener('click', () => {
-            if (confirm('確定要刪除這張圖片嗎？')) {
-              deleteItem(item.id);
-            }
-          });
-        }
-
         gallery.appendChild(card);
-
-        if (isAdmin) {
-          const selectEl = document.getElementById(`badge-${item.id}`);
-          if (selectEl) {
-            selectEl.addEventListener('change', async () => {
-              const newValue = selectEl.value;
-              const status = document.getElementById('status');
-              status.innerText = "正在儲存至雲端...";
-              
-              const success = await updateItem(item.id, 'quantity', newValue);
-              if (success) {
-                item.quantity = newValue;
-                selectEl.className = 'status-select';
-                if (newValue.includes('暫售')) {
-                  selectEl.classList.add('is-pending');
-                } else if (newValue.includes('售出')) {
-                  selectEl.classList.add('is-sold');
-                }
-                status.innerText = "修改成功！";
-              } else {
-                status.innerText = "儲存失敗，請重試";
-              }
-              setTimeout(() => { status.innerText = ""; }, 1500);
-            });
-          }
-
-          bindEditable(item.id, 'caption', `text-${item.id}`);
-          bindEditable(item.id, 'note', `note-${item.id}`);
-        }
       });
     }
-
-    function bindEditable(id, field, elementId) {
-      const el = document.getElementById(elementId);
-      if (!el) return;
-      let originalValue = "";
-
-      el.addEventListener('focus', () => {
-        if (!isAdmin) return;
-        originalValue = el.innerText.trim();
-      });
-
-      el.addEventListener('blur', async () => {
-        if (!isAdmin) return;
-        const newValue = el.innerText.trim();
-        if (newValue === originalValue) return;
-
-        const targetItem = allData.find(item => item.id === id);
-        if (targetItem) {
-          targetItem[field] = newValue;
-        }
-
-        const status = document.getElementById('status');
-        status.innerText = "正在儲存至雲端...";
-        
-        const success = await updateItem(id, field, newValue);
-        if (success) {
-          originalValue = newValue;
-          status.innerText = "修改成功！";
-          if (field === 'caption') {
-            renderGallery();
-          }
-        } else {
-          status.innerText = "儲存失敗，請重試";
-        }
-        setTimeout(() => { status.innerText = ""; }, 1500);
-      });
-
-      el.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && field !== 'caption') { e.preventDefault(); el.blur(); }
-      });
-    }
-
-    async function updateItem(id, field, value) {
-      try {
-        const response = await fetch(`${SCRIPT_URL}?action=updateItem&id=${id}&field=${field}&value=${encodeURIComponent(value)}`);
-        const result = await response.json();
-        return result.status === 'success';
-      } catch (err) {
-        console.error(err);
-        return false;
-      }
-    }
-
-    async function deleteItem(id) {
-      await fetch(`${SCRIPT_URL}?action=deleteItem&id=${id}`);
-      allData = allData.filter(item => item.id !== id);
-      renderGallery();
-    }
-
-    function compressImage(srcUrl, maxSize = 400, quality = 0.8) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.crossOrigin = "Anonymous";
-        img.onload = () => {
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height) {
-            if (width > maxSize) {
-              height *= maxSize / width;
-              width = maxSize;
-            }
-          } else {
-            if (height > maxSize) {
-              width *= maxSize / height;
-              height = maxSize;
-            }
-          }
-
-          const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-
-          const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
-          resolve(compressedDataUrl);
-        };
-        img.onerror = (e) => reject(e);
-        img.src = srcUrl;
-      });
-    }
-
-    function handleImageFile(file) {
-      if (!isAdmin || !file || !file.type.startsWith('image/')) return;
-      const status = document.getElementById('status');
-      status.innerText = "正在縮小並上傳圖片...";
-
-      const reader = new FileReader();
-      reader.onload = async function(e) {
-        try {
-          const compressedDataUrl = await compressImage(e.target.result, 400, 0.8);
-          const base64Data = compressedDataUrl.split(',')[1];
-          const defaultTime = String(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-          const tempId = 'temp_' + new Date().getTime();
-
-          const tempItem = {
-            id: tempId,
-            category: currentCategory,
-            url: compressedDataUrl,
-            caption: defaultTime,
-            quantity: '數量: 1',
-            note: '',
-            timestamp: new Date().getTime()
-          };
-          
-          allData.unshift(tempItem);
-          renderGallery();
-
-          const formData = new URLSearchParams();
-          formData.append('action', 'addItem');
-          formData.append('category', currentCategory);
-          formData.append('caption', defaultTime);
-          formData.append('quantity', '數量: 1');
-          formData.append('note', '');
-          formData.append('mimeType', 'image/jpeg');
-          formData.append('imageBase64', base64Data);
-
-          const response = await fetch(SCRIPT_URL, {
-            method: 'POST',
-            body: formData
-          });
-          const result = await response.json();
-          if (result.status === 'success') {
-            status.innerText = "上傳成功！";
-            fetchData();
-            setTimeout(() => status.innerText = "", 1500);
-          }
-        } catch (err) {
-          status.innerText = "上傳失敗";
-          console.error(err);
-          fetchData();
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-
-    document.addEventListener('paste', (e) => {
-      if (!isAdmin || document.activeElement.isContentEditable) return;
-      const items = e.clipboardData?.items;
-      if (!items) return;
-      for (let item of items) {
-        if (item.type.includes('image')) {
-          handleImageFile(item.getAsFile());
-          break;
-        }
-      }
-    });
-
-    const dropZone = document.getElementById('dropZone');
-    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-    dropZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropZone.classList.remove('dragover');
-      if (isAdmin && e.dataTransfer.files.length > 0) {
-        handleImageFile(e.dataTransfer.files[0]);
-      }
-    });
   </script>
 </body>
 </html>
