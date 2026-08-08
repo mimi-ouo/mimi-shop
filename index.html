@@ -94,6 +94,7 @@
       font-size: 13px;
       font-weight: bold;
       width: fit-content;
+      cursor: pointer;
       text-decoration: none;
       transition: background-color 0.2s, border-color 0.2s;
     }
@@ -104,7 +105,7 @@
       color: #8fa3ef;
     }
 
-    /* 動態「點我」提示與左右位移動畫 */
+    /* 動態提示與左右位移動畫 */
     .discord-hint {
       display: inline-flex;
       align-items: center;
@@ -121,7 +122,7 @@
         transform: translateX(0);
       }
       50% {
-        transform: translateX(6px); /* 往右滑動 6px 產生動態感 */
+        transform: translateX(6px);
       }
     }
 
@@ -749,15 +750,15 @@
             <div class="title-area">
               <h2>⭐ 米米小舖 ⭐</h2>
             </div>
-            <!-- Discord 按鈕與動態提示區塊 -->
+            <!-- Discord 按鈕：點擊後複製帳號並顯示已複製提示 -->
             <div class="discord-container">
-              <a href="https://discord.com/users/mimi_ouo" target="_blank" class="discord-badge" title="點擊前往 Discord 聯絡">
+              <div class="discord-badge" id="discordCopyBtn" title="點擊複製 Discord 帳號">
                 <span>💬</span>
                 <span>Discord：mimi_ouo</span>
-              </a>
-              <div class="discord-hint">
+              </div>
+              <div class="discord-hint" id="discordHint">
                 <span>👈</span>
-                <span>點我</span>
+                <span id="discordHintText">點我複製</span>
               </div>
             </div>
           </div>
@@ -822,11 +823,37 @@
       initAuthUI();
       setupTabs();
       setupCollapseToggle();
+      setupDiscordButton(); // 綁定 Discord 按鈕點擊複製功能
       fetchData();
       updateCartButtonBadge();
       
       document.getElementById('searchInput').addEventListener('input', renderGallery);
     });
+
+    // 實作點擊 Discord 按鈕：複製帳號並將提示文字改為「已複製」
+    function setupDiscordButton() {
+      const btn = document.getElementById('discordCopyBtn');
+      const hintText = document.getElementById('discordHintText');
+      if (!btn || !hintText) return;
+
+      btn.addEventListener('click', () => {
+        const discordAccount = "mimi_ouo";
+        
+        // 執行複製到剪貼簿
+        navigator.clipboard.writeText(discordAccount).then(() => {
+          hintText.innerText = "已複製！";
+          const status = document.getElementById('status');
+          status.innerText = "📋 已成功複製 Discord 帳號 (mimi_ouo)！";
+          
+          setTimeout(() => {
+            hintText.innerText = "點我複製";
+            status.innerText = "";
+          }, 2500);
+        }).catch(err => {
+          console.error("複製失敗", err);
+        });
+      });
+    }
 
     function setupCollapseToggle() {
       const toggleBtn = document.getElementById('collapseToggleBtn');
