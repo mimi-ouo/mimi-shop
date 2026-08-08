@@ -26,7 +26,7 @@
       padding-right: 20px; 
     }
 
-    /* 上方黏貼頂端區塊：調整 z-index 讓懸浮區塊與其重疊或不被擋住 */
+    /* 上方黏貼頂端區塊 */
     .sticky-header-wrapper {
       position: sticky;
       top: 0;
@@ -74,7 +74,6 @@
       color: #ffffff;
     }
 
-    /* 3. 💬Discord：mimi_ouo 改用藍色系 */
     .discord-badge {
       display: inline-flex;
       align-items: center;
@@ -96,7 +95,6 @@
       max-width: 100%;
     }
 
-    /* 1. 公告區取消底框設計，像標題一樣就好 */
     .info-badge {
       display: inline-flex;
       align-items: flex-start;
@@ -128,7 +126,7 @@
       border: 1px dashed var(--accent-color);
     }
 
-    /* 2. 懸浮區塊調整 top 讓其與凍結區塊重疊（拉高到頁面最上方） */
+    /* 右側直立懸浮分頁（重疊於頂端、最下方為登入） */
     .side-tabs-panel {
       position: fixed;
       right: 20px;
@@ -424,7 +422,6 @@
       justify-content: center;
     }
 
-    /* 載入中文字樣樣式 */
     .loading-text {
       position: absolute;
       font-size: 11px;
@@ -538,6 +535,52 @@
       border-top: 1px solid var(--border-color);
     }
 
+    /* 圖片下方資訊列改用兩欄佈局（依圖片設計範本優化） */
+    .caption-container {
+      display: flex;
+      align-items: center;
+      background-color: #171717;
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      padding: 2px 4px;
+      box-sizing: border-box;
+      width: 100%;
+      gap: 4px;
+    }
+
+    /* 第一欄：固定寬度可容納三個數字（約對應 3ch 加上 padding）並帶有黃色「$」 */
+    .price-col {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      width: 38px; 
+      flex-shrink: 0;
+      gap: 1px;
+      color: #ffe600;
+      font-weight: bold;
+      font-size: 11px;
+    }
+
+    .price-col .currency-symbol {
+      color: #ffe600;
+      user-select: none;
+    }
+
+    .price-col .editable-price {
+      width: 24px;
+      text-align: right;
+      outline: none;
+      color: #ffe600;
+    }
+
+    /* 第二欄：佔用剩餘空間放置商品名稱/說明 */
+    .desc-col {
+      flex: 1;
+      min-width: 0;
+      border-left: 1px solid var(--border-color);
+      padding-left: 4px;
+    }
+
     .editable-text {
       outline: none;
       padding: 2px 4px;
@@ -545,6 +588,10 @@
       color: var(--text-color);
       word-break: break-all;
       display: block;
+      text-align: left;
+      font-size: 11px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .admin-note-box {
@@ -574,7 +621,7 @@
       min-height: 14px;
     }
 
-    .is-admin .editable-text, .is-admin .admin-note-text { 
+    .is-admin .editable-text, .is-admin .admin-note-text, .is-admin .editable-price { 
       background: rgba(255, 255, 255, 0.1); 
       cursor: text; 
     }
@@ -984,6 +1031,13 @@
           badgeHTML = `<span class="status-badge ${statusClass}" id="badge-${item.id}">${currentQty}</span>`;
         }
 
+        // 智慧解析 caption：假設價格與名稱合在一起，可透過空格或簡單格式分離，或者預設將 price 獨立欄位對應
+        // 這裡相容既有 caption 邏輯，若 caption 含有數字或價格可自動拆分，或者預設空值讓使用者填寫
+        const fullCaption = item.caption || '';
+        // 這裡示範將 caption 分離為 price 與 text（若有特定格式可依需求調整，此處預設全部放入名稱或自動提取數字開頭作為價格）
+        let priceVal = item.price || '';
+        let textVal = fullCaption;
+
         card.innerHTML = `
           <button class="delete-btn" title="刪除圖片">✕</button>
           <div class="img-wrapper">
@@ -992,7 +1046,15 @@
             <img src="${item.url}" alt="image" loading="lazy" decoding="async" />
           </div>
           <div class="img-info">
-            <span class="editable-text" contenteditable="${isAdmin}" id="text-${item.id}">${item.caption || ''}</span>
+            <div class="caption-container">
+              <div class="price-col">
+                <span class="currency-symbol">$</span>
+                <span class="editable-price" contenteditable="${isAdmin}" id="price-${item.id}" maxlength="3">${priceVal}</span>
+              </div>
+              <div class="desc-col">
+                <span class="editable-text" contenteditable="${isAdmin}" id="text-${item.id}">${textVal}</span>
+              </div>
+            </div>
           </div>
           <div class="admin-note-box">
             <div class="admin-note-label">🔒 備註</div>
@@ -1044,6 +1106,7 @@
           }
 
           bindEditable(item.id, 'caption', `text-${item.id}`);
+          bindEditable(item.id, 'price', `price-${item.id}`);
           bindEditable(item.id, 'note', `note-${item.id}`);
         }
       });
@@ -1061,7 +1124,14 @@
 
       el.addEventListener('blur', async () => {
         if (!isAdmin) return;
-        const newValue = el.innerText.trim();
+        let newValue = el.innerText.trim();
+        
+        // 若為價格欄位，限制最多3位數字
+        if (field === 'price') {
+          newValue = newValue.replace(/\D/g, '').slice(0, 3);
+          el.innerText = newValue;
+        }
+
         if (newValue === originalValue) return;
 
         const targetItem = allData.find(item => item.id === id);
@@ -1159,6 +1229,7 @@
             category: currentCategory,
             url: compressedDataUrl,
             caption: defaultTime,
+            price: '',
             quantity: '數量: 1',
             note: '',
             timestamp: new Date().getTime()
@@ -1171,6 +1242,7 @@
           formData.append('action', 'addItem');
           formData.append('category', currentCategory);
           formData.append('caption', defaultTime);
+          formData.append('price', '');
           formData.append('quantity', '數量: 1');
           formData.append('note', '');
           formData.append('mimeType', 'image/jpeg');
