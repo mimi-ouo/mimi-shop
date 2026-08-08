@@ -76,6 +76,20 @@
     }
 
     /* Discord 區塊包裝：讓按鈕與動態提示水平排列 */
+    .discord-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    /* 新增的購物車提示文字樣式 */
+    .discord-instruction {
+      font-size: 12px;
+      font-weight: bold;
+      color: var(--success-color);
+      letter-spacing: 0.5px;
+    }
+
     .discord-container {
       display: inline-flex;
       align-items: center;
@@ -750,15 +764,18 @@
             <div class="title-area">
               <h2>⭐ 米米小舖 ⭐</h2>
             </div>
-            <!-- Discord 按鈕：點擊後複製帳號並顯示已複製提示 -->
-            <div class="discord-container">
-              <div class="discord-badge" id="discordCopyBtn" title="點擊複製 Discord 帳號">
-                <span>💬</span>
-                <span>Discord：mimi_ouo</span>
-              </div>
-              <div class="discord-hint" id="discordHint">
-                <span>👈</span>
-                <span id="discordHintText">點我複製</span>
+            <!-- Discord 區塊：上方新增提示文字，下方維持點擊複製按鈕與提示 -->
+            <div class="discord-wrapper">
+              <div class="discord-instruction">打勾加入購物車 購物車截圖給我</div>
+              <div class="discord-container">
+                <div class="discord-badge" id="discordCopyBtn" title="點擊複製 Discord 帳號">
+                  <span>💬</span>
+                  <span>Discord：mimi_ouo</span>
+                </div>
+                <div class="discord-hint" id="discordHint">
+                  <span>👈</span>
+                  <span id="discordHintText">點我複製</span>
+                </div>
               </div>
             </div>
           </div>
