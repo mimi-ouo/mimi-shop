@@ -479,7 +479,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
     }
 
     .loading-text {
@@ -506,85 +505,6 @@
 
     .img-card.loaded .img-wrapper img {
       opacity: 1;
-    }
-
-    /* 點擊後彈出的置中放大檢視視窗 (Modal Popup) */
-    .click-preview-modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: rgba(0, 0, 0, 0.75);
-      z-index: 9999;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .click-preview-content {
-      position: relative;
-      width: 380px;
-      height: 380px;
-      background-color: #1e1e1e;
-      border: 2px solid var(--accent-color);
-      border-radius: 10px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.9);
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .click-preview-content img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      background-color: #000;
-    }
-
-    .click-preview-close {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background-color: rgba(0, 0, 0, 0.7);
-      color: #fff;
-      border: 1px solid var(--border-color);
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      font-weight: bold;
-      z-index: 10000;
-    }
-
-    .click-preview-close:hover {
-      background-color: var(--danger-color);
-    }
-
-    #clickUploadOverlay {
-      display: none;
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.85);
-      color: #fff;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      font-weight: bold;
-      text-align: center;
-      padding: 15px;
-      box-sizing: border-box;
-      border: 2px dashed var(--accent-color);
-      cursor: pointer;
     }
 
     .status-badge {
@@ -749,39 +669,6 @@
       box-sizing: border-box;
     }
 
-    .interact-select {
-      width: 100%;
-      background-color: #171717;
-      color: var(--text-color);
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      padding: 3px 2px;
-      font-size: 10px;
-      font-weight: bold;
-      cursor: pointer;
-      outline: none;
-      box-sizing: border-box;
-      text-align: center;
-    }
-
-    .interact-select option {
-      background-color: #1e1e1e;
-      color: var(--text-color);
-    }
-
-    .interact-badge {
-      width: 100%;
-      background-color: #171717;
-      color: var(--success-color);
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      padding: 3px 2px;
-      font-size: 10px;
-      font-weight: bold;
-      box-sizing: border-box;
-      text-align: center;
-    }
-
     .admin-note-box {
       display: none;
       background-color: #181818;
@@ -822,19 +709,6 @@
   </style>
 </head>
 <body>
-
-  <!-- 點擊後彈出的置中放大檢視視窗 (Modal) -->
-  <div class="click-preview-modal" id="clickPreviewModal">
-    <div class="click-preview-content" id="clickPreviewInner">
-      <button class="click-preview-close" id="clickPreviewCloseBtn" title="關閉">✕</button>
-      <img id="clickPreviewImg" src="" alt="Real Image" style="display:none;">
-      <div id="clickUploadOverlay">
-        <span id="overlayText">未上傳</span>
-        <span style="font-size:11px; color:#aaa; margin-top:4px;" id="overlaySubText">點擊、貼上或拖曳圖片以上傳實體圖</span>
-      </div>
-      <input type="file" id="clickFileInput" accept="image/*" style="display:none;">
-    </div>
-  </div>
 
   <!-- 右側直立懸浮分頁 -->
   <div class="side-tabs-panel" id="sideTabsPanel">
@@ -959,7 +833,6 @@
     let isAdmin = localStorage.getItem('isAdmin') === 'true';
     let allData = [];
     let cartItems = new Map();
-    let activeModalItemId = null;
 
     const ADMIN_PASSWORD = "1j6ul42l4ji3++";
 
@@ -968,158 +841,11 @@
       setupTabs();
       setupCollapseToggle();
       setupDiscordButton();
-      setupClickPreviewModal();
       fetchData();
       updateCartButtonBadge();
       
       document.getElementById('searchInput').addEventListener('input', renderGallery);
     });
-
-    function setupClickPreviewModal() {
-      const modal = document.getElementById('clickPreviewModal');
-      const previewImg = document.getElementById('clickPreviewImg');
-      const closeBtn = document.getElementById('clickPreviewCloseBtn');
-      const uploadOverlay = document.getElementById('clickUploadOverlay');
-      const overlayText = document.getElementById('overlayText');
-      const overlaySubText = document.getElementById('overlaySubText');
-      const clickFileInput = document.getElementById('clickFileInput');
-      const clickPreviewInner = document.getElementById('clickPreviewInner');
-
-      document.addEventListener('click', (e) => {
-        const wrapper = e.target.closest('.img-wrapper');
-        if (wrapper) {
-          const card = wrapper.closest('.img-card');
-          if (card) {
-            activeModalItemId = card.getAttribute('data-id');
-          }
-          const targetItem = allData.find(item => String(item.id) === String(activeModalItemId));
-          
-          modal.style.display = 'flex';
-          
-          if (targetItem && targetItem.real_img && targetItem.real_img.startsWith('data:image')) {
-            previewImg.src = targetItem.real_img;
-            previewImg.style.display = 'block';
-            if (isAdmin) {
-              overlayText.innerText = "更換實體圖";
-              overlaySubText.innerText = "點擊、貼上或拖曳圖片以替換";
-              uploadOverlay.style.display = 'none'; // 滑鼠移上去才顯示，或預設隱藏
-            } else {
-              uploadOverlay.style.display = 'none';
-            }
-          } else {
-            previewImg.src = '';
-            previewImg.style.display = 'none';
-            overlayText.innerText = "未上傳";
-            overlaySubText.innerText = isAdmin ? "點擊、貼上或拖曳圖片以上傳實體圖" : "目前尚無實體圖";
-            uploadOverlay.style.display = 'flex';
-          }
-        }
-      });
-
-      // 滑鼠移至有圖片的預覽區塊時顯示上傳提示 (限管理員)
-      clickPreviewInner.addEventListener('mouseenter', () => {
-        if (!isAdmin || !activeModalItemId) return;
-        const targetItem = allData.find(item => String(item.id) === String(activeModalItemId));
-        if (targetItem && targetItem.real_img && targetItem.real_img.startsWith('data:image')) {
-          overlayText.innerText = "更換實體圖";
-          overlaySubText.innerText = "點擊、貼上或拖曳圖片以替換";
-          uploadOverlay.style.display = 'flex';
-        }
-      });
-
-      clickPreviewInner.addEventListener('mouseleave', () => {
-        if (!isAdmin || !activeModalItemId) return;
-        const targetItem = allData.find(item => String(item.id) === String(activeModalItemId));
-        if (targetItem && targetItem.real_img && targetItem.real_img.startsWith('data:image')) {
-          uploadOverlay.style.display = 'none';
-        }
-      });
-
-      closeBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        modal.style.display = 'none';
-        activeModalItemId = null;
-      });
-
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          modal.style.display = 'none';
-          activeModalItemId = null;
-        }
-      });
-
-      uploadOverlay.addEventListener('click', () => {
-        if (!isAdmin || !activeModalItemId) return;
-        clickFileInput.click();
-      });
-
-      clickFileInput.addEventListener('change', (e) => {
-        if (e.target.files.length > 0 && activeModalItemId) {
-          handleReplaceRealImageFile(activeModalItemId, e.target.files[0]);
-          clickFileInput.value = '';
-        }
-      });
-
-      clickPreviewInner.addEventListener('dragover', (e) => {
-        if (!isAdmin) return;
-        e.preventDefault();
-        uploadOverlay.style.background = 'rgba(43,115,223,0.85)';
-      });
-
-      clickPreviewInner.addEventListener('dragleave', () => {
-        if (!isAdmin) return;
-        uploadOverlay.style.background = 'rgba(0,0,0,0.85)';
-      });
-
-      clickPreviewInner.addEventListener('drop', (e) => {
-        if (!isAdmin) return;
-        e.preventDefault();
-        uploadOverlay.style.background = 'rgba(0,0,0,0.85)';
-        if (e.dataTransfer.files.length > 0 && activeModalItemId) {
-          handleReplaceRealImageFile(activeModalItemId, e.dataTransfer.files[0]);
-        }
-      });
-    }
-
-    async function handleReplaceRealImageFile(id, file) {
-      if (!isAdmin || !file || !file.type.startsWith('image/')) return;
-      const status = document.getElementById('status');
-      status.innerText = "正在縮小並上傳實體圖...";
-
-      const reader = new FileReader();
-      reader.onload = async function(e) {
-        try {
-          const compressedDataUrl = await compressImage(e.target.result, 600, 0.85);
-
-          const targetItem = allData.find(item => String(item.id) === String(id));
-          if (targetItem) {
-            targetItem.real_img = compressedDataUrl;
-          }
-          
-          const previewImg = document.getElementById('clickPreviewImg');
-          const uploadOverlay = document.getElementById('clickUploadOverlay');
-          previewImg.src = compressedDataUrl;
-          previewImg.style.display = 'block';
-          uploadOverlay.style.display = 'none';
-
-          const response = await fetch(`${SCRIPT_URL}?action=updateItem&id=${id}&field=real_img&value=${encodeURIComponent(compressedDataUrl)}`);
-          const result = await response.json();
-          
-          if (result.status === 'success') {
-            status.innerText = "實體圖上傳成功！";
-            fetchData();
-            setTimeout(() => status.innerText = "", 1500);
-          } else {
-            status.innerText = "雲端更新失敗";
-          }
-        } catch (err) {
-          status.innerText = "上傳失敗";
-          console.error(err);
-          fetchData();
-        }
-      };
-      reader.readAsDataURL(file);
-    }
 
     function setupDiscordButton() {
       const btn = document.getElementById('discordCopyBtn');
@@ -1486,19 +1212,6 @@
         const fullCaption = item.caption || '';
         let priceVal = item.price || '';
         let textVal = fullCaption;
-        let interactVal = item.interact || '無互動';
-
-        let interactHTML = '';
-        if (isAdmin) {
-          interactHTML = `
-            <select class="interact-select" id="interact-${item.id}">
-              <option value="無互動" ${interactVal === '無互動' ? 'selected' : ''}>無互動</option>
-              <option value="有互動" ${interactVal === '有互動' ? 'selected' : ''}>有互動</option>
-            </select>
-          `;
-        } else {
-          interactHTML = `<div class="interact-badge" id="interact-${item.id}">${interactVal}</div>`;
-        }
 
         card.innerHTML = `
           <button class="delete-btn" title="刪除圖片">✕</button>
@@ -1517,7 +1230,6 @@
                 <span class="editable-text" contenteditable="${isAdmin}" id="text-${item.id}">${textVal}</span>
               </div>
             </div>
-            ${interactHTML}
           </div>
           <div class="admin-note-box">
             <div class="admin-note-label">🔒 備註</div>
@@ -1539,24 +1251,6 @@
               deleteItem(item.id);
             }
           });
-
-          const interactSelectEl = document.getElementById(`interact-${item.id}`);
-          if (interactSelectEl) {
-            interactSelectEl.addEventListener('change', async () => {
-              const newInteractVal = interactSelectEl.value;
-              const status = document.getElementById('status');
-              status.innerText = "正在儲存至雲端...";
-              
-              const success = await updateItem(item.id, 'interact', newInteractVal);
-              if (success) {
-                item.interact = newInteractVal;
-                status.innerText = "修改成功！";
-              } else {
-                status.innerText = "儲存失敗，請重試";
-              }
-              setTimeout(() => { status.innerText = ""; }, 1500);
-            });
-          }
         }
 
         const chkEl = card.querySelector(`#cart-chk-${item.id}`);
@@ -1735,11 +1429,9 @@
             id: tempId,
             category: currentCategory,
             url: compressedDataUrl,
-            real_img: '',
             caption: defaultTime,
             price: '',
             quantity: '數量: 1',
-            interact: '無互動',
             note: '',
             timestamp: new Date().getTime()
           };
@@ -1753,7 +1445,6 @@
           formData.append('caption', defaultTime);
           formData.append('price', '');
           formData.append('quantity', '數量: 1');
-          formData.append('interact', '無互動');
           formData.append('note', '');
           formData.append('mimeType', 'image/jpeg');
           formData.append('imageBase64', base64Data);
@@ -1802,3 +1493,4 @@
   </script>
 </body>
 </html>
+```[cite: 6]
