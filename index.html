@@ -6,13 +6,14 @@
   <title>⭐ 米米小舖-Club MStar ⭐</title>
   <style>
     :root {
-      --bg-color: #36393f;
-      --card-bg: #2f3136;
-      --text-color: #dcddde;
-      --accent-color: #ffb6c1; /* 調整為更符合粉色系的強調色 */
-      --danger-color: #ed4245;
-      --success-color: #57F287;
-      --warning-color: #fee75c;
+      --bg-color: #ffe4e6;
+      --card-bg: #fff0f3;
+      --text-color: #5c4033;
+      --accent-color: #ff69b4;
+      --danger-color: #ff4d4d;
+      --success-color: #2e8b57;
+      --warning-color: #ffb347;
+      --border-color: #ffb6c1;
     }
 
     body {
@@ -22,7 +23,6 @@
       max-width: 1200px;
       margin: 0 auto;
       padding: 20px;
-      /* 預留右側空間避免被懸浮分頁遮擋 */
       padding-right: 140px; 
     }
 
@@ -32,7 +32,7 @@
       }
     }
 
-    /* 上方黏貼頂端區塊：左側控制、中間公告 */
+    /* 上方黏貼頂端區塊 */
     .sticky-header-wrapper {
       position: sticky;
       top: 0;
@@ -40,7 +40,7 @@
       z-index: 1000;
       padding-top: 10px;
       padding-bottom: 15px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 4px 10px rgba(255, 182, 193, 0.3);
     }
 
     .header-layout {
@@ -59,6 +59,13 @@
 
     .left-control-panel {
       display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .title-area-group {
+      display: flex;
       flex-direction: column;
       gap: 6px;
     }
@@ -68,16 +75,16 @@
       font-size: 22px;
       line-height: 1.4;
       white-space: nowrap;
+      color: #d81b60;
     }
 
-    /* 可愛區塊 (Discord) */
     .discord-badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background-color: #202225;
-      border: 1px solid #ffb6c1;
-      color: #ffb6c1;
+      background-color: #fff;
+      border: 1px solid var(--border-color);
+      color: #d81b60;
       padding: 4px 10px;
       border-radius: 6px;
       font-size: 13px;
@@ -85,10 +92,10 @@
       width: fit-content;
     }
 
-    /* 中間公告區塊：隨文字長度與寬度自動調整 */
+    /* 公告區塊放右側並排顯示 */
     .center-notice-panel {
       flex: 1;
-      min-width: 250px;
+      min-width: 280px;
       max-width: 100%;
     }
 
@@ -96,9 +103,9 @@
       display: inline-flex;
       align-items: flex-start;
       gap: 6px;
-      background-color: #202225;
-      border: 1px solid #4f545c;
-      color: #b9bbbe;
+      background-color: #fff;
+      border: 1px solid var(--border-color);
+      color: #7b5247;
       padding: 8px 12px;
       border-radius: 8px;
       font-size: 13px;
@@ -106,22 +113,21 @@
       box-sizing: border-box;
       text-align: left;
       width: 100%;
-      max-width: 100%;
     }
 
     .info-badge .editable-text {
       outline: none;
-      color: #dcddde;
+      color: #5c4033;
       white-space: pre-wrap;
       word-break: break-all;
     }
 
     .is-admin .info-badge .editable-text {
-      background: rgba(0, 0, 0, 0.2);
+      background: rgba(255, 182, 193, 0.2);
       cursor: text;
       padding: 2px 4px;
       border-radius: 4px;
-      border: 1px dashed #4f545c;
+      border: 1px dashed var(--accent-color);
     }
 
     /* 右側直立懸浮分頁區塊 */
@@ -136,14 +142,14 @@
       background: var(--card-bg);
       padding: 12px;
       border-radius: 10px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-      border: 1px solid #4f545c;
+      box-shadow: 0 4px 15px rgba(255, 182, 193, 0.5);
+      border: 1px solid var(--border-color);
     }
 
     .tab-btn, .dropdown-toggle {
-      background: var(--bg-color);
+      background: #fff;
       color: var(--text-color);
-      border: 1px solid #4f545c;
+      border: 1px solid var(--border-color);
       padding: 8px 12px;
       border-radius: 6px;
       font-size: 13px;
@@ -158,12 +164,12 @@
     }
 
     .tab-btn:hover, .dropdown-toggle:hover {
-      background: #4f545c;
+      background: #ffc0cb;
     }
 
     .tab-btn.active {
-      background: #5865f2;
-      border-color: #5865f2;
+      background: var(--accent-color);
+      border-color: var(--accent-color);
       color: #fff;
       font-weight: bold;
     }
@@ -174,21 +180,24 @@
       width: 100px;
     }
 
+    /* 修改：子選單預設隱藏，透過 hover 或是 active 狀態來持續顯示，直到點擊子分頁 */
     .dropdown-menu {
       display: none;
       position: absolute;
       top: 0;
       right: calc(100% + 8px);
-      background-color: #2f3136;
+      background-color: var(--card-bg);
       min-width: 110px;
-      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
+      box-shadow: 0px 8px 16px 0px rgba(255, 182, 193, 0.5);
       border-radius: 6px;
       z-index: 1200;
       padding: 4px 0;
-      border: 1px solid #4f545c;
+      border: 1px solid var(--border-color);
     }
 
+    /* 支援 hover 展開 或 當父容器有 open 類別時展開 */
     .dropdown:hover .dropdown-menu,
+    .dropdown.open .dropdown-menu,
     .dropdown-menu:hover {
       display: block;
     }
@@ -208,11 +217,10 @@
     }
 
     .dropdown-item:hover {
-      background-color: #5865f2;
+      background-color: var(--accent-color);
       color: #fff;
     }
 
-    /* 登入與搜尋相關樣式 */
     .auth-box {
       display: flex;
       gap: 8px;
@@ -228,15 +236,15 @@
     .auth-inputs input {
       padding: 4px 8px;
       border-radius: 4px;
-      border: 1px solid #4f545c;
-      background: #202225;
-      color: #fff;
+      border: 1px solid var(--border-color);
+      background: #fff;
+      color: var(--text-color);
       width: 90px;
       font-size: 12px;
     }
 
     .auth-btn {
-      background: #5865f2;
+      background: var(--accent-color);
       color: white;
       border: none;
       padding: 5px 12px;
@@ -246,8 +254,8 @@
     }
 
     .cancel-btn {
-      background: #4f545c;
-      color: white;
+      background: #d3d3d3;
+      color: var(--text-color);
       border: none;
       padding: 5px 8px;
       border-radius: 4px;
@@ -255,19 +263,17 @@
       font-size: 13px;
     }
 
-    /* 搜尋框改為整行顯示 */
     .search-input {
       padding: 8px 12px;
       border-radius: 6px;
-      border: 1px solid #4f545c;
-      background: #202225;
-      color: #fff;
+      border: 1px solid var(--border-color);
+      background: #fff;
+      color: var(--text-color);
       width: 100%;
       font-size: 13px;
       box-sizing: border-box;
     }
 
-    /* 額外說明區塊樣式 (粉色系) */
     .custom-notice-container {
       display: none;
       width: 100%;
@@ -279,9 +285,9 @@
       display: flex;
       align-items: flex-start;
       gap: 6px;
-      background-color: #202225;
-      border: 1px solid #ffb6c1;
-      color: #b9bbbe;
+      background-color: #fff;
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
       padding: 12px 16px;
       border-radius: 8px;
       font-size: 14px;
@@ -293,22 +299,22 @@
 
     .custom-notice-box .editable-text {
       outline: none;
-      color: #dcddde;
+      color: var(--text-color);
       white-space: pre-wrap;
       word-break: break-all;
       flex: 1;
     }
 
     .is-admin .custom-notice-box .editable-text {
-      background: rgba(0, 0, 0, 0.2);
+      background: rgba(255, 182, 193, 0.2);
       cursor: text;
       padding: 2px 4px;
       border-radius: 4px;
-      border: 1px dashed #ffb6c1;
+      border: 1px dashed var(--accent-color);
     }
 
     .drop-zone {
-      border: 2px dashed #4f545c;
+      border: 2px dashed var(--border-color);
       background: var(--card-bg);
       padding: 25px;
       text-align: center;
@@ -319,8 +325,8 @@
     }
     
     .drop-zone.dragover {
-      background: #393c43;
-      border-color: #5865f2;
+      background: #ffccd5;
+      border-color: var(--accent-color);
     }
 
     .gallery {
@@ -336,13 +342,14 @@
       background-color: var(--card-bg);
       border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 4px 10px rgba(255, 182, 193, 0.3);
       display: flex;
       flex-direction: column;
       position: relative;
       opacity: 0;
       transform: translateY(10px);
       transition: opacity 0.3s ease, transform 0.3s ease;
+      border: 1px solid var(--border-color);
     }
 
     .img-card.loaded {
@@ -354,7 +361,7 @@
       width: 120px;
       height: 120px;
       position: relative;
-      background-color: #202225;
+      background-color: #fff;
     }
 
     .img-wrapper img {
@@ -369,9 +376,9 @@
       top: 4px;
       right: 4px;
       z-index: 10;
-      background-color: rgba(32, 34, 37, 0.85);
-      color: #fff;
-      border: 1px solid #4f545c;
+      background-color: rgba(255, 255, 255, 0.9);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
       border-radius: 4px;
       padding: 1px 4px;
       font-size: 9px;
@@ -399,9 +406,9 @@
       top: 4px;
       right: 4px;
       z-index: 10;
-      background-color: rgba(32, 34, 37, 0.95);
-      color: #fff;
-      border: 1px solid #5865f2;
+      background-color: rgba(255, 255, 255, 0.95);
+      color: var(--text-color);
+      border: 1px solid var(--accent-color);
       border-radius: 4px;
       padding: 1px 2px;
       font-size: 9px;
@@ -445,24 +452,25 @@
     .img-info {
       padding: 6px;
       font-size: 11px;
-      color: #b9bbbe;
-      background-color: #2f3136;
+      color: var(--text-color);
+      background-color: var(--card-bg);
       text-align: center;
+      border-top: 1px solid var(--border-color);
     }
 
     .editable-text {
       outline: none;
       padding: 2px 4px;
       border-radius: 4px;
-      color: #ffffff;
+      color: var(--text-color);
       word-break: break-all;
       display: block;
     }
 
     .admin-note-box {
       display: none;
-      background-color: #202225;
-      border-top: 1px solid #4f545c;
+      background-color: #fff;
+      border-top: 1px solid var(--border-color);
       padding: 6px;
       font-size: 10px;
       text-align: left;
@@ -471,14 +479,14 @@
     .is-admin .admin-note-box { display: block; }
 
     .admin-note-label {
-      color: #57F287;
+      color: var(--success-color);
       font-weight: bold;
       margin-bottom: 2px;
     }
 
     .admin-note-text {
       outline: none;
-      color: #dcddde;
+      color: var(--text-color);
       word-break: break-all;
       display: block;
       padding: 2px;
@@ -487,7 +495,7 @@
     }
 
     .is-admin .editable-text, .is-admin .admin-note-text { 
-      background: rgba(0, 0, 0, 0.2); 
+      background: rgba(255, 182, 193, 0.2); 
       cursor: text; 
     }
     
@@ -502,16 +510,16 @@
     <button class="tab-btn" data-category="memes">🧸 熊熊</button>
     <button class="tab-btn" data-category="pot">🪴 花盆</button>
     
-    <div class="dropdown">
-      <button class="dropdown-toggle">💍 戒指 ▾</button>
+    <div class="dropdown" id="dropdown-ring">
+      <button class="dropdown-toggle" data-dropdown="dropdown-ring">💍 戒指 ▾</button>
       <div class="dropdown-menu">
         <button class="dropdown-item tab-btn" data-category="ring_male">👦 限男</button>
         <button class="dropdown-item tab-btn" data-category="ring_female">👧 限女</button>
       </div>
     </div>
 
-    <div class="dropdown">
-      <button class="dropdown-toggle">🌱 作物 ▾</button>
+    <div class="dropdown" id="dropdown-crop">
+      <button class="dropdown-toggle" data-dropdown="dropdown-crop">🌱 作物 ▾</button>
       <div class="dropdown-menu">
         <button class="dropdown-item tab-btn" data-category="crop_male">👦 限男</button>
         <button class="dropdown-item tab-btn" data-category="crop_female">👧 限女</button>
@@ -525,20 +533,30 @@
   <div class="sticky-header-wrapper">
     <div class="header-layout">
       
-      <!-- 第一行：左側標題與右側登入 -->
+      <!-- 第一行：左側標題與公告並排，右側登入 -->
       <div class="header-top-row">
         <div class="left-control-panel">
-          <div class="title-area">
-            <h2>⭐ 米米小舖 ⭐</h2>
+          <div class="title-area-group">
+            <div class="title-area">
+              <h2>⭐ 米米小舖 ⭐</h2>
+            </div>
+            <div class="discord-badge">
+              <span>💬</span>
+              <span>Discord：mimi_ouo</span>
+            </div>
           </div>
-          <!-- 可愛區塊 -->
-          <div class="discord-badge">
-            <span>💬</span>
-            <span>Discord：mimi_ouo</span>
+          
+          <!-- 公告區塊改放到標題旁邊 -->
+          <div class="center-notice-panel">
+            <div class="info-badge">
+              <span>📕</span>
+              <span class="editable-text" id="siteDescription" contenteditable="false">本人夜班，交易需另約時間，故不接急單
+交易方式：可糖可T，比值1:1</span>
+            </div>
           </div>
         </div>
         
-        <!-- 登入按鈕移至右側 -->
+        <!-- 登入按鈕 -->
         <div class="auth-box" id="authBox">
           <button class="auth-btn" id="showLoginBtn">登入</button>
           <div class="auth-inputs" id="authInputs">
@@ -549,16 +567,7 @@
         </div>
       </div>
 
-      <!-- 中間：公告區塊 -->
-      <div class="center-notice-panel">
-        <div class="info-badge">
-          <span>📕</span>
-          <span class="editable-text" id="siteDescription" contenteditable="false">本人夜班，交易需另約時間，故不接急單
-交易方式：可糖可T，比值1:1</span>
-        </div>
-      </div>
-
-      <!-- 搜尋區改成整行顯示並放在凍結區最下方 -->
+      <!-- 搜尋區 -->
       <div class="search-panel">
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 搜尋名稱或備註...">
       </div>
@@ -631,8 +640,8 @@
         ringDescElem.contentEditable = "true";
         cropDescElem.contentEditable = "true";
         authBox.innerHTML = `
-          <span style="color:#57F287; font-size:13px;">已登入管理員</span>
-          <button class="auth-btn" id="logoutBtn" style="background:#4f545c">登出</button>
+          <span style="color:var(--success-color); font-size:13px; font-weight:bold;">已登入管理員</span>
+          <button class="auth-btn" id="logoutBtn" style="background:#d3d3d3; color:var(--text-color);">登出</button>
         `;
         document.getElementById('logoutBtn').addEventListener('click', () => {
           localStorage.removeItem('isAdmin');
@@ -656,7 +665,6 @@
         bindAuthEvents();
       }
 
-      // 儲存文字事件綁定
       setupEditableSave(descElem, 'settings_desc', 'caption');
       setupEditableSave(giftDescElem, 'settings_gift', 'caption');
       setupEditableSave(ringDescElem, 'settings_ring', 'caption');
@@ -717,15 +725,48 @@
     }
 
     function setupTabs() {
+      // 處理下拉選單點擊展開/收合保持顯示直到點擊子分頁
+      document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
+        toggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const dropdownId = toggle.getAttribute('data-dropdown');
+          const dropdownEl = document.getElementById(dropdownId);
+          
+          // 切換開啟狀態
+          const isOpen = dropdownEl.classList.contains('open');
+          // 關閉所有其他下拉
+          document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
+          
+          if (!isOpen) {
+            dropdownEl.classList.add('open');
+          }
+        });
+      });
+
+      // 點擊網頁其他地方時關閉未固定的下拉選單
+      document.addEventListener('click', () => {
+        document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
+      });
+
       document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
+          e.stopPropagation();
           document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
+          
+          // 如果點擊的是子分頁，讓對應的父分類標籤也保持高亮或開啟狀態
+          const parentDropdown = btn.closest('.dropdown');
+          if (parentDropdown) {
+            parentDropdown.classList.remove('open');
+          } else {
+            // 點擊一般分頁時關閉所有下拉選單
+            document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
+          }
+
           currentCategory = btn.getAttribute('data-category');
           currentCategoryDisplayName = btn.innerText.trim();
           document.getElementById('currentTabName').innerText = currentCategoryDisplayName;
           
-          // 控制各分頁說明區塊的顯示
           document.getElementById('giftNoticeContainer').style.display = (currentCategory === 'gift') ? 'block' : 'none';
           document.getElementById('ringNoticeContainer').style.display = (currentCategory === 'ring_male' || currentCategory === 'ring_female') ? 'block' : 'none';
           document.getElementById('cropNoticeContainer').style.display = (currentCategory === 'crop_male' || currentCategory === 'crop_female') ? 'block' : 'none';
@@ -743,7 +784,6 @@
           const settingsIds = ['settings_desc', 'settings_gift', 'settings_ring', 'settings_crop'];
           allData = result.data.filter(item => !settingsIds.includes(String(item.id)));
           
-          // 載入各項設定文字
           const loadSetting = (id, elemId) => {
             const item = result.data.find(i => String(i.id) === id);
             const elem = document.getElementById(elemId);
