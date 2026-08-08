@@ -614,12 +614,19 @@
 
     .caption-container {
       display: flex;
-      align-items: center;
+      flex-direction: column;
       background-color: #171717;
       border: 1px solid var(--border-color);
       border-radius: 5px;
-      padding: 2px 4px;
+      padding: 4px;
       box-sizing: border-box;
+      width: 100%;
+      gap: 4px;
+    }
+
+    .caption-row-top {
+      display: flex;
+      align-items: center;
       width: 100%;
       gap: 4px;
     }
@@ -667,6 +674,27 @@
       font-size: 11px;
       width: 100%;
       box-sizing: border-box;
+    }
+
+    .interact-col {
+      width: 100%;
+      border-top: 1px solid var(--border-color);
+      padding-top: 4px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .interact-select {
+      background-color: #222;
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 2px 4px;
+      font-size: 10px;
+      width: 100%;
+      text-align: center;
+      outline: none;
+      cursor: pointer;
     }
 
     .admin-note-box {
@@ -1212,6 +1240,7 @@
         const fullCaption = item.caption || '';
         let priceVal = item.price || '';
         let textVal = fullCaption;
+        let interactVal = item.interact || '無互動';
 
         card.innerHTML = `
           <button class="delete-btn" title="刪除圖片">✕</button>
@@ -1222,12 +1251,20 @@
           </div>
           <div class="img-info">
             <div class="caption-container">
-              <div class="price-col">
-                <span class="currency-symbol">$</span>
-                <span class="editable-price" contenteditable="${isAdmin}" id="price-${item.id}" maxlength="3">${priceVal}</span>
+              <div class="caption-row-top">
+                <div class="price-col">
+                  <span class="currency-symbol">$</span>
+                  <span class="editable-price" contenteditable="${isAdmin}" id="price-${item.id}" maxlength="3">${priceVal}</span>
+                </div>
+                <div class="desc-col">
+                  <span class="editable-text" contenteditable="${isAdmin}" id="text-${item.id}">${textVal}</span>
+                </div>
               </div>
-              <div class="desc-col">
-                <span class="editable-text" contenteditable="${isAdmin}" id="text-${item.id}">${textVal}</span>
+              <div class="interact-col">
+                <select class="interact-select" id="interact-${item.id}" ${!isAdmin ? 'disabled' : ''}>
+                  <option value="有互動" ${interactVal === '有互動' ? 'selected' : ''}>有互動</option>
+                  <option value="無互動" ${interactVal === '無互動' ? 'selected' : ''}>無互動</option>
+                </select>
               </div>
             </div>
           </div>
@@ -1297,6 +1334,24 @@
                 } else if (newValue.includes('售出')) {
                   selectEl.classList.add('is-sold');
                 }
+                status.innerText = "修改成功！";
+              } else {
+                status.innerText = "儲存失敗，請重試";
+              }
+              setTimeout(() => { status.innerText = ""; }, 1500);
+            });
+          }
+
+          const interactSelectEl = document.getElementById(`interact-${item.id}`);
+          if (interactSelectEl) {
+            interactSelectEl.addEventListener('change', async () => {
+              const newValue = interactSelectEl.value;
+              const status = document.getElementById('status');
+              status.innerText = "正在儲存至雲端...";
+              
+              const success = await updateItem(item.id, 'interact', newValue);
+              if (success) {
+                item.interact = newValue;
                 status.innerText = "修改成功！";
               } else {
                 status.innerText = "儲存失敗，請重試";
@@ -1432,6 +1487,7 @@
             caption: defaultTime,
             price: '',
             quantity: '數量: 1',
+            interact: '無互動',
             note: '',
             timestamp: new Date().getTime()
           };
@@ -1445,6 +1501,7 @@
           formData.append('caption', defaultTime);
           formData.append('price', '');
           formData.append('quantity', '數量: 1');
+          formData.append('interact', '無互動');
           formData.append('note', '');
           formData.append('mimeType', 'image/jpeg');
           formData.append('imageBase64', base64Data);
