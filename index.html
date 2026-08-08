@@ -6,14 +6,14 @@
   <title>⭐ 米米小舖-Club MStar ⭐</title>
   <style>
     :root {
-      --bg-color: #ffe4e6;
-      --card-bg: #fff0f3;
-      --text-color: #5c4033;
-      --accent-color: #ff69b4;
-      --danger-color: #ff4d4d;
-      --success-color: #2e8b57;
-      --warning-color: #ffb347;
-      --border-color: #ffb6c1;
+      --bg-color: #121212;
+      --card-bg: #1e1e1e;
+      --text-color: #e0e0e0;
+      --accent-color: #ff79c6;
+      --danger-color: #ff5555;
+      --success-color: #50fa7b;
+      --warning-color: #f1fa8c;
+      --border-color: #333333;
     }
 
     body {
@@ -40,7 +40,7 @@
       z-index: 1000;
       padding-top: 10px;
       padding-bottom: 15px;
-      box-shadow: 0 4px 10px rgba(255, 182, 193, 0.3);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
     }
 
     .header-layout {
@@ -75,16 +75,16 @@
       font-size: 22px;
       line-height: 1.4;
       white-space: nowrap;
-      color: #d81b60;
+      color: #ff79c6;
     }
 
     .discord-badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background-color: #fff;
+      background-color: var(--card-bg);
       border: 1px solid var(--border-color);
-      color: #d81b60;
+      color: #ff79c6;
       padding: 4px 10px;
       border-radius: 6px;
       font-size: 13px;
@@ -103,9 +103,9 @@
       display: inline-flex;
       align-items: flex-start;
       gap: 6px;
-      background-color: #fff;
+      background-color: var(--card-bg);
       border: 1px solid var(--border-color);
-      color: #7b5247;
+      color: var(--text-color);
       padding: 8px 12px;
       border-radius: 8px;
       font-size: 13px;
@@ -117,13 +117,13 @@
 
     .info-badge .editable-text {
       outline: none;
-      color: #5c4033;
+      color: var(--text-color);
       white-space: pre-wrap;
       word-break: break-all;
     }
 
     .is-admin .info-badge .editable-text {
-      background: rgba(255, 182, 193, 0.2);
+      background: rgba(255, 121, 198, 0.15);
       cursor: text;
       padding: 2px 4px;
       border-radius: 4px;
@@ -142,12 +142,12 @@
       background: var(--card-bg);
       padding: 12px;
       border-radius: 10px;
-      box-shadow: 0 4px 15px rgba(255, 182, 193, 0.5);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
       border: 1px solid var(--border-color);
     }
 
     .tab-btn, .dropdown-toggle {
-      background: #fff;
+      background: var(--bg-color);
       color: var(--text-color);
       border: 1px solid var(--border-color);
       padding: 8px 12px;
@@ -164,13 +164,14 @@
     }
 
     .tab-btn:hover, .dropdown-toggle:hover {
-      background: #ffc0cb;
+      background: #2a2a2a;
+      border-color: var(--accent-color);
     }
 
     .tab-btn.active {
       background: var(--accent-color);
       border-color: var(--accent-color);
-      color: #fff;
+      color: #121212;
       font-weight: bold;
     }
 
@@ -188,7 +189,7 @@
       right: calc(100% + 8px);
       background-color: var(--card-bg);
       min-width: 110px;
-      box-shadow: 0px 8px 16px 0px rgba(255, 182, 193, 0.5);
+      box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.5);
       border-radius: 6px;
       z-index: 1200;
       padding: 4px 0;
@@ -218,7 +219,7 @@
 
     .dropdown-item:hover {
       background-color: var(--accent-color);
-      color: #fff;
+      color: #121212;
     }
 
     .auth-box {
@@ -237,7 +238,7 @@
       padding: 4px 8px;
       border-radius: 4px;
       border: 1px solid var(--border-color);
-      background: #fff;
+      background: var(--card-bg);
       color: var(--text-color);
       width: 90px;
       font-size: 12px;
@@ -245,16 +246,17 @@
 
     .auth-btn {
       background: var(--accent-color);
-      color: white;
+      color: #121212;
       border: none;
       padding: 5px 12px;
       border-radius: 4px;
       cursor: pointer;
       font-size: 13px;
+      font-weight: bold;
     }
 
     .cancel-btn {
-      background: #d3d3d3;
+      background: #333333;
       color: var(--text-color);
       border: none;
       padding: 5px 8px;
@@ -267,7 +269,7 @@
       padding: 8px 12px;
       border-radius: 6px;
       border: 1px solid var(--border-color);
-      background: #fff;
+      background: var(--card-bg);
       color: var(--text-color);
       width: 100%;
       font-size: 13px;
@@ -285,7 +287,7 @@
       display: flex;
       align-items: flex-start;
       gap: 6px;
-      background-color: #fff;
+      background-color: var(--card-bg);
       border: 1px solid var(--border-color);
       color: var(--text-color);
       padding: 12px 16px;
@@ -306,7 +308,7 @@
     }
 
     .is-admin .custom-notice-box .editable-text {
-      background: rgba(255, 182, 193, 0.2);
+      background: rgba(255, 121, 198, 0.15);
       cursor: text;
       padding: 2px 4px;
       border-radius: 4px;
@@ -325,7 +327,7 @@
     }
     
     .drop-zone.dragover {
-      background: #ffccd5;
+      background: #2a2a2a;
       border-color: var(--accent-color);
     }
 
@@ -342,7 +344,7 @@
       background-color: var(--card-bg);
       border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0 4px 10px rgba(255, 182, 193, 0.3);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
       display: flex;
       flex-direction: column;
       position: relative;
@@ -361,7 +363,7 @@
       width: 120px;
       height: 120px;
       position: relative;
-      background-color: #fff;
+      background-color: #000;
     }
 
     .img-wrapper img {
@@ -376,7 +378,7 @@
       top: 4px;
       right: 4px;
       z-index: 10;
-      background-color: rgba(255, 255, 255, 0.9);
+      background-color: rgba(30, 30, 30, 0.9);
       color: var(--text-color);
       border: 1px solid var(--border-color);
       border-radius: 4px;
@@ -390,13 +392,13 @@
     }
 
     .status-badge.is-pending {
-      background-color: rgba(254, 231, 92, 0.95);
+      background-color: rgba(241, 250, 140, 0.95);
       border-color: var(--warning-color);
-      color: #000000;
+      color: #121212;
     }
 
     .status-badge.is-sold {
-      background-color: rgba(237, 66, 69, 0.9);
+      background-color: rgba(255, 85, 85, 0.9);
       border-color: var(--danger-color);
       color: #ffffff;
     }
@@ -406,7 +408,7 @@
       top: 4px;
       right: 4px;
       z-index: 10;
-      background-color: rgba(255, 255, 255, 0.95);
+      background-color: rgba(30, 30, 30, 0.95);
       color: var(--text-color);
       border: 1px solid var(--accent-color);
       border-radius: 4px;
@@ -418,13 +420,13 @@
     }
 
     .status-select.is-pending {
-      background-color: rgba(254, 231, 92, 0.95);
+      background-color: rgba(241, 250, 140, 0.95);
       border-color: var(--warning-color);
-      color: #000000;
+      color: #121212;
     }
 
     .status-select.is-sold {
-      background-color: rgba(237, 66, 69, 0.9);
+      background-color: rgba(255, 85, 85, 0.9);
       border-color: var(--danger-color);
       color: #ffffff;
     }
@@ -433,7 +435,7 @@
       position: absolute;
       top: 4px;
       left: 4px;
-      background-color: rgba(0, 0, 0, 0.6);
+      background-color: rgba(0, 0, 0, 0.7);
       color: #fff;
       border: none;
       width: 22px;
@@ -469,7 +471,7 @@
 
     .admin-note-box {
       display: none;
-      background-color: #fff;
+      background-color: #181818;
       border-top: 1px solid var(--border-color);
       padding: 6px;
       font-size: 10px;
@@ -495,7 +497,7 @@
     }
 
     .is-admin .editable-text, .is-admin .admin-note-text { 
-      background: rgba(255, 182, 193, 0.2); 
+      background: rgba(255, 121, 198, 0.15); 
       cursor: text; 
     }
     
@@ -546,7 +548,7 @@
             </div>
           </div>
           
-          <!-- 公告區塊改放到標題旁邊 -->
+          <!-- 公告區塊放右側並排 -->
           <div class="center-notice-panel">
             <div class="info-badge">
               <span>📕</span>
@@ -641,7 +643,7 @@
         cropDescElem.contentEditable = "true";
         authBox.innerHTML = `
           <span style="color:var(--success-color); font-size:13px; font-weight:bold;">已登入管理員</span>
-          <button class="auth-btn" id="logoutBtn" style="background:#d3d3d3; color:var(--text-color);">登出</button>
+          <button class="auth-btn" id="logoutBtn" style="background:#333; color:var(--text-color);">登出</button>
         `;
         document.getElementById('logoutBtn').addEventListener('click', () => {
           localStorage.removeItem('isAdmin');
@@ -725,16 +727,13 @@
     }
 
     function setupTabs() {
-      // 處理下拉選單點擊展開/收合保持顯示直到點擊子分頁
       document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
         toggle.addEventListener('click', (e) => {
           e.stopPropagation();
           const dropdownId = toggle.getAttribute('data-dropdown');
           const dropdownEl = document.getElementById(dropdownId);
           
-          // 切換開啟狀態
           const isOpen = dropdownEl.classList.contains('open');
-          // 關閉所有其他下拉
           document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
           
           if (!isOpen) {
@@ -743,7 +742,6 @@
         });
       });
 
-      // 點擊網頁其他地方時關閉未固定的下拉選單
       document.addEventListener('click', () => {
         document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
       });
@@ -754,12 +752,10 @@
           document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           
-          // 如果點擊的是子分頁，讓對應的父分類標籤也保持高亮或開啟狀態
           const parentDropdown = btn.closest('.dropdown');
           if (parentDropdown) {
             parentDropdown.classList.remove('open');
           } else {
-            // 點擊一般分頁時關閉所有下拉選單
             document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
           }
 
