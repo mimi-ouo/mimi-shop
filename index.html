@@ -9,7 +9,7 @@
       --bg-color: #36393f;
       --card-bg: #2f3136;
       --text-color: #dcddde;
-      --accent-color: #5865f2;
+      --accent-color: #ffb6c1; /* 調整為更符合粉色系的強調色 */
       --danger-color: #ed4245;
       --success-color: #57F287;
       --warning-color: #fee75c;
@@ -45,17 +45,22 @@
 
     .header-layout {
       display: flex;
-      align-items: flex-start;
-      gap: 15px;
-      flex-wrap: wrap;
+      flex-direction: column;
+      gap: 12px;
     }
 
-    /* 左側直欄：標題、登入、搜尋由上到下 */
+    .header-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
     .left-control-panel {
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      min-width: 180px;
+      gap: 6px;
     }
 
     .title-area h2 {
@@ -65,11 +70,26 @@
       white-space: nowrap;
     }
 
+    /* 可愛區塊 (Discord) */
+    .discord-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background-color: #202225;
+      border: 1px solid #ffb6c1;
+      color: #ffb6c1;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: bold;
+      width: fit-content;
+    }
+
     /* 中間公告區塊：隨文字長度與寬度自動調整 */
     .center-notice-panel {
       flex: 1;
       min-width: 250px;
-      max-width: 600px;
+      max-width: 100%;
     }
 
     .info-badge {
@@ -85,7 +105,7 @@
       line-height: 1.5;
       box-sizing: border-box;
       text-align: left;
-      width: auto;
+      width: 100%;
       max-width: 100%;
     }
 
@@ -104,7 +124,7 @@
       border: 1px dashed #4f545c;
     }
 
-    /* 右側直立懸浮分頁區塊（向下位移，避免與上方凍結區塊重疊） */
+    /* 右側直立懸浮分頁區塊 */
     .side-tabs-panel {
       position: fixed;
       right: 20px;
@@ -142,8 +162,8 @@
     }
 
     .tab-btn.active {
-      background: var(--accent-color);
-      border-color: var(--accent-color);
+      background: #5865f2;
+      border-color: #5865f2;
       color: #fff;
       font-weight: bold;
     }
@@ -188,7 +208,7 @@
     }
 
     .dropdown-item:hover {
-      background-color: var(--accent-color);
+      background-color: #5865f2;
       color: #fff;
     }
 
@@ -216,7 +236,7 @@
     }
 
     .auth-btn {
-      background: var(--accent-color);
+      background: #5865f2;
       color: white;
       border: none;
       padding: 5px 12px;
@@ -235,30 +255,32 @@
       font-size: 13px;
     }
 
+    /* 搜尋框改為整行顯示 */
     .search-input {
-      padding: 6px 10px;
-      border-radius: 4px;
+      padding: 8px 12px;
+      border-radius: 6px;
       border: 1px solid #4f545c;
       background: #202225;
       color: #fff;
-      width: 160px;
+      width: 100%;
       font-size: 13px;
+      box-sizing: border-box;
     }
 
-    .gift-notice-container {
+    /* 額外說明區塊樣式 (粉色系) */
+    .custom-notice-container {
       display: none;
       width: 100%;
-      max-width: 800px;
-      margin: 15px auto 0 auto;
+      margin: 15px 0 0 0;
       text-align: center;
     }
 
-    .gift-notice-box {
+    .custom-notice-box {
       display: flex;
       align-items: flex-start;
       gap: 6px;
       background-color: #202225;
-      border: 1px solid #57F287;
+      border: 1px solid #ffb6c1;
       color: #b9bbbe;
       padding: 12px 16px;
       border-radius: 8px;
@@ -266,9 +288,10 @@
       line-height: 1.5;
       text-align: left;
       box-sizing: border-box;
+      width: 100%;
     }
 
-    .gift-notice-box .editable-text {
+    .custom-notice-box .editable-text {
       outline: none;
       color: #dcddde;
       white-space: pre-wrap;
@@ -276,12 +299,12 @@
       flex: 1;
     }
 
-    .is-admin .gift-notice-box .editable-text {
+    .is-admin .custom-notice-box .editable-text {
       background: rgba(0, 0, 0, 0.2);
       cursor: text;
       padding: 2px 4px;
       border-radius: 4px;
-      border: 1px dashed #57F287;
+      border: 1px dashed #ffb6c1;
     }
 
     .drop-zone {
@@ -297,7 +320,7 @@
     
     .drop-zone.dragover {
       background: #393c43;
-      border-color: var(--accent-color);
+      border-color: #5865f2;
     }
 
     .gallery {
@@ -378,7 +401,7 @@
       z-index: 10;
       background-color: rgba(32, 34, 37, 0.95);
       color: #fff;
-      border: 1px solid var(--accent-color);
+      border: 1px solid #5865f2;
       border-radius: 4px;
       padding: 1px 2px;
       font-size: 9px;
@@ -473,7 +496,7 @@
 </head>
 <body>
 
-  <!-- 右側直立懸浮分頁（調整 top 數值避免與上方凍結區塊重疊） -->
+  <!-- 右側直立懸浮分頁 -->
   <div class="side-tabs-panel">
     <button class="tab-btn active" data-category="general">🏠 家具</button>
     <button class="tab-btn" data-category="memes">🧸 熊熊</button>
@@ -502,11 +525,20 @@
   <div class="sticky-header-wrapper">
     <div class="header-layout">
       
-      <!-- 左側：標題、登入、搜尋 (由上到下排列) -->
-      <div class="left-control-panel">
-        <div class="title-area">
-          <h2>⭐ 米米小舖 ⭐</h2>
+      <!-- 第一行：左側標題與右側登入 -->
+      <div class="header-top-row">
+        <div class="left-control-panel">
+          <div class="title-area">
+            <h2>⭐ 米米小舖 ⭐</h2>
+          </div>
+          <!-- 可愛區塊 -->
+          <div class="discord-badge">
+            <span>💬</span>
+            <span>Discord：mimi_ouo</span>
+          </div>
         </div>
+        
+        <!-- 登入按鈕移至右側 -->
         <div class="auth-box" id="authBox">
           <button class="auth-btn" id="showLoginBtn">登入</button>
           <div class="auth-inputs" id="authInputs">
@@ -515,27 +547,46 @@
             <button class="cancel-btn" id="cancelBtn">✕</button>
           </div>
         </div>
-        <input type="text" id="searchInput" class="search-input" placeholder="🔍 搜尋名稱或備註...">
       </div>
 
-      <!-- 中間：公告區塊（隨文字大小與長度自動調整） -->
+      <!-- 中間：公告區塊 -->
       <div class="center-notice-panel">
         <div class="info-badge">
           <span>📕</span>
           <span class="editable-text" id="siteDescription" contenteditable="false">本人夜班，交易需另約時間，故不接急單
-交易方式：可糖可T，比值1:1
-Discord：mimi_ouo
-加載較慢，請稍等，或重新整理頁面</span>
+交易方式：可糖可T，比值1:1</span>
         </div>
+      </div>
+
+      <!-- 搜尋區改成整行顯示並放在凍結區最下方 -->
+      <div class="search-panel">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 搜尋名稱或備註...">
       </div>
 
     </div>
   </div>
   
-  <div class="gift-notice-container" id="giftNoticeContainer">
-    <div class="gift-notice-box">
+  <!-- 贈品區說明 -->
+  <div class="custom-notice-container" id="giftNoticeContainer">
+    <div class="custom-notice-box">
       <span>🎁</span>
-      <span class="editable-text" id="giftDescription" contenteditable="false">這裏是贈品區的說明文字，管理者登入後可以直接點擊編輯並自動同步至雲端！</span>
+      <span class="editable-text" id="giftDescription" contenteditable="false">本區一律2糖，如有購買任一商品或本區滿五件，可選本區一件免費贈送</span>
+    </div>
+  </div>
+
+  <!-- 戒指區說明 -->
+  <div class="custom-notice-container" id="ringNoticeContainer">
+    <div class="custom-notice-box">
+      <span>💍</span>
+      <span class="editable-text" id="ringDescription" contenteditable="false">情侶等級由買家負擔</span>
+    </div>
+  </div>
+
+  <!-- 作物區說明 -->
+  <div class="custom-notice-container" id="cropNoticeContainer">
+    <div class="custom-notice-box">
+      <span>🌱</span>
+      <span class="editable-text" id="cropDescription" contenteditable="false">誕生作物只收T，一律種植後付款</span>
     </div>
   </div>
 
@@ -561,7 +612,6 @@ Discord：mimi_ouo
       setupTabs();
       fetchData();
       
-      // 綁定搜尋框事件
       document.getElementById('searchInput').addEventListener('input', renderGallery);
     });
 
@@ -570,12 +620,16 @@ Discord：mimi_ouo
       const dropZone = document.getElementById('dropZone');
       const descElem = document.getElementById('siteDescription');
       const giftDescElem = document.getElementById('giftDescription');
+      const ringDescElem = document.getElementById('ringDescription');
+      const cropDescElem = document.getElementById('cropDescription');
 
       if (isAdmin) {
         document.body.classList.add('is-admin');
         dropZone.style.display = 'block';
         descElem.contentEditable = "true";
         giftDescElem.contentEditable = "true";
+        ringDescElem.contentEditable = "true";
+        cropDescElem.contentEditable = "true";
         authBox.innerHTML = `
           <span style="color:#57F287; font-size:13px;">已登入管理員</span>
           <button class="auth-btn" id="logoutBtn" style="background:#4f545c">登出</button>
@@ -589,6 +643,8 @@ Discord：mimi_ouo
         dropZone.style.display = 'none';
         descElem.contentEditable = "false";
         giftDescElem.contentEditable = "false";
+        ringDescElem.contentEditable = "false";
+        cropDescElem.contentEditable = "false";
         authBox.innerHTML = `
           <button class="auth-btn" id="showLoginBtn">登入</button>
           <div class="auth-inputs" id="authInputs">
@@ -600,47 +656,31 @@ Discord：mimi_ouo
         bindAuthEvents();
       }
 
-      let originalDesc = "";
-      descElem.addEventListener('focus', () => {
+      // 儲存文字事件綁定
+      setupEditableSave(descElem, 'settings_desc', 'caption');
+      setupEditableSave(giftDescElem, 'settings_gift', 'caption');
+      setupEditableSave(ringDescElem, 'settings_ring', 'caption');
+      setupEditableSave(cropDescElem, 'settings_crop', 'caption');
+    }
+
+    function setupEditableSave(elem, id, field) {
+      let originalText = "";
+      elem.addEventListener('focus', () => {
         if (!isAdmin) return;
-        originalDesc = descElem.innerText;
+        originalText = elem.innerText;
       });
 
-      descElem.addEventListener('blur', async () => {
+      elem.addEventListener('blur', async () => {
         if (!isAdmin) return;
-        const newText = descElem.innerText;
-        if (newText === originalDesc) return;
+        const newText = elem.innerText;
+        if (newText === originalText) return;
 
         const status = document.getElementById('status');
         status.innerText = "正在儲存至雲端...";
         
-        const success = await updateItemById('settings_desc', 'caption', newText);
+        const success = await updateItemById(id, field, newText);
         if (success) {
-          originalDesc = newText;
-          status.innerText = "修改成功！";
-        } else {
-          status.innerText = "儲存失敗，請重試";
-        }
-        setTimeout(() => { status.innerText = ""; }, 1500);
-      });
-
-      let originalGiftDesc = "";
-      giftDescElem.addEventListener('focus', () => {
-        if (!isAdmin) return;
-        originalGiftDesc = giftDescElem.innerText;
-      });
-
-      giftDescElem.addEventListener('blur', async () => {
-        if (!isAdmin) return;
-        const newText = giftDescElem.innerText;
-        if (newText === originalGiftDesc) return;
-
-        const status = document.getElementById('status');
-        status.innerText = "正在儲存至雲端...";
-        
-        const success = await updateItemById('settings_gift', 'caption', newText);
-        if (success) {
-          originalGiftDesc = newText;
+          originalText = newText;
           status.innerText = "修改成功！";
         } else {
           status.innerText = "儲存失敗，請重試";
@@ -685,12 +725,10 @@ Discord：mimi_ouo
           currentCategoryDisplayName = btn.innerText.trim();
           document.getElementById('currentTabName').innerText = currentCategoryDisplayName;
           
-          const giftNoticeContainer = document.getElementById('giftNoticeContainer');
-          if (currentCategory === 'gift') {
-            giftNoticeContainer.style.display = 'block';
-          } else {
-            giftNoticeContainer.style.display = 'none';
-          }
+          // 控制各分頁說明區塊的顯示
+          document.getElementById('giftNoticeContainer').style.display = (currentCategory === 'gift') ? 'block' : 'none';
+          document.getElementById('ringNoticeContainer').style.display = (currentCategory === 'ring_male' || currentCategory === 'ring_female') ? 'block' : 'none';
+          document.getElementById('cropNoticeContainer').style.display = (currentCategory === 'crop_male' || currentCategory === 'crop_female') ? 'block' : 'none';
 
           renderGallery();
         });
@@ -702,19 +740,20 @@ Discord：mimi_ouo
         const response = await fetch(`${SCRIPT_URL}?action=getData`);
         const result = await response.json();
         if (result.status === 'success') {
-          allData = result.data.filter(item => String(item.id) !== 'settings_desc' && String(item.id) !== 'settings_gift');
+          const settingsIds = ['settings_desc', 'settings_gift', 'settings_ring', 'settings_crop'];
+          allData = result.data.filter(item => !settingsIds.includes(String(item.id)));
           
-          const descItem = result.data.find(item => String(item.id) === 'settings_desc');
-          const descElem = document.getElementById('siteDescription');
-          if (descItem && descItem.caption) {
-            descElem.innerText = descItem.caption;
-          }
+          // 載入各項設定文字
+          const loadSetting = (id, elemId) => {
+            const item = result.data.find(i => String(i.id) === id);
+            const elem = document.getElementById(elemId);
+            if (item && item.caption && elem) elem.innerText = item.caption;
+          };
 
-          const giftDescItem = result.data.find(item => String(item.id) === 'settings_gift');
-          const giftDescElem = document.getElementById('giftDescription');
-          if (giftDescItem && giftDescItem.caption) {
-            giftDescElem.innerText = giftDescItem.caption;
-          }
+          loadSetting('settings_desc', 'siteDescription');
+          loadSetting('settings_gift', 'giftDescription');
+          loadSetting('settings_ring', 'ringDescription');
+          loadSetting('settings_crop', 'cropDescription');
 
           renderGallery();
         }
