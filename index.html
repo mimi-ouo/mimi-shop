@@ -23,16 +23,15 @@
       max-width: 1200px;
       margin: 0 auto;
       padding: 20px;
-      /* 移除原本固定的右側留白，改由 CSS 或浮動視窗動態處理 */
       padding-right: 20px; 
     }
 
-    /* 上方黏貼頂端區塊 */
+    /* 上方黏貼頂端區塊：調整 z-index 讓懸浮區塊與其重疊或不被擋住 */
     .sticky-header-wrapper {
       position: sticky;
       top: 0;
       background-color: var(--bg-color);
-      z-index: 1000;
+      z-index: 900;
       padding-top: 10px;
       padding-bottom: 15px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
@@ -57,7 +56,6 @@
       align-items: center;
       gap: 20px;
       flex-wrap: wrap;
-      /* 讓頂端左側佔滿剩餘空間，避免被隱藏的登入鈕影響 */
       flex: 1;
       min-width: 280px;
     }
@@ -76,13 +74,14 @@
       color: #ffffff;
     }
 
+    /* 3. 💬Discord：mimi_ouo 改用藍色系 */
     .discord-badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background-color: var(--card-bg);
-      border: 1px solid var(--border-color);
-      color: #cccccc;
+      background-color: rgba(43, 115, 223, 0.15);
+      border: 1px solid rgba(43, 115, 223, 0.4);
+      color: #7289da;
       padding: 4px 10px;
       border-radius: 6px;
       font-size: 13px;
@@ -97,15 +96,16 @@
       max-width: 100%;
     }
 
+    /* 1. 公告區取消底框設計，像標題一樣就好 */
     .info-badge {
       display: inline-flex;
       align-items: flex-start;
       gap: 6px;
-      background-color: var(--card-bg);
-      border: 1px solid var(--border-color);
+      background-color: transparent;
+      border: none;
       color: var(--text-color);
-      padding: 8px 12px;
-      border-radius: 8px;
+      padding: 0;
+      border-radius: 0;
       font-size: 13px;
       line-height: 1.5;
       box-sizing: border-box;
@@ -128,11 +128,11 @@
       border: 1px dashed var(--accent-color);
     }
 
-    /* 右側直立懸浮分頁區塊（含縮小/展開功能與登入按鈕） */
+    /* 2. 懸浮區塊調整 top 讓其與凍結區塊重疊（拉高到頁面最上方） */
     .side-tabs-panel {
       position: fixed;
       right: 20px;
-      top: 140px;
+      top: 10px;
       display: flex;
       flex-direction: column;
       gap: 8px;
