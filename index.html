@@ -13,6 +13,7 @@
       --danger-color: #ff4d4d;
       --success-color: #cccccc;
       --warning-color: #ffd700;
+      --cart-color: #2b73df; /* 藍色系購物車/勾選框 */
       --border-color: #333333;
     }
 
@@ -88,7 +89,6 @@
       width: fit-content;
     }
 
-    /* 公告區塊放右側並排顯示 */
     .center-notice-panel {
       flex: 1;
       min-width: 280px;
@@ -111,7 +111,6 @@
       width: 100%;
     }
 
-    /* 公告與說明區維持 15px 與靠左 */
     .info-badge .editable-text,
     .custom-notice-box .editable-text {
       outline: none;
@@ -131,7 +130,7 @@
       border: 1px dashed var(--accent-color);
     }
 
-    /* 右側直立懸浮分頁（重疊於頂端、最下方為登入） */
+    /* 右側直立懸浮分頁 */
     .side-tabs-panel {
       position: fixed;
       right: 20px;
@@ -148,7 +147,6 @@
       transition: all 0.3s ease;
     }
 
-    /* 縮小收合狀態 */
     .side-tabs-panel.collapsed {
       padding: 8px;
       gap: 4px;
@@ -157,7 +155,6 @@
       display: none;
     }
 
-    /* 收合切換按鈕樣式 */
     .collapse-toggle-btn {
       background: var(--bg-color);
       color: var(--text-color);
@@ -215,6 +212,34 @@
       font-weight: bold;
     }
 
+    /* 購物車分頁特別樣式（藍色系，即使收合也常駐在面板最上方） */
+    .tab-btn[data-category="cart"] {
+      border-color: var(--cart-color);
+      color: #7289da;
+      justify-content: space-between;
+      position: relative;
+    }
+    .tab-btn[data-category="cart"].active {
+      background: var(--cart-color);
+      color: #ffffff;
+      font-weight: bold;
+    }
+
+    /* 紅底白字圓形數量徽章樣式 */
+    .cart-badge-count {
+      background-color: #ff4d4d;
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: bold;
+      padding: 1px 6px;
+      border-radius: 50px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 14px;
+      line-height: 1.2;
+    }
+
     .dropdown {
       position: relative;
       display: block;
@@ -260,7 +285,6 @@
       color: #121212;
     }
 
-    /* 懸浮區塊內的登入專區 */
     .auth-section-wrapper {
       border-top: 1px solid var(--border-color);
       padding-top: 8px;
@@ -355,10 +379,6 @@
       text-align: left;
       box-sizing: border-box;
       width: 100%;
-    }
-
-    .custom-notice-box .editable-text {
-      flex: 1;
     }
 
     .drop-zone {
@@ -487,22 +507,39 @@
       outline: none;
     }
 
-    .status-select.is-pending {
-      background-color: rgba(255, 215, 0, 0.95);
-      border-color: var(--warning-color);
-      color: #121212;
+    /* 左上角藍色系勾選方框（管理端與客戶端通用） */
+    .cart-checkbox {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      z-index: 10;
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--cart-color);
     }
 
-    .status-select.is-sold {
-      background-color: rgba(255, 77, 77, 0.95);
-      border-color: var(--danger-color);
+    /* 購物車內訪客可選擇數量的下拉選單 */
+    .cart-qty-select {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      z-index: 10;
+      background-color: rgba(30, 30, 30, 0.95);
       color: #ffffff;
+      border: 1px solid var(--cart-color);
+      border-radius: 4px;
+      padding: 1px 2px;
+      font-size: 9px;
+      font-weight: bold;
+      cursor: pointer;
+      outline: none;
     }
 
     .delete-btn {
       position: absolute;
       top: 4px;
-      left: 4px;
+      left: 26px; /* 讓位給左上角的勾選框 */
       background-color: rgba(0, 0, 0, 0.7);
       color: #fff;
       border: none;
@@ -528,7 +565,6 @@
       border-top: 1px solid var(--border-color);
     }
 
-    /* 圖片下方資訊列兩欄佈局 */
     .caption-container {
       display: flex;
       align-items: center;
@@ -541,12 +577,11 @@
       gap: 4px;
     }
 
-    /* 第一欄：價格欄文字置中 */
     .price-col {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 34px; 
+      width: 37px; 
       flex-shrink: 0;
       gap: 1px;
       color: #ffffff;
@@ -567,7 +602,6 @@
       font-size: 11px;
     }
 
-    /* 第二欄：商品名稱說明欄 */
     .desc-col {
       flex: 1;
       min-width: 0;
@@ -575,7 +609,6 @@
       padding-left: 4px;
     }
 
-    /* 圖片下方的商品名稱/說明文字：維持 11px 且置中對齊 */
     .desc-col .editable-text {
       outline: none;
       padding: 2px 4px;
@@ -630,10 +663,15 @@
 </head>
 <body>
 
-  <!-- 右側直立懸浮分頁（含縮小收合功能與最下方登入區） -->
+  <!-- 右側直立懸浮分頁 -->
   <div class="side-tabs-panel" id="sideTabsPanel">
     <button class="collapse-toggle-btn" id="collapseToggleBtn">📂 收合 ▾</button>
     
+    <!-- 購物車按鈕獨立放於外面，即使面板收合也不會消失 -->
+    <button class="tab-btn" id="cartTabBtn" data-category="cart">
+      <span>🛒 購物車</span>
+    </button>
+
     <div class="collapse-content" id="collapseContent">
       <button class="tab-btn active" data-category="general">🏠 家具</button>
       <button class="tab-btn" data-category="memes">🧸 熊熊</button>
@@ -658,7 +696,6 @@
       <button class="tab-btn" data-category="gift">🎁 贈品區</button>
     </div>
 
-    <!-- 登入按鈕/區塊移至懸浮區塊最下方 -->
     <div class="auth-section-wrapper">
       <div class="auth-box" id="authBox">
         <button class="auth-btn" id="showLoginBtn">登入</button>
@@ -675,7 +712,6 @@
   <div class="sticky-header-wrapper">
     <div class="header-layout">
       
-      <!-- 第一行：左側標題與公告並排 -->
       <div class="header-top-row">
         <div class="left-control-panel">
           <div class="title-area-group">
@@ -688,7 +724,6 @@
             </div>
           </div>
           
-          <!-- 公告區塊放右側並排 -->
           <div class="center-notice-panel">
             <div class="info-badge">
               <span>📕</span>
@@ -699,7 +734,6 @@
         </div>
       </div>
 
-      <!-- 搜尋區 -->
       <div class="search-panel">
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 搜尋全區名稱或備註...">
       </div>
@@ -707,7 +741,6 @@
     </div>
   </div>
   
-  <!-- 贈品區說明 -->
   <div class="custom-notice-container" id="giftNoticeContainer">
     <div class="custom-notice-box">
       <span>🎁</span>
@@ -715,7 +748,6 @@
     </div>
   </div>
 
-  <!-- 戒指區說明 -->
   <div class="custom-notice-container" id="ringNoticeContainer">
     <div class="custom-notice-box">
       <span>💍</span>
@@ -723,7 +755,6 @@
     </div>
   </div>
 
-  <!-- 作物區說明 -->
   <div class="custom-notice-container" id="cropNoticeContainer">
     <div class="custom-notice-box">
       <span>🌱</span>
@@ -745,6 +776,7 @@
     let currentCategoryDisplayName = '🏠 家具';
     let isAdmin = localStorage.getItem('isAdmin') === 'true';
     let allData = [];
+    let cartItems = new Map(); // 用 Map 記錄加入購物車的商品 ID 與其選擇的數量
 
     const ADMIN_PASSWORD = "1j6ul42l4ji3++";
 
@@ -753,6 +785,7 @@
       setupTabs();
       setupCollapseToggle();
       fetchData();
+      updateCartButtonBadge();
       
       document.getElementById('searchInput').addEventListener('input', renderGallery);
     });
@@ -770,6 +803,15 @@
           toggleBtn.innerText = "📂 收合 ▾";
         }
       });
+    }
+
+    function updateCartButtonBadge() {
+      const cartBtn = document.getElementById('cartTabBtn');
+      if (cartItems.size > 0) {
+        cartBtn.innerHTML = `<span>🛒 購物車</span><span class="cart-badge-count">${cartItems.size}</span>`;
+      } else {
+        cartBtn.innerHTML = `<span>🛒 購物車</span>`;
+      }
     }
 
     function initAuthUI() {
@@ -906,14 +948,13 @@
           }
 
           currentCategory = btn.getAttribute('data-category');
-          currentCategoryDisplayName = btn.innerText.trim();
+          currentCategoryDisplayName = btn.getAttribute('data-category') === 'cart' ? '🛒 購物車' : btn.innerText.trim();
           document.getElementById('currentTabName').innerText = currentCategoryDisplayName;
           
           document.getElementById('giftNoticeContainer').style.display = (currentCategory === 'gift') ? 'block' : 'none';
           document.getElementById('ringNoticeContainer').style.display = (currentCategory === 'ring_male' || currentCategory === 'ring_female') ? 'block' : 'none';
           document.getElementById('cropNoticeContainer').style.display = (currentCategory === 'crop_male' || currentCategory === 'crop_female') ? 'block' : 'none';
 
-          // 點擊分頁時清空搜尋框，回到正常分頁檢視
           document.getElementById('searchInput').value = '';
           renderGallery();
         });
@@ -985,16 +1026,39 @@
       return capA.localeCompare(capB, 'zh-Hant', { numeric: true, sensitivity: 'base' });
     }
 
+    // 產生訪客下拉選單的選項（根據管理端設置的最大數量或特殊狀態）
+    function generateVisitorQtyOptions(adminQtyStr, selectedQty) {
+      let optionsHTML = '';
+      const text = String(adminQtyStr).trim();
+
+      if (text === '大量') {
+        const options = ['數量: 1', '數量: 2', '數量: 3', '數量: 4', '數量: 5', '數量: 6', '數量: 7', '數量: 8', '數量: 9', '數量: 10', '大量'];
+        options.forEach(opt => {
+          optionsHTML += `<option value="${opt}" ${selectedQty === opt ? 'selected' : ''}>${opt}</option>`;
+        });
+      } else {
+        const match = text.match(/\d+/);
+        const maxNum = match ? parseInt(match[0], 10) : 1;
+        
+        for (let i = 1; i <= maxNum; i++) {
+          const val = `數量: ${i}`;
+          optionsHTML += `<option value="${val}" ${selectedQty === val ? 'selected' : ''}>${val}</option>`;
+        }
+      }
+      return optionsHTML;
+    }
+
     function renderGallery() {
       const gallery = document.getElementById('gallery');
       const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
 
       const filtered = allData.filter(item => {
-        // 如果有輸入搜尋關鍵字，則進行「全區」比對；否則只顯示「目前分頁」
         if (keyword) {
           const caption = String(item.caption || '').toLowerCase();
           const note = String(item.note || '').toLowerCase();
           return caption.includes(keyword) || note.includes(keyword);
+        } else if (currentCategory === 'cart') {
+          return cartItems.has(String(item.id));
         } else {
           return item.category === currentCategory;
         }
@@ -1018,26 +1082,52 @@
         else if (isSold) statusClass = 'is-sold';
 
         let badgeHTML = '';
+        const isChecked = cartItems.has(String(item.id));
+        const selectedQty = cartItems.get(String(item.id)) || '數量: 1';
+
         if (isAdmin) {
+          let topRightHTML = `<select class="status-select ${statusClass}" id="badge-${item.id}">
+            <option value="數量: 1" ${currentQty === '數量: 1' ? 'selected' : ''}>數量: 1</option>
+            <option value="數量: 2" ${currentQty === '數量: 2' ? 'selected' : ''}>數量: 2</option>
+            <option value="數量: 3" ${currentQty === '數量: 3' ? 'selected' : ''}>數量: 3</option>
+            <option value="數量: 4" ${currentQty === '數量: 4' ? 'selected' : ''}>數量: 4</option>
+            <option value="數量: 5" ${currentQty === '數量: 5' ? 'selected' : ''}>數量: 5</option>
+            <option value="數量: 6" ${currentQty === '數量: 6' ? 'selected' : ''}>數量: 6</option>
+            <option value="數量: 7" ${currentQty === '數量: 7' ? 'selected' : ''}>數量: 7</option>
+            <option value="數量: 8" ${currentQty === '數量: 8' ? 'selected' : ''}>數量: 8</option>
+            <option value="數量: 9" ${currentQty === '數量: 9' ? 'selected' : ''}>數量: 9</option>
+            <option value="數量: 10" ${currentQty === '數量: 10' ? 'selected' : ''}>數量: 10</option>
+            <option value="大量" ${currentQty === '大量' ? 'selected' : ''}>大量</option>
+            <option value="暫售，待交易" ${isPending ? 'selected' : ''}>暫售，待交易</option>
+            <option value="已售出" ${isSold ? 'selected' : ''}>已售出</option>
+          </select>`;
+
+          if (isChecked) {
+            topRightHTML = `
+              <select class="cart-qty-select" id="cart-qty-${item.id}">
+                ${generateVisitorQtyOptions(currentQty, selectedQty)}
+              </select>
+            `;
+          }
+
           badgeHTML = `
-            <select class="status-select ${statusClass}" id="badge-${item.id}">
-              <option value="數量: 1" ${currentQty === '數量: 1' ? 'selected' : ''}>數量: 1</option>
-              <option value="數量: 2" ${currentQty === '數量: 2' ? 'selected' : ''}>數量: 2</option>
-              <option value="數量: 3" ${currentQty === '數量: 3' ? 'selected' : ''}>數量: 3</option>
-              <option value="數量: 4" ${currentQty === '數量: 4' ? 'selected' : ''}>數量: 4</option>
-              <option value="數量: 5" ${currentQty === '數量: 5' ? 'selected' : ''}>數量: 5</option>
-              <option value="數量: 6" ${currentQty === '數量: 6' ? 'selected' : ''}>數量: 6</option>
-              <option value="數量: 7" ${currentQty === '數量: 7' ? 'selected' : ''}>數量: 7</option>
-              <option value="數量: 8" ${currentQty === '數量: 8' ? 'selected' : ''}>數量: 8</option>
-              <option value="數量: 9" ${currentQty === '數量: 9' ? 'selected' : ''}>數量: 9</option>
-              <option value="數量: 10" ${currentQty === '數量: 10' ? 'selected' : ''}>數量: 10</option>
-              <option value="大量" ${currentQty === '大量' ? 'selected' : ''}>大量</option>
-              <option value="暫售，待交易" ${isPending ? 'selected' : ''}>暫售，待交易</option>
-              <option value="已售出" ${isSold ? 'selected' : ''}>已售出</option>
-            </select>
+            <input type="checkbox" class="cart-checkbox" id="cart-chk-${item.id}" ${isChecked ? 'checked' : ''} title="加入購物車" />
+            ${topRightHTML}
           `;
         } else {
-          badgeHTML = `<span class="status-badge ${statusClass}" id="badge-${item.id}">${currentQty}</span>`;
+          let topRightHTML = `<span class="status-badge ${statusClass}" style="right:4px; left:auto;" id="badge-${item.id}">${currentQty}</span>`;
+          if (isChecked) {
+            topRightHTML = `
+              <select class="cart-qty-select" id="cart-qty-${item.id}">
+                ${generateVisitorQtyOptions(currentQty, selectedQty)}
+              </select>
+            `;
+          }
+
+          badgeHTML = `
+            <input type="checkbox" class="cart-checkbox" id="cart-chk-${item.id}" ${isChecked ? 'checked' : ''} title="加入購物車" />
+            ${topRightHTML}
+          `;
         }
 
         const fullCaption = item.caption || '';
@@ -1081,6 +1171,31 @@
             if (confirm('確定要刪除這張圖片嗎？')) {
               deleteItem(item.id);
             }
+          });
+        }
+
+        const chkEl = card.querySelector(`#cart-chk-${item.id}`);
+        if (chkEl) {
+          chkEl.addEventListener('change', () => {
+            const status = document.getElementById('status');
+            if (chkEl.checked) {
+              cartItems.set(String(item.id), '數量: 1');
+              status.innerText = "🛒 已加入購物車！";
+            } else {
+              cartItems.delete(String(item.id));
+              status.innerText = "❌ 已從購物車移除";
+            }
+            setTimeout(() => { status.innerText = ""; }, 1500);
+            updateCartButtonBadge();
+            renderGallery();
+          });
+        }
+
+        const qtySelEl = card.querySelector(`#cart-qty-${item.id}`);
+        if (qtySelEl) {
+          qtySelEl.addEventListener('change', () => {
+            cartItems.set(String(item.id), qtySelEl.value);
+            updateCartButtonBadge();
           });
         }
 
@@ -1179,6 +1294,8 @@
     async function deleteItem(id) {
       await fetch(`${SCRIPT_URL}?action=deleteItem&id=${id}`);
       allData = allData.filter(item => String(item.id) !== String(id));
+      cartItems.delete(String(id));
+      updateCartButtonBadge();
       renderGallery();
     }
 
