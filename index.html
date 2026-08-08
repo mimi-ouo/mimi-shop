@@ -464,6 +464,7 @@
       transform: translateY(10px);
       transition: opacity 0.3s ease, transform 0.3s ease;
       border: 1px solid var(--border-color);
+      cursor: pointer;
     }
 
     .img-card.loaded {
@@ -734,6 +735,157 @@
     }
     
     .is-admin .img-card:hover .delete-btn { display: flex; }
+
+    /* 相簿彈跳視窗樣式 (單張放大與左右切換) */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 2000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+    }
+
+    .modal-header {
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: flex-end; /* 靠右對齊（標題隱藏後只剩關閉按鈕） */
+      align-items: center;
+      background: #171717;
+    }
+
+    .modal-title {
+      font-size: 15px;
+      font-weight: bold;
+      color: #fff;
+      margin: 0;
+      display: none; /* 隱藏相簿頂部標題 */
+    }
+
+    .modal-close-btn {
+      background: none;
+      border: none;
+      color: var(--text-color);
+      font-size: 18px;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    .modal-close-btn:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    .modal-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .modal-drop-zone {
+      border: 2px dashed var(--border-color);
+      background: var(--bg-color);
+      padding: 10px;
+      text-align: center;
+      border-radius: 8px;
+      display: none;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .modal-drop-zone.dragover {
+      background: #2a2a2a;
+      border-color: var(--accent-color);
+    }
+
+    /* 單張大圖與左右箭頭容器 */
+    .modal-viewer-container {
+      position: relative;
+      width: 100%;
+      max-height: 50vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .modal-main-img {
+      max-width: 100%;
+      max-height: 50vh;
+      object-fit: contain;
+    }
+
+    .modal-nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      border: none;
+      font-size: 22px;
+      padding: 12px 10px;
+      cursor: pointer;
+      z-index: 10;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+    .modal-nav-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    .modal-prev-btn { left: 10px; }
+    .modal-next-btn { right: 10px; }
+
+    /* 底部小圓點導覽列 */
+    .modal-dots-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 5px;
+      flex-wrap: wrap;
+    }
+
+    .modal-dot {
+      width: 10px;
+      height: 10px;
+      background-color: #444;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      transition: background-color 0.2s, transform 0.2s;
+    }
+    .modal-dot.active {
+      background-color: #ffffff;
+      transform: scale(1.2);
+    }
+
+    .modal-footer-action {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      align-items: center;
+    }
   </style>
 </head>
 <body>
@@ -853,6 +1005,33 @@
 
   <div class="gallery" id="gallery"></div>
 
+  <!-- 相簿彈跳視窗 Modal (單張放大 + 左右箭頭/小圓點) -->
+  <div class="modal-overlay" id="albumModal">
+    <div class="modal-content" id="albumModalContent">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">商品相簿</h3>
+        <button class="modal-close-btn" id="modalCloseBtn">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-drop-zone" id="modalDropZone">
+          <p style="font-size: 13px; margin: 0;">💡 在此相簿按 <b>Ctrl + V</b> 貼上或拖曳圖片以新增相片</p>
+          <p id="modalStatus" style="color: var(--accent-color); margin: 2px 0 0 0; font-size: 11px; font-weight: bold;"></p>
+        </div>
+        
+        <div class="modal-viewer-container" id="modalViewerContainer">
+          <button class="modal-nav-btn modal-prev-btn" id="modalPrevBtn">❮</button>
+          <img class="modal-main-img" id="modalMainImg" src="" alt="Zoomed Image" />
+          <button class="modal-nav-btn modal-next-btn" id="modalNextBtn">❯</button>
+        </div>
+
+        <div class="modal-footer-action">
+          <div class="modal-dots-container" id="modalDotsContainer"></div>
+          <button class="auth-btn" id="deleteCurrentPhotoBtn" style="background: var(--danger-color); color: #fff; width: auto; padding: 4px 10px; display: none; font-size: 11px;">刪除此相片</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxVrP__g-bnoVRQQrJkKLlMZDhSbFeUuTMyw6-zVRhtYkkSedoVbJXKUwN0bUyc4vs3rQ/exec";
 
@@ -861,6 +1040,9 @@
     let isAdmin = localStorage.getItem('isAdmin') === 'true';
     let allData = [];
     let cartItems = new Map();
+    let activeModalItem = null; // 當前主商品
+    let currentAlbumList = []; // 當前相簿的所有圖片陣列
+    let currentAlbumIndex = 0; // 目前顯示第幾張相片
 
     const ADMIN_PASSWORD = "1j6ul42l4ji3++";
 
@@ -869,6 +1051,7 @@
       setupTabs();
       setupCollapseToggle();
       setupDiscordButton();
+      setupModalEvents();
       fetchData();
       updateCartButtonBadge();
       
@@ -1075,8 +1258,10 @@
         const result = await response.json();
         if (result.status === 'success') {
           const settingsIds = ['settings_desc', 'settings_gift', 'settings_ring', 'settings_crop'];
-          allData = result.data.filter(item => !settingsIds.includes(String(item.id)));
           
+          allData = result.data.filter(item => !settingsIds.includes(String(item.id)) && item.category !== 'album_item');
+          window._rawServerData = result.data;
+
           const loadSetting = (id, elemId) => {
             const item = result.data.find(i => String(i.id) === id);
             const elem = document.getElementById(elemId);
@@ -1089,6 +1274,12 @@
           loadSetting('settings_crop', 'cropDescription');
 
           renderGallery();
+
+          if (activeModalItem) {
+            const updated = window._rawServerData.find(i => String(i.id) === String(activeModalItem.id));
+            if (updated) openAlbumModal(updated, currentAlbumIndex);
+            else closeAlbumModal();
+          }
         }
       } catch (err) {
         console.error("載入資料失敗", err);
@@ -1243,7 +1434,7 @@
         let interactVal = item.interact || '無互動';
 
         card.innerHTML = `
-          <button class="delete-btn" title="刪除圖片">✕</button>
+          <button class="delete-btn" title="刪除商品">✕</button>
           <div class="img-wrapper">
             <span class="loading-text">加載中請稍後</span>
             ${badgeHTML}
@@ -1282,9 +1473,17 @@
           card.classList.add('loaded');
         }
 
+        card.addEventListener('click', (e) => {
+          if (e.target.closest('button') || e.target.closest('input') || e.target.closest('select') || e.target.closest('[contenteditable="true"]')) {
+            return;
+          }
+          openAlbumModal(item, 0);
+        });
+
         if (isAdmin) {
-          card.querySelector('.delete-btn').addEventListener('click', () => {
-            if (confirm('確定要刪除這張圖片嗎？')) {
+          card.querySelector('.delete-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (confirm('確定要刪除這個商品嗎？')) {
               deleteItem(item.id);
             }
           });
@@ -1433,6 +1632,201 @@
       renderGallery();
     }
 
+    // --- 單張放大相簿與切換邏輯 ---
+    function setupModalEvents() {
+      const modal = document.getElementById('albumModal');
+      const closeBtn = document.getElementById('modalCloseBtn');
+      const prevBtn = document.getElementById('modalPrevBtn');
+      const nextBtn = document.getElementById('modalNextBtn');
+      const deletePhotoBtn = document.getElementById('deleteCurrentPhotoBtn');
+
+      closeBtn.addEventListener('click', closeAlbumModal);
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeAlbumModal();
+      });
+
+      prevBtn.addEventListener('click', () => {
+        if (currentAlbumList.length <= 1) return;
+        currentAlbumIndex = (currentAlbumIndex - 1 + currentAlbumList.length) % currentAlbumList.length;
+        updateModalView();
+      });
+
+      nextBtn.addEventListener('click', () => {
+        if (currentAlbumList.length <= 1) return;
+        currentAlbumIndex = (currentAlbumIndex + 1) % currentAlbumList.length;
+        updateModalView();
+      });
+
+      deletePhotoBtn.addEventListener('click', async () => {
+        const currentPhoto = currentAlbumList[currentAlbumIndex];
+        if (!currentPhoto) return;
+        if (confirm('確定要刪除這張相片嗎？')) {
+          await deleteItem(currentPhoto.id);
+          await fetchData();
+        }
+      });
+
+      // 鍵盤左右方向鍵控制相簿切換
+      document.addEventListener('keydown', (e) => {
+        if (modal.style.display !== 'flex') return;
+        if (e.key === 'ArrowLeft') {
+          prevBtn.click();
+        } else if (e.key === 'ArrowRight') {
+          nextBtn.click();
+        } else if (e.key === 'Escape') {
+          closeAlbumModal();
+        }
+      });
+
+      // 相簿內的 Ctrl+V 貼上事件
+      const modalDropZone = document.getElementById('modalDropZone');
+      document.addEventListener('paste', (e) => {
+        if (!isAdmin || !activeModalItem || modal.style.display !== 'flex') return;
+        if (document.activeElement.isContentEditable) return;
+        
+        const items = e.clipboardData?.items;
+        if (!items) return;
+        for (let item of items) {
+          if (item.type.includes('image')) {
+            handleModalImageFile(item.getAsFile());
+            break;
+          }
+        }
+      });
+
+      modalDropZone.addEventListener('dragover', (e) => { e.preventDefault(); modalDropZone.classList.add('dragover'); });
+      modalDropZone.addEventListener('dragleave', () => modalDropZone.classList.remove('dragover'));
+      modalDropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        modalDropZone.classList.remove('dragover');
+        if (isAdmin && activeModalItem && e.dataTransfer.files.length > 0) {
+          handleModalImageFile(e.dataTransfer.files[0]);
+        }
+      });
+    }
+
+    function openAlbumModal(item, index = 0) {
+      activeModalItem = item;
+      const modal = document.getElementById('albumModal');
+      const modalDropZone = document.getElementById('modalDropZone');
+
+      modalDropZone.style.display = isAdmin ? 'block' : 'none';
+      modal.style.display = 'flex';
+
+      const rawData = window._rawServerData || [];
+      const albumImages = rawData.filter(i => i.category === 'album_item' && String(i.note) === String(activeModalItem.id));
+      
+      // 僅顯示新上傳的相片陣列（不包含主商品）
+      currentAlbumList = albumImages;
+      
+      currentAlbumIndex = currentAlbumList.length > 0 ? Math.min(index, currentAlbumList.length - 1) : 0;
+
+      updateModalView();
+    }
+
+    function closeAlbumModal() {
+      const modal = document.getElementById('albumModal');
+      modal.style.display = 'none';
+      activeModalItem = null;
+      currentAlbumList = [];
+      currentAlbumIndex = 0;
+    }
+
+    function updateModalView() {
+      const mainImg = document.getElementById('modalMainImg');
+      const dotsContainer = document.getElementById('modalDotsContainer');
+      const prevBtn = document.getElementById('modalPrevBtn');
+      const nextBtn = document.getElementById('modalNextBtn');
+      const deletePhotoBtn = document.getElementById('deleteCurrentPhotoBtn');
+
+      if (currentAlbumList.length === 0) {
+        mainImg.src = '';
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+        dotsContainer.innerHTML = '';
+        deletePhotoBtn.style.display = 'none';
+        return;
+      }
+
+      const currentPhoto = currentAlbumList[currentAlbumIndex];
+      mainImg.src = currentPhoto.url;
+
+      // 根據圖片數量決定是否顯示左右箭頭
+      if (currentAlbumList.length > 1) {
+        prevBtn.style.display = 'block';
+        nextBtn.style.display = 'block';
+      } else {
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+      }
+
+      // 產生下方小圓點
+      dotsContainer.innerHTML = '';
+      currentAlbumList.forEach((imgObj, idx) => {
+        const dot = document.createElement('div');
+        dot.className = `modal-dot ${idx === currentAlbumIndex ? 'active' : ''}`;
+        dot.addEventListener('click', () => {
+          currentAlbumIndex = idx;
+          updateModalView();
+        });
+        dotsContainer.appendChild(dot);
+      });
+
+      // 管理員專用：可刪除當前顯示的相簿圖片
+      if (isAdmin) {
+        deletePhotoBtn.style.display = 'block';
+      }
+    }
+
+    async function handleModalImageFile(file) {
+      if (!isAdmin || !activeModalItem || !file || !file.type.startsWith('image/')) return;
+      const status = document.getElementById('modalStatus');
+      status.innerText = "正在縮小並上傳相片至相簿...";
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        try {
+          const compressedDataUrl = await compressImage(e.target.result, 800, 0.85);
+          const base64Data = compressedDataUrl.split(',')[1];
+
+          const formData = new URLSearchParams();
+          formData.append('action', 'addItem');
+          formData.append('category', 'album_item');
+          formData.append('caption', activeModalItem.caption + ' (相片)');
+          formData.append('price', '0');
+          formData.append('quantity', '數量: 1');
+          formData.append('interact', '無互動');
+          formData.append('note', activeModalItem.id);
+          formData.append('mimeType', 'image/jpeg');
+          formData.append('imageBase64', base64Data);
+
+          const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: formData
+          });
+          const result = await response.json();
+          if (result.status === 'success') {
+            status.innerText = "相簿上傳成功！";
+            await fetchData();
+            // 自動跳至剛才上傳的新圖片
+            if (window._rawServerData) {
+              const updatedAlbumImages = window._rawServerData.filter(i => i.category === 'album_item' && String(i.note) === String(activeModalItem.id));
+              currentAlbumList = updatedAlbumImages;
+              currentAlbumIndex = currentAlbumList.length - 1;
+              updateModalView();
+            }
+            setTimeout(() => status.innerText = "", 1500);
+          }
+        } catch (err) {
+          status.innerText = "上傳失敗";
+          console.error(err);
+          await fetchData();
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+    // --- 結束相簿邏輯 ---
+
     function compressImage(srcUrl, maxSize = 400, quality = 0.8) {
       return new Promise((resolve, reject) => {
         const img = new Image();
@@ -1526,7 +1920,9 @@
     }
 
     document.addEventListener('paste', (e) => {
-      if (!isAdmin || document.activeElement.isContentEditable) return;
+      const modal = document.getElementById('albumModal');
+      if (!isAdmin || document.activeElement.isContentEditable || (modal && modal.style.display === 'flex')) return;
+      
       const items = e.clipboardData?.items;
       if (!items) return;
       for (let item of items) {
@@ -1543,6 +1939,8 @@
     dropZone.addEventListener('drop', (e) => {
       e.preventDefault();
       dropZone.classList.remove('dragover');
+      const modal = document.getElementById('albumModal');
+      if (modal && modal.style.display === 'flex') return;
       if (isAdmin && e.dataTransfer.files.length > 0) {
         handleImageFile(e.dataTransfer.files[0]);
       }
