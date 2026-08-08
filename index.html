@@ -24,10 +24,22 @@
       max-width: 1200px;
       margin: 0 auto;
       padding: 20px;
-      padding-right: 20px; 
     }
 
-    /* 回到頂部按鈕 */
+    /* 新增：購物車金額顯示區 */
+    .cart-summary {
+      background: var(--card-bg);
+      border: 1px solid var(--cart-color);
+      color: #ffffff;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none; /* 預設隱藏，切換至購物車分頁時顯示 */
+      text-align: center;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
     #backToTopBtn {
       position: fixed;
       bottom: 30px;
@@ -48,7 +60,6 @@
       background-color: #333;
     }
 
-    /* 上方黏貼頂端區塊 */
     .sticky-header-wrapper {
       position: sticky;
       top: 0;
@@ -199,7 +210,6 @@
       border: 1px dashed var(--accent-color);
     }
 
-    /* 右側直立懸浮分頁 */
     .side-tabs-panel {
       position: fixed;
       right: 20px;
@@ -757,7 +767,6 @@
     
     .is-admin .img-card:hover .delete-btn { display: flex; }
 
-    /* 相簿彈跳視窗樣式 (單張放大與左右切換) */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -838,7 +847,6 @@
       border-color: var(--accent-color);
     }
 
-    /* 單張大圖與左右箭頭容器 */
     .modal-viewer-container {
       position: relative;
       width: 100%;
@@ -877,7 +885,6 @@
     .modal-prev-btn { left: 10px; }
     .modal-next-btn { right: 10px; }
 
-    /* 底部小圓點導覽列 */
     .modal-dots-container {
       display: flex;
       align-items: center;
@@ -911,10 +918,8 @@
 </head>
 <body>
 
-  <!-- 回到頂部按鈕 -->
   <button id="backToTopBtn" title="回到頂部">↑ 頂部</button>
 
-  <!-- 右側直立懸浮分頁 -->
   <div class="side-tabs-panel" id="sideTabsPanel">
     <button class="collapse-toggle-btn" id="collapseToggleBtn">📂 收合 ▾</button>
     
@@ -958,7 +963,6 @@
     </div>
   </div>
 
-  <!-- 上方黏貼頂端區塊 -->
   <div class="sticky-header-wrapper">
     <div class="header-layout">
       
@@ -1001,6 +1005,11 @@
     </div>
   </div>
   
+  <!-- 新增：購物車總額顯示 -->
+  <div id="cartSummary" class="cart-summary">
+    購物車總金額: <span id="totalAmount">0</span>
+  </div>
+
   <div class="custom-notice-container" id="giftNoticeContainer">
     <div class="custom-notice-box">
       <span>🎁</span>
@@ -1029,7 +1038,6 @@
 
   <div class="gallery" id="gallery"></div>
 
-  <!-- 相簿彈跳視窗 Modal -->
   <div class="modal-overlay" id="albumModal">
     <div class="modal-content" id="albumModalContent">
       <div class="modal-header">
@@ -1063,7 +1071,7 @@
     let currentCategoryDisplayName = '🏠 家具';
     let isAdmin = localStorage.getItem('isAdmin') === 'true';
     let allData = [];
-    let cartItems = new Map();
+    let cartItems = new Map(); // ID => QuantityString
     let activeModalItem = null;
     let currentAlbumList = [];
     let currentAlbumIndex = 0;
@@ -1083,7 +1091,21 @@
       document.getElementById('searchInput').addEventListener('input', renderGallery);
     });
 
-    // 回到頂部功能
+    // 新增：計算並顯示購物車總額
+    function calculateTotal() {
+        let total = 0;
+        cartItems.forEach((qtyStr, id) => {
+            const item = allData.find(i => String(i.id) === String(id));
+            if (item && item.category !== 'gift') { // 排除贈品區
+                const price = parseInt(item.price) || 0;
+                const qtyMatch = qtyStr.match(/\d+/);
+                const qty = qtyMatch ? parseInt(qtyMatch[0], 10) : 1;
+                total += (price * qty);
+            }
+        });
+        document.getElementById('totalAmount').innerText = total;
+    }
+
     function setupBackToTop() {
       const btn = document.getElementById('backToTopBtn');
       window.addEventListener('scroll', () => {
@@ -1143,6 +1165,7 @@
       } else {
         cartBtn.innerHTML = `<span>🛒 購物車</span>`;
       }
+      calculateTotal(); // 更新總金額
     }
 
     function initAuthUI() {
@@ -1286,6 +1309,9 @@
           document.getElementById('ringNoticeContainer').style.display = (currentCategory === 'ring_male' || currentCategory === 'ring_female') ? 'block' : 'none';
           document.getElementById('cropNoticeContainer').style.display = (currentCategory === 'crop_male' || currentCategory === 'crop_female') ? 'block' : 'none';
 
+          // 新增：顯示/隱藏購物車總額
+          document.getElementById('cartSummary').style.display = (currentCategory === 'cart') ? 'block' : 'none';
+
           document.getElementById('searchInput').value = '';
           renderGallery();
         });
@@ -1314,6 +1340,7 @@
           loadSetting('settings_crop', 'cropDescription');
 
           renderGallery();
+          calculateTotal(); // 初始計算
 
           if (activeModalItem) {
             const updated = window._rawServerData.find(i => String(i.id) === String(activeModalItem.id));
@@ -1543,6 +1570,7 @@
             setTimeout(() => { status.innerText = ""; }, 1500);
             updateCartButtonBadge();
             renderGallery();
+            calculateTotal(); // 更新總金額
           });
         }
 
@@ -1551,6 +1579,7 @@
           qtySelEl.addEventListener('change', () => {
             cartItems.set(String(item.id), qtySelEl.value);
             updateCartButtonBadge();
+            calculateTotal(); // 更新總金額
           });
         }
 
@@ -1641,6 +1670,7 @@
           status.innerText = "修改成功！";
           if (field === 'caption' || field === 'price') {
             renderGallery();
+            calculateTotal(); // 價格變更時重新計算
           }
         } else {
           status.innerText = "儲存失敗，請重試";
@@ -1670,6 +1700,7 @@
       cartItems.delete(String(id));
       updateCartButtonBadge();
       renderGallery();
+      calculateTotal(); // 項目刪除時重新計算
     }
 
     function setupModalEvents() {
