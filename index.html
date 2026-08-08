@@ -91,10 +91,18 @@
       border: 1px dashed #4f545c;
     }
 
-    .auth-box {
+    /* 登入與搜尋區塊 */
+    .auth-search-wrapper {
       position: absolute;
       right: 0;
       top: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-end;
+    }
+
+    .auth-box {
       display: flex;
       gap: 10px;
       align-items: center;
@@ -130,6 +138,16 @@
       padding: 6px 10px;
       border-radius: 4px;
       cursor: pointer;
+    }
+
+    .search-input {
+      padding: 6px 10px;
+      border-radius: 4px;
+      border: 1px solid #4f545c;
+      background: #202225;
+      color: #fff;
+      width: 140px;
+      font-size: 12px;
     }
 
     .tabs-container {
@@ -444,16 +462,23 @@
       </div>
       <div class="info-badge">
         <span>📕</span>
-        <span class="editable-text" id="siteDescription" contenteditable="false">本人夜班，交易需另約時間，故不接急單 ｜ 交易方式：可糖可T，比值1:1 ｜ Discord：mimi_ouo｜ 加載較慢，請稍等，或重新整理頁面</span>
+        <span class="editable-text" id="siteDescription" contenteditable="false">本人夜班，交易需另約時間，故不接急單
+交易方式：可糖可T，比值1:1
+Discord：mimi_ouo
+加載較慢，請稍等，或重新整理頁面</span>
       </div>
 
-      <div class="auth-box" id="authBox">
-        <button class="auth-btn" id="showLoginBtn">登入</button>
-        <div class="auth-inputs" id="authInputs">
-          <input type="password" id="passwordInput" placeholder="管理員密碼">
-          <button class="auth-btn" id="loginBtn">確認</button>
-          <button class="cancel-btn" id="cancelBtn">✕</button>
+      <!-- 登入與搜尋區塊 -->
+      <div class="auth-search-wrapper">
+        <div class="auth-box" id="authBox">
+          <button class="auth-btn" id="showLoginBtn">登入</button>
+          <div class="auth-inputs" id="authInputs">
+            <input type="password" id="passwordInput" placeholder="管理員密碼">
+            <button class="auth-btn" id="loginBtn">確認</button>
+            <button class="cancel-btn" id="cancelBtn">✕</button>
+          </div>
         </div>
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 搜尋名稱或備註...">
       </div>
     </div>
 
@@ -510,6 +535,9 @@
       initAuthUI();
       setupTabs();
       fetchData();
+      
+      // 綁定搜尋框事件
+      document.getElementById('searchInput').addEventListener('input', renderGallery);
     });
 
     function initAuthUI() {
@@ -704,7 +732,18 @@
 
     function renderGallery() {
       const gallery = document.getElementById('gallery');
-      const filtered = allData.filter(item => item.category === currentCategory);
+      const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+
+      // 先依當前分類篩選，再依搜尋關鍵字篩選（比對名稱或備註）
+      const filtered = allData.filter(item => {
+        const matchCategory = (item.category === currentCategory);
+        if (!matchCategory) return false;
+
+        if (!keyword) return true;
+        const caption = String(item.caption || '').toLowerCase();
+        const note = String(item.note || '').toLowerCase();
+        return caption.includes(keyword) || note.includes(keyword);
+      });
       
       filtered.sort(compareCaption);
       gallery.innerHTML = '';
