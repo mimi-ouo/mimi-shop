@@ -546,7 +546,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 35px; 
+      width: 34px; 
       flex-shrink: 0;
       gap: 1px;
       color: #ffffff;
@@ -701,7 +701,7 @@
 
       <!-- 搜尋區 -->
       <div class="search-panel">
-        <input type="text" id="searchInput" class="search-input" placeholder="🔍 搜尋名稱或備註...">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 搜尋全區名稱或備註...">
       </div>
 
     </div>
@@ -913,6 +913,8 @@
           document.getElementById('ringNoticeContainer').style.display = (currentCategory === 'ring_male' || currentCategory === 'ring_female') ? 'block' : 'none';
           document.getElementById('cropNoticeContainer').style.display = (currentCategory === 'crop_male' || currentCategory === 'crop_female') ? 'block' : 'none';
 
+          // 點擊分頁時清空搜尋框，回到正常分頁檢視
+          document.getElementById('searchInput').value = '';
           renderGallery();
         });
       });
@@ -988,13 +990,14 @@
       const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
 
       const filtered = allData.filter(item => {
-        const matchCategory = (item.category === currentCategory);
-        if (!matchCategory) return false;
-
-        if (!keyword) return true;
-        const caption = String(item.caption || '').toLowerCase();
-        const note = String(item.note || '').toLowerCase();
-        return caption.includes(keyword) || note.includes(keyword);
+        // 如果有輸入搜尋關鍵字，則進行「全區」比對；否則只顯示「目前分頁」
+        if (keyword) {
+          const caption = String(item.caption || '').toLowerCase();
+          const note = String(item.note || '').toLowerCase();
+          return caption.includes(keyword) || note.includes(keyword);
+        } else {
+          return item.category === currentCategory;
+        }
       });
       
       filtered.sort(compareItems);
