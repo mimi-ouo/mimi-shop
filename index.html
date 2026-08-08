@@ -768,7 +768,7 @@
       padding: 12px 20px;
       border-bottom: 1px solid var(--border-color);
       display: flex;
-      justify-content: flex-end; /* 靠右對齊（標題隱藏後只剩關閉按鈕） */
+      justify-content: space-between; /* 改回 space-between 讓標題與關閉按鈕分開對齊 */
       align-items: center;
       background: #171717;
     }
@@ -778,7 +778,7 @@
       font-weight: bold;
       color: #fff;
       margin: 0;
-      display: none; /* 隱藏相簿頂部標題 */
+      display: block; /* 顯示相簿頂部標題 */
     }
 
     .modal-close-btn {
@@ -1009,7 +1009,7 @@
   <div class="modal-overlay" id="albumModal">
     <div class="modal-content" id="albumModalContent">
       <div class="modal-header">
-        <h3 class="modal-title" id="modalTitle">商品相簿</h3>
+        <h3 class="modal-title" id="modalTitle">按叉或空白處關閉</h3>
         <button class="modal-close-btn" id="modalCloseBtn">✕</button>
       </div>
       <div class="modal-body">
