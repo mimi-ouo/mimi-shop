@@ -87,6 +87,14 @@
       font-size: 13px;
       font-weight: bold;
       width: fit-content;
+      text-decoration: none;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .discord-badge:hover {
+      background-color: rgba(43, 115, 223, 0.3);
+      border-color: rgba(43, 115, 223, 0.8);
+      color: #8fa3ef;
     }
 
     .center-notice-panel {
@@ -718,10 +726,10 @@
             <div class="title-area">
               <h2>⭐ 米米小舖 ⭐</h2>
             </div>
-            <div class="discord-badge">
+            <a href="https://discord.com/users/mimi_ouo" target="_blank" class="discord-badge" title="點擊前往 Discord 聯絡">
               <span>💬</span>
               <span>Discord：mimi_ouo</span>
-            </div>
+            </a>
           </div>
           
           <div class="center-notice-panel">
@@ -1026,7 +1034,6 @@
       return capA.localeCompare(capB, 'zh-Hant', { numeric: true, sensitivity: 'base' });
     }
 
-    // 產生訪客下拉選單的選項（根據管理端設置的最大數量或特殊狀態）
     function generateVisitorQtyOptions(adminQtyStr, selectedQty) {
       let optionsHTML = '';
       const text = String(adminQtyStr).trim();
