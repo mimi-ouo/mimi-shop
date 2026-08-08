@@ -26,7 +26,7 @@
       padding: 20px;
     }
 
-    /* 新增：購物車金額顯示區 */
+    /* 購物車金額顯示與操作區 */
     .cart-summary {
       background: var(--card-bg);
       border: 1px solid var(--cart-color);
@@ -34,12 +34,32 @@
       padding: 15px;
       border-radius: 8px;
       margin-bottom: 20px;
-      display: none; /* 預設隱藏，切換至購物車分頁時顯示 */
+      display: none;
       text-align: center;
       font-weight: bold;
       font-size: 18px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
     }
 
+    .clear-cart-btn {
+      background-color: var(--danger-color);
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    
+    .clear-cart-btn:hover {
+      background-color: #cc3d3d;
+    }
+
+    /* 其他樣式維持原樣 ... */
     #backToTopBtn {
       position: fixed;
       bottom: 30px;
@@ -1005,9 +1025,10 @@
     </div>
   </div>
   
-  <!-- 新增：購物車總額顯示 -->
+  <!-- 更新：購物車區塊新增清空按鈕 -->
   <div id="cartSummary" class="cart-summary">
-    購物車總金額: <span id="totalAmount">0</span>
+    <div>購物車總金額: <span id="totalAmount">0</span></div>
+    <button id="clearCartBtn" class="clear-cart-btn">清空購物車</button>
   </div>
 
   <div class="custom-notice-container" id="giftNoticeContainer">
@@ -1085,18 +1106,30 @@
       setupDiscordButton();
       setupModalEvents();
       setupBackToTop();
+      setupClearCartBtn(); // 新增：清空按鈕事件綁定
       fetchData();
       updateCartButtonBadge();
       
       document.getElementById('searchInput').addEventListener('input', renderGallery);
     });
 
-    // 新增：計算並顯示購物車總額
+    // 新增：清空購物車按鈕邏輯
+    function setupClearCartBtn() {
+      document.getElementById('clearCartBtn').addEventListener('click', () => {
+        if (confirm('確定要清空購物車嗎？')) {
+          cartItems.clear();
+          updateCartButtonBadge();
+          renderGallery();
+          calculateTotal();
+        }
+      });
+    }
+
     function calculateTotal() {
         let total = 0;
         cartItems.forEach((qtyStr, id) => {
             const item = allData.find(i => String(i.id) === String(id));
-            if (item && item.category !== 'gift') { // 排除贈品區
+            if (item && item.category !== 'gift') {
                 const price = parseInt(item.price) || 0;
                 const qtyMatch = qtyStr.match(/\d+/);
                 const qty = qtyMatch ? parseInt(qtyMatch[0], 10) : 1;
@@ -1165,7 +1198,7 @@
       } else {
         cartBtn.innerHTML = `<span>🛒 購物車</span>`;
       }
-      calculateTotal(); // 更新總金額
+      calculateTotal();
     }
 
     function initAuthUI() {
@@ -1309,8 +1342,7 @@
           document.getElementById('ringNoticeContainer').style.display = (currentCategory === 'ring_male' || currentCategory === 'ring_female') ? 'block' : 'none';
           document.getElementById('cropNoticeContainer').style.display = (currentCategory === 'crop_male' || currentCategory === 'crop_female') ? 'block' : 'none';
 
-          // 新增：顯示/隱藏購物車總額
-          document.getElementById('cartSummary').style.display = (currentCategory === 'cart') ? 'block' : 'none';
+          document.getElementById('cartSummary').style.display = (currentCategory === 'cart') ? 'flex' : 'none';
 
           document.getElementById('searchInput').value = '';
           renderGallery();
@@ -1340,7 +1372,7 @@
           loadSetting('settings_crop', 'cropDescription');
 
           renderGallery();
-          calculateTotal(); // 初始計算
+          calculateTotal();
 
           if (activeModalItem) {
             const updated = window._rawServerData.find(i => String(i.id) === String(activeModalItem.id));
@@ -1570,7 +1602,7 @@
             setTimeout(() => { status.innerText = ""; }, 1500);
             updateCartButtonBadge();
             renderGallery();
-            calculateTotal(); // 更新總金額
+            calculateTotal();
           });
         }
 
@@ -1579,7 +1611,7 @@
           qtySelEl.addEventListener('change', () => {
             cartItems.set(String(item.id), qtySelEl.value);
             updateCartButtonBadge();
-            calculateTotal(); // 更新總金額
+            calculateTotal();
           });
         }
 
@@ -1670,7 +1702,7 @@
           status.innerText = "修改成功！";
           if (field === 'caption' || field === 'price') {
             renderGallery();
-            calculateTotal(); // 價格變更時重新計算
+            calculateTotal();
           }
         } else {
           status.innerText = "儲存失敗，請重試";
@@ -1700,7 +1732,7 @@
       cartItems.delete(String(id));
       updateCartButtonBadge();
       renderGallery();
-      calculateTotal(); // 項目刪除時重新計算
+      calculateTotal();
     }
 
     function setupModalEvents() {
