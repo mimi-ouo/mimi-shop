@@ -575,7 +575,7 @@
       color: #ffffff;
     }
 
-    /* 第二欄：佔用剩餘空間放置商品名稱/說明（維持 10px 不變） */
+    /* 第二欄：佔用剩餘空間放置商品名稱/說明（文字大小 15px，圖片說明欄保持 10px） */
     .desc-col {
       flex: 1;
       min-width: 0;
@@ -591,9 +591,14 @@
       word-break: break-all;
       display: block;
       text-align: left;
-      font-size: 10px;
+      font-size: 15px;
       width: 100%;
       box-sizing: border-box;
+    }
+
+    /* 圖片下方的說明文字維持 10px 不變 */
+    .img-info .editable-text {
+      font-size: 10px;
     }
 
     .admin-note-box {
@@ -1139,7 +1144,7 @@
 
         if (newValue === originalValue) return;
 
-        const targetItem = allData.find(item => item.id === id);
+        const targetItem = allData.find(item => String(item.id) === String(id));
         if (targetItem) {
           targetItem[field] = newValue;
         }
@@ -1161,7 +1166,7 @@
       });
 
       el.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && field !== 'caption') { e.preventDefault(); el.blur(); }
+        if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
       });
     }
 
@@ -1178,7 +1183,7 @@
 
     async function deleteItem(id) {
       await fetch(`${SCRIPT_URL}?action=deleteItem&id=${id}`);
-      allData = allData.filter(item => item.id !== id);
+      allData = allData.filter(item => String(item.id) !== String(id));
       renderGallery();
     }
 
