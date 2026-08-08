@@ -550,11 +550,11 @@
       gap: 4px;
     }
 
-    /* 第一欄：固定寬度可容納三個數字並帶有白色「$」與白色字體 */
+    /* 第一欄：固定寬度可容納三個數字並帶有白色「$」與白色字體 (已改為置中) */
     .price-col {
       display: flex;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: center;
       width: 38px; 
       flex-shrink: 0;
       gap: 1px;
@@ -570,12 +570,12 @@
 
     .price-col .editable-price {
       width: 24px;
-      text-align: right;
+      text-align: center;
       outline: none;
       color: #ffffff;
     }
 
-    /* 第二欄：佔用剩餘空間放置商品名稱/說明（文字大小 15px，圖片說明欄保持 10px） */
+    /* 第二欄：佔用剩餘空間放置商品名稱/說明 (已改為置中) */
     .desc-col {
       flex: 1;
       min-width: 0;
@@ -590,7 +590,7 @@
       color: var(--text-color);
       word-break: break-all;
       display: block;
-      text-align: left;
+      text-align: center;
       font-size: 15px;
       width: 100%;
       box-sizing: border-box;
