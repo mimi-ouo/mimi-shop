@@ -27,6 +27,27 @@
       padding-right: 20px; 
     }
 
+    /* 回到頂部按鈕 */
+    #backToTopBtn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      display: none;
+      background-color: var(--card-bg);
+      color: var(--accent-color);
+      border: 1px solid var(--border-color);
+      padding: 10px 15px;
+      border-radius: 50px;
+      cursor: pointer;
+      z-index: 9999;
+      font-weight: bold;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      transition: background 0.3s;
+    }
+    #backToTopBtn:hover {
+      background-color: #333;
+    }
+
     /* 上方黏貼頂端區塊 */
     .sticky-header-wrapper {
       position: sticky;
@@ -768,7 +789,7 @@
       padding: 12px 20px;
       border-bottom: 1px solid var(--border-color);
       display: flex;
-      justify-content: space-between; /* 改回 space-between 讓標題與關閉按鈕分開對齊 */
+      justify-content: space-between;
       align-items: center;
       background: #171717;
     }
@@ -778,7 +799,7 @@
       font-weight: bold;
       color: #fff;
       margin: 0;
-      display: block; /* 顯示相簿頂部標題 */
+      display: block;
     }
 
     .modal-close-btn {
@@ -889,6 +910,9 @@
   </style>
 </head>
 <body>
+
+  <!-- 回到頂部按鈕 -->
+  <button id="backToTopBtn" title="回到頂部">↑ 頂部</button>
 
   <!-- 右側直立懸浮分頁 -->
   <div class="side-tabs-panel" id="sideTabsPanel">
@@ -1005,7 +1029,7 @@
 
   <div class="gallery" id="gallery"></div>
 
-  <!-- 相簿彈跳視窗 Modal (單張放大 + 左右箭頭/小圓點) -->
+  <!-- 相簿彈跳視窗 Modal -->
   <div class="modal-overlay" id="albumModal">
     <div class="modal-content" id="albumModalContent">
       <div class="modal-header">
@@ -1040,9 +1064,9 @@
     let isAdmin = localStorage.getItem('isAdmin') === 'true';
     let allData = [];
     let cartItems = new Map();
-    let activeModalItem = null; // 當前主商品
-    let currentAlbumList = []; // 當前相簿的所有圖片陣列
-    let currentAlbumIndex = 0; // 目前顯示第幾張相片
+    let activeModalItem = null;
+    let currentAlbumList = [];
+    let currentAlbumIndex = 0;
 
     const ADMIN_PASSWORD = "1j6ul42l4ji3++";
 
@@ -1052,11 +1076,27 @@
       setupCollapseToggle();
       setupDiscordButton();
       setupModalEvents();
+      setupBackToTop();
       fetchData();
       updateCartButtonBadge();
       
       document.getElementById('searchInput').addEventListener('input', renderGallery);
     });
+
+    // 回到頂部功能
+    function setupBackToTop() {
+      const btn = document.getElementById('backToTopBtn');
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+          btn.style.display = 'block';
+        } else {
+          btn.style.display = 'none';
+        }
+      });
+      btn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
 
     function setupDiscordButton() {
       const btn = document.getElementById('discordCopyBtn');
@@ -1632,7 +1672,6 @@
       renderGallery();
     }
 
-    // --- 單張放大相簿與切換邏輯 ---
     function setupModalEvents() {
       const modal = document.getElementById('albumModal');
       const closeBtn = document.getElementById('modalCloseBtn');
@@ -1666,7 +1705,6 @@
         }
       });
 
-      // 鍵盤左右方向鍵控制相簿切換
       document.addEventListener('keydown', (e) => {
         if (modal.style.display !== 'flex') return;
         if (e.key === 'ArrowLeft') {
@@ -1678,7 +1716,6 @@
         }
       });
 
-      // 相簿內的 Ctrl+V 貼上事件
       const modalDropZone = document.getElementById('modalDropZone');
       document.addEventListener('paste', (e) => {
         if (!isAdmin || !activeModalItem || modal.style.display !== 'flex') return;
@@ -1716,7 +1753,6 @@
       const rawData = window._rawServerData || [];
       const albumImages = rawData.filter(i => i.category === 'album_item' && String(i.note) === String(activeModalItem.id));
       
-      // 僅顯示新上傳的相片陣列（不包含主商品）
       currentAlbumList = albumImages;
       
       currentAlbumIndex = currentAlbumList.length > 0 ? Math.min(index, currentAlbumList.length - 1) : 0;
@@ -1751,7 +1787,6 @@
       const currentPhoto = currentAlbumList[currentAlbumIndex];
       mainImg.src = currentPhoto.url;
 
-      // 根據圖片數量決定是否顯示左右箭頭
       if (currentAlbumList.length > 1) {
         prevBtn.style.display = 'block';
         nextBtn.style.display = 'block';
@@ -1760,7 +1795,6 @@
         nextBtn.style.display = 'none';
       }
 
-      // 產生下方小圓點
       dotsContainer.innerHTML = '';
       currentAlbumList.forEach((imgObj, idx) => {
         const dot = document.createElement('div');
@@ -1772,7 +1806,6 @@
         dotsContainer.appendChild(dot);
       });
 
-      // 管理員專用：可刪除當前顯示的相簿圖片
       if (isAdmin) {
         deletePhotoBtn.style.display = 'block';
       }
@@ -1808,7 +1841,6 @@
           if (result.status === 'success') {
             status.innerText = "相簿上傳成功！";
             await fetchData();
-            // 自動跳至剛才上傳的新圖片
             if (window._rawServerData) {
               const updatedAlbumImages = window._rawServerData.filter(i => i.category === 'album_item' && String(i.note) === String(activeModalItem.id));
               currentAlbumList = updatedAlbumImages;
@@ -1825,7 +1857,6 @@
       };
       reader.readAsDataURL(file);
     }
-    // --- 結束相簿邏輯 ---
 
     function compressImage(srcUrl, maxSize = 400, quality = 0.8) {
       return new Promise((resolve, reject) => {
