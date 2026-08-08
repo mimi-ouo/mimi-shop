@@ -111,15 +111,19 @@
       width: 100%;
     }
 
-    .info-badge .editable-text {
+    /* 公告與說明區維持 15px 與靠左 */
+    .info-badge .editable-text,
+    .custom-notice-box .editable-text {
       outline: none;
       color: var(--text-color);
       white-space: pre-wrap;
       word-break: break-all;
       font-size: 15px;
+      text-align: left;
     }
 
-    .is-admin .info-badge .editable-text {
+    .is-admin .info-badge .editable-text,
+    .is-admin .custom-notice-box .editable-text {
       background: rgba(255, 255, 255, 0.1);
       cursor: text;
       padding: 2px 4px;
@@ -354,20 +358,7 @@
     }
 
     .custom-notice-box .editable-text {
-      outline: none;
-      color: var(--text-color);
-      white-space: pre-wrap;
-      word-break: break-all;
       flex: 1;
-      font-size: 15px;
-    }
-
-    .is-admin .custom-notice-box .editable-text {
-      background: rgba(255, 255, 255, 0.1);
-      cursor: text;
-      padding: 2px 4px;
-      border-radius: 4px;
-      border: 1px dashed var(--accent-color);
     }
 
     .drop-zone {
@@ -550,12 +541,12 @@
       gap: 4px;
     }
 
-    /* 第一欄：固定寬度可容納三個數字並帶有白色「$」與白色字體 (已改為置中) */
+    /* 第一欄：價格欄文字置中 */
     .price-col {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 38px; 
+      width: 37px; 
       flex-shrink: 0;
       gap: 1px;
       color: #ffffff;
@@ -573,9 +564,10 @@
       text-align: center;
       outline: none;
       color: #ffffff;
+      font-size: 11px;
     }
 
-    /* 第二欄：佔用剩餘空間放置商品名稱/說明 (已改為置中) */
+    /* 第二欄：商品名稱說明欄 */
     .desc-col {
       flex: 1;
       min-width: 0;
@@ -583,7 +575,8 @@
       padding-left: 4px;
     }
 
-    .editable-text {
+    /* 圖片下方的商品名稱/說明文字：維持 11px 且置中對齊 */
+    .desc-col .editable-text {
       outline: none;
       padding: 2px 4px;
       border-radius: 4px;
@@ -591,14 +584,9 @@
       word-break: break-all;
       display: block;
       text-align: center;
-      font-size: 15px;
+      font-size: 11px;
       width: 100%;
       box-sizing: border-box;
-    }
-
-    /* 圖片下方的說明文字維持 10px 不變 */
-    .img-info .editable-text {
-      font-size: 10px;
     }
 
     .admin-note-box {
@@ -628,7 +616,11 @@
       min-height: 14px;
     }
 
-    .is-admin .editable-text, .is-admin .admin-note-text, .is-admin .editable-price { 
+    .is-admin .desc-col .editable-text, 
+    .is-admin .info-badge .editable-text, 
+    .is-admin .custom-notice-box .editable-text, 
+    .is-admin .admin-note-text, 
+    .is-admin .editable-price { 
       background: rgba(255, 255, 255, 0.1); 
       cursor: text; 
     }
@@ -700,8 +692,8 @@
           <div class="center-notice-panel">
             <div class="info-badge">
               <span>📕</span>
-              <span class="editable-text" id="siteDescription" contenteditable="false">本人夜班，交易需另約時間，故不接急單
-交易方式：可糖可T，比值1:1</span>
+              <span class="editable-text" id="siteDescription" contenteditable="false">本人夜班, 交易需另約時間, 故不接急單
+交易方式: 可糖可T, 比值1:1</span>
             </div>
           </div>
         </div>
@@ -719,7 +711,7 @@
   <div class="custom-notice-container" id="giftNoticeContainer">
     <div class="custom-notice-box">
       <span>🎁</span>
-      <span class="editable-text" id="giftDescription" contenteditable="false">本區一律2糖，如有購買任一商品或本區滿五件，可選本區一件免費贈送</span>
+      <span class="editable-text" id="giftDescription" contenteditable="false">本區一律2糖, 如有購買任一商品或本區滿五件, 可選本區一件免費贈送</span>
     </div>
   </div>
 
@@ -735,7 +727,7 @@
   <div class="custom-notice-container" id="cropNoticeContainer">
     <div class="custom-notice-box">
       <span>🌱</span>
-      <span class="editable-text" id="cropDescription" contenteditable="false">誕生作物只收T，一律種植後付款</span>
+      <span class="editable-text" id="cropDescription" contenteditable="false">誕生作物只收T, 一律種植後付款</span>
     </div>
   </div>
 
