@@ -181,7 +181,6 @@
       width: 100px;
     }
 
-    /* 修改：子選單預設隱藏，透過 hover 或是 active 狀態來持續顯示，直到點擊子分頁 */
     .dropdown-menu {
       display: none;
       position: absolute;
@@ -196,7 +195,6 @@
       border: 1px solid var(--border-color);
     }
 
-    /* 支援 hover 展開 或 當父容器有 open 類別時展開 */
     .dropdown:hover .dropdown-menu,
     .dropdown.open .dropdown-menu,
     .dropdown-menu:hover {
@@ -363,7 +361,22 @@
       width: 120px;
       height: 120px;
       position: relative;
-      background-color: #000;
+      background-color: #1a1a1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 載入中文字樣樣式 */
+    .loading-text {
+      position: absolute;
+      font-size: 11px;
+      color: #888888;
+      text-align: center;
+      width: 100%;
+      padding: 0 4px;
+      box-sizing: border-box;
+      z-index: 1;
     }
 
     .img-wrapper img {
@@ -371,6 +384,14 @@
       height: 100%;
       object-fit: cover;
       pointer-events: none;
+      position: relative;
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .img-card.loaded .img-wrapper img {
+      opacity: 1;
     }
 
     .status-badge {
@@ -887,6 +908,7 @@
         card.innerHTML = `
           <button class="delete-btn" title="刪除圖片">✕</button>
           <div class="img-wrapper">
+            <span class="loading-text">加載中請稍後</span>
             ${badgeHTML}
             <img src="${item.url}" alt="image" loading="lazy" decoding="async" />
           </div>
