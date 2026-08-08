@@ -23,13 +23,8 @@
       max-width: 1200px;
       margin: 0 auto;
       padding: 20px;
-      padding-right: 140px; 
-    }
-
-    @media (max-width: 900px) {
-      body {
-        padding-right: 20px;
-      }
+      /* 移除原本固定的右側留白，改由 CSS 或浮動視窗動態處理 */
+      padding-right: 20px; 
     }
 
     /* 上方黏貼頂端區塊 */
@@ -62,6 +57,9 @@
       align-items: center;
       gap: 20px;
       flex-wrap: wrap;
+      /* 讓頂端左側佔滿剩餘空間，避免被隱藏的登入鈕影響 */
+      flex: 1;
+      min-width: 280px;
     }
 
     .title-area-group {
@@ -130,11 +128,11 @@
       border: 1px dashed var(--accent-color);
     }
 
-    /* 右側直立懸浮分頁區塊 */
+    /* 右側直立懸浮分頁區塊（含縮小/展開功能與登入按鈕） */
     .side-tabs-panel {
       position: fixed;
       right: 20px;
-      top: 160px;
+      top: 140px;
       display: flex;
       flex-direction: column;
       gap: 8px;
@@ -144,6 +142,45 @@
       border-radius: 10px;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
       border: 1px solid var(--border-color);
+      transition: all 0.3s ease;
+    }
+
+    /* 縮小收合狀態 */
+    .side-tabs-panel.collapsed {
+      padding: 8px;
+      gap: 4px;
+    }
+    .side-tabs-panel.collapsed .collapse-content {
+      display: none;
+    }
+
+    /* 收合切換按鈕樣式 */
+    .collapse-toggle-btn {
+      background: var(--bg-color);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      width: 100px;
+      box-sizing: border-box;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .collapse-toggle-btn:hover {
+      background: #2a2a2a;
+      border-color: var(--accent-color);
+    }
+
+    .collapse-content {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
     .tab-btn, .dropdown-toggle {
@@ -220,47 +257,67 @@
       color: #121212;
     }
 
+    /* 懸浮區塊內的登入專區 */
+    .auth-section-wrapper {
+      border-top: 1px solid var(--border-color);
+      padding-top: 8px;
+      margin-top: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100px;
+      box-sizing: border-box;
+    }
+
     .auth-box {
       display: flex;
-      gap: 8px;
-      align-items: center;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
     }
 
     .auth-inputs {
       display: none;
+      flex-direction: column;
       gap: 6px;
-      align-items: center;
+      width: 100%;
     }
 
     .auth-inputs input {
-      padding: 4px 8px;
+      padding: 4px 6px;
       border-radius: 4px;
       border: 1px solid var(--border-color);
       background: var(--card-bg);
       color: var(--text-color);
-      width: 90px;
+      width: 100%;
       font-size: 12px;
+      box-sizing: border-box;
     }
 
     .auth-btn {
       background: var(--accent-color);
       color: #121212;
       border: none;
-      padding: 5px 12px;
+      padding: 6px 8px;
       border-radius: 4px;
       cursor: pointer;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: bold;
+      width: 100%;
+      box-sizing: border-box;
+      text-align: center;
     }
 
     .cancel-btn {
       background: #333333;
       color: var(--text-color);
       border: none;
-      padding: 5px 8px;
+      padding: 4px;
       border-radius: 4px;
       cursor: pointer;
-      font-size: 13px;
+      font-size: 12px;
+      width: 100%;
+      text-align: center;
     }
 
     .search-input {
@@ -527,36 +584,52 @@
 </head>
 <body>
 
-  <!-- 右側直立懸浮分頁 -->
-  <div class="side-tabs-panel">
-    <button class="tab-btn active" data-category="general">🏠 家具</button>
-    <button class="tab-btn" data-category="memes">🧸 熊熊</button>
-    <button class="tab-btn" data-category="pot">🪴 花盆</button>
+  <!-- 右側直立懸浮分頁（含縮小收合功能與最下方登入區） -->
+  <div class="side-tabs-panel" id="sideTabsPanel">
+    <button class="collapse-toggle-btn" id="collapseToggleBtn">📂 收合 ▾</button>
     
-    <div class="dropdown" id="dropdown-ring">
-      <button class="dropdown-toggle" data-dropdown="dropdown-ring">💍 戒指 ▾</button>
-      <div class="dropdown-menu">
-        <button class="dropdown-item tab-btn" data-category="ring_male">👦 限男</button>
-        <button class="dropdown-item tab-btn" data-category="ring_female">👧 限女</button>
+    <div class="collapse-content" id="collapseContent">
+      <button class="tab-btn active" data-category="general">🏠 家具</button>
+      <button class="tab-btn" data-category="memes">🧸 熊熊</button>
+      <button class="tab-btn" data-category="pot">🪴 花盆</button>
+      
+      <div class="dropdown" id="dropdown-ring">
+        <button class="dropdown-toggle" data-dropdown="dropdown-ring">💍 戒指 ▾</button>
+        <div class="dropdown-menu">
+          <button class="dropdown-item tab-btn" data-category="ring_male">👦 限男</button>
+          <button class="dropdown-item tab-btn" data-category="ring_female">👧 限女</button>
+        </div>
       </div>
+
+      <div class="dropdown" id="dropdown-crop">
+        <button class="dropdown-toggle" data-dropdown="dropdown-crop">🌱 作物 ▾</button>
+        <div class="dropdown-menu">
+          <button class="dropdown-item tab-btn" data-category="crop_male">👦 限男</button>
+          <button class="dropdown-item tab-btn" data-category="crop_female">👧 限女</button>
+        </div>
+      </div>
+
+      <button class="tab-btn" data-category="gift">🎁 贈品區</button>
     </div>
 
-    <div class="dropdown" id="dropdown-crop">
-      <button class="dropdown-toggle" data-dropdown="dropdown-crop">🌱 作物 ▾</button>
-      <div class="dropdown-menu">
-        <button class="dropdown-item tab-btn" data-category="crop_male">👦 限男</button>
-        <button class="dropdown-item tab-btn" data-category="crop_female">👧 限女</button>
+    <!-- 登入按鈕/區塊移至懸浮區塊最下方 -->
+    <div class="auth-section-wrapper">
+      <div class="auth-box" id="authBox">
+        <button class="auth-btn" id="showLoginBtn">登入</button>
+        <div class="auth-inputs" id="authInputs">
+          <input type="password" id="passwordInput" placeholder="管理員密碼">
+          <button class="auth-btn" id="loginBtn">確認</button>
+          <button class="cancel-btn" id="cancelBtn">✕</button>
+        </div>
       </div>
     </div>
-
-    <button class="tab-btn" data-category="gift">🎁 贈品區</button>
   </div>
 
   <!-- 上方黏貼頂端區塊 -->
   <div class="sticky-header-wrapper">
     <div class="header-layout">
       
-      <!-- 第一行：左側標題與公告並排，右側登入 -->
+      <!-- 第一行：左側標題與公告並排 -->
       <div class="header-top-row">
         <div class="left-control-panel">
           <div class="title-area-group">
@@ -576,16 +649,6 @@
               <span class="editable-text" id="siteDescription" contenteditable="false">本人夜班，交易需另約時間，故不接急單
 交易方式：可糖可T，比值1:1</span>
             </div>
-          </div>
-        </div>
-        
-        <!-- 登入按鈕 -->
-        <div class="auth-box" id="authBox">
-          <button class="auth-btn" id="showLoginBtn">登入</button>
-          <div class="auth-inputs" id="authInputs">
-            <input type="password" id="passwordInput" placeholder="管理員密碼">
-            <button class="auth-btn" id="loginBtn">確認</button>
-            <button class="cancel-btn" id="cancelBtn">✕</button>
           </div>
         </div>
       </div>
@@ -642,10 +705,26 @@
     document.addEventListener('DOMContentLoaded', () => {
       initAuthUI();
       setupTabs();
+      setupCollapseToggle();
       fetchData();
       
       document.getElementById('searchInput').addEventListener('input', renderGallery);
     });
+
+    function setupCollapseToggle() {
+      const toggleBtn = document.getElementById('collapseToggleBtn');
+      const panel = document.getElementById('sideTabsPanel');
+
+      toggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        panel.classList.toggle('collapsed');
+        if (panel.classList.contains('collapsed')) {
+          toggleBtn.innerText = "📂 展開 ▴";
+        } else {
+          toggleBtn.innerText = "📂 收合 ▾";
+        }
+      });
+    }
 
     function initAuthUI() {
       const authBox = document.getElementById('authBox');
@@ -663,7 +742,7 @@
         ringDescElem.contentEditable = "true";
         cropDescElem.contentEditable = "true";
         authBox.innerHTML = `
-          <span style="color:var(--success-color); font-size:13px; font-weight:bold;">已登入管理員</span>
+          <div style="font-size:11px; font-weight:bold; color:var(--success-color); text-align:center; margin-bottom:4px;">已登入</div>
           <button class="auth-btn" id="logoutBtn" style="background:#333; color:var(--text-color);">登出</button>
         `;
         document.getElementById('logoutBtn').addEventListener('click', () => {
@@ -733,7 +812,7 @@
 
       cancelBtn.addEventListener('click', () => {
         authInputs.style.display = 'none';
-        showLoginBtn.style.display = 'inline-block';
+        showLoginBtn.style.display = 'block';
       });
 
       loginBtn.addEventListener('click', () => {
