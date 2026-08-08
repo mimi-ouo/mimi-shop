@@ -535,7 +535,7 @@
       border-top: 1px solid var(--border-color);
     }
 
-    /* 圖片下方資訊列改用兩欄佈局（依圖片設計範本優化） */
+    /* 圖片下方資訊列兩欄佈局 */
     .caption-container {
       display: flex;
       align-items: center;
@@ -548,7 +548,7 @@
       gap: 4px;
     }
 
-    /* 第一欄：固定寬度可容納三個數字（約對應 3ch 加上 padding）並帶有黃色「$」 */
+    /* 第一欄：固定寬度可容納三個數字並帶有白色「$」與白色字體 */
     .price-col {
       display: flex;
       align-items: center;
@@ -556,13 +556,13 @@
       width: 38px; 
       flex-shrink: 0;
       gap: 1px;
-      color: #ffe600;
+      color: #ffffff;
       font-weight: bold;
       font-size: 11px;
     }
 
     .price-col .currency-symbol {
-      color: #ffe600;
+      color: #ffffff;
       user-select: none;
     }
 
@@ -570,10 +570,10 @@
       width: 24px;
       text-align: right;
       outline: none;
-      color: #ffe600;
+      color: #ffffff;
     }
 
-    /* 第二欄：佔用剩餘空間放置商品名稱/說明 */
+    /* 第二欄：佔用剩餘空間放置商品名稱/說明（字形大小縮小 2px，從 11px 改為 9px） */
     .desc-col {
       flex: 1;
       min-width: 0;
@@ -589,7 +589,7 @@
       word-break: break-all;
       display: block;
       text-align: left;
-      font-size: 11px;
+      font-size: 9px;
       width: 100%;
       box-sizing: border-box;
     }
@@ -1031,10 +1031,7 @@
           badgeHTML = `<span class="status-badge ${statusClass}" id="badge-${item.id}">${currentQty}</span>`;
         }
 
-        // 智慧解析 caption：假設價格與名稱合在一起，可透過空格或簡單格式分離，或者預設將 price 獨立欄位對應
-        // 這裡相容既有 caption 邏輯，若 caption 含有數字或價格可自動拆分，或者預設空值讓使用者填寫
         const fullCaption = item.caption || '';
-        // 這裡示範將 caption 分離為 price 與 text（若有特定格式可依需求調整，此處預設全部放入名稱或自動提取數字開頭作為價格）
         let priceVal = item.price || '';
         let textVal = fullCaption;
 
@@ -1126,7 +1123,6 @@
         if (!isAdmin) return;
         let newValue = el.innerText.trim();
         
-        // 若為價格欄位，限制最多3位數字
         if (field === 'price') {
           newValue = newValue.replace(/\D/g, '').slice(0, 3);
           el.innerText = newValue;
