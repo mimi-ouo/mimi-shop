@@ -24,11 +24,22 @@
       padding: 20px;
     }
 
+    /* 將上方固定區域包裝起來並設定黏貼在頂端 */
+    .sticky-header-wrapper {
+      position: sticky;
+      top: 0;
+      background-color: var(--bg-color);
+      z-index: 1000;
+      padding-top: 10px;
+      padding-bottom: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
     .header {
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-bottom: 25px;
+      margin-bottom: 15px;
       position: relative;
     }
 
@@ -124,7 +135,7 @@
     .tabs-container {
       display: flex;
       gap: 8px;
-      margin-bottom: 20px;
+      margin-bottom: 0;
       border-bottom: 2px solid #4f545c;
       padding-bottom: 10px;
       flex-wrap: wrap;
@@ -201,7 +212,7 @@
       display: none;
       width: 100%;
       max-width: 800px;
-      margin: 0 auto 20px auto;
+      margin: 15px auto 0 auto;
       text-align: center;
     }
 
@@ -242,6 +253,7 @@
       padding: 25px;
       text-align: center;
       border-radius: 8px;
+      margin-top: 20px;
       margin-bottom: 25px;
       display: none;
     }
@@ -256,6 +268,7 @@
       grid-template-columns: repeat(auto-fill, 120px);
       gap: 12px;
       align-items: start;
+      margin-top: 20px;
     }
 
     .img-card {
@@ -309,7 +322,6 @@
       text-overflow: ellipsis;
     }
 
-    /* 黃底樣式：暫售，待交易 */
     .status-badge.is-pending {
       background-color: rgba(254, 231, 92, 0.95);
       border-color: var(--warning-color);
@@ -424,47 +436,50 @@
 </head>
 <body>
 
-  <div class="header">
-    <div class="title-center">
-      <h2>⭐ 米米小舖 ⭐</h2>
-    </div>
-    <div class="info-badge">
-      <span>📕</span>
-      <span class="editable-text" id="siteDescription" contenteditable="false">本人夜班，交易需另約時間，故不接急單 ｜ 交易方式：可糖可T，比值1:1 ｜ Discord：mimi_ouo｜ 加載較慢，請稍等，或重新整理頁面</span>
-    </div>
-
-    <div class="auth-box" id="authBox">
-      <button class="auth-btn" id="showLoginBtn">登入</button>
-      <div class="auth-inputs" id="authInputs">
-        <input type="password" id="passwordInput" placeholder="管理員密碼">
-        <button class="auth-btn" id="loginBtn">確認</button>
-        <button class="cancel-btn" id="cancelBtn">✕</button>
+  <!-- 將標題與分頁群組包在黏貼區塊內 -->
+  <div class="sticky-header-wrapper">
+    <div class="header">
+      <div class="title-center">
+        <h2>⭐ 米米小舖 ⭐</h2>
       </div>
-    </div>
-  </div>
+      <div class="info-badge">
+        <span>📕</span>
+        <span class="editable-text" id="siteDescription" contenteditable="false">本人夜班，交易需另約時間，故不接急單 ｜ 交易方式：可糖可T，比值1:1 ｜ Discord：mimi_ouo｜ 加載較慢，請稍等，或重新整理頁面</span>
+      </div>
 
-  <div class="tabs-container" id="tabsContainer">
-    <button class="tab-btn active" data-category="general">🏠 家具</button>
-    <button class="tab-btn" data-category="memes">🧸 熊熊</button>
-    <button class="tab-btn" data-category="pot">🪴 花盆</button>
-    
-    <div class="dropdown">
-      <button class="dropdown-toggle">💍 戒指 ▾</button>
-      <div class="dropdown-menu">
-        <div class="dropdown-item tab-btn" data-category="ring_male">👦 限男</div>
-        <div class="dropdown-item tab-btn" data-category="ring_female">👧 限女</div>
+      <div class="auth-box" id="authBox">
+        <button class="auth-btn" id="showLoginBtn">登入</button>
+        <div class="auth-inputs" id="authInputs">
+          <input type="password" id="passwordInput" placeholder="管理員密碼">
+          <button class="auth-btn" id="loginBtn">確認</button>
+          <button class="cancel-btn" id="cancelBtn">✕</button>
+        </div>
       </div>
     </div>
 
-    <div class="dropdown">
-      <button class="dropdown-toggle">🌱 作物 ▾</button>
-      <div class="dropdown-menu">
-        <div class="dropdown-item tab-btn" data-category="crop_male">👦 限男</div>
-        <div class="dropdown-item tab-btn" data-category="crop_female">👧 限女</div>
+    <div class="tabs-container" id="tabsContainer">
+      <button class="tab-btn active" data-category="general">🏠 家具</button>
+      <button class="tab-btn" data-category="memes">🧸 熊熊</button>
+      <button class="tab-btn" data-category="pot">🪴 花盆</button>
+      
+      <div class="dropdown">
+        <button class="dropdown-toggle">💍 戒指 ▾</button>
+        <div class="dropdown-menu">
+          <div class="dropdown-item tab-btn" data-category="ring_male">👦 限男</div>
+          <div class="dropdown-item tab-btn" data-category="ring_female">👧 限女</div>
+        </div>
       </div>
-    </div>
 
-    <button class="tab-btn" data-category="gift">🎁 贈品區</button>
+      <div class="dropdown">
+        <button class="dropdown-toggle">🌱 作物 ▾</button>
+        <div class="dropdown-menu">
+          <div class="dropdown-item tab-btn" data-category="crop_male">👦 限男</div>
+          <div class="dropdown-item tab-btn" data-category="crop_female">👧 限女</div>
+        </div>
+      </div>
+
+      <button class="tab-btn" data-category="gift">🎁 贈品區</button>
+    </div>
   </div>
   
   <div class="gift-notice-container" id="giftNoticeContainer">
