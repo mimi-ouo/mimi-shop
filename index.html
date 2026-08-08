@@ -32,7 +32,7 @@
       }
     }
 
-    /* 上方黏貼頂端區塊：左側控制、中間公告 */
+    /* 上方黏貼頂端區塊 */
     .sticky-header-wrapper {
       position: sticky;
       top: 0;
@@ -46,16 +46,25 @@
     .header-layout {
       display: flex;
       align-items: flex-start;
+      justify-content: space-between;
       gap: 15px;
       flex-wrap: wrap;
     }
 
-    /* 左側直欄：標題、登入、搜尋由上到下 */
+    .header-left-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 15px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+
+    /* 左側直欄：僅放標題 */
     .left-control-panel {
       display: flex;
       flex-direction: column;
       gap: 10px;
-      min-width: 180px;
+      min-width: 140px;
     }
 
     .title-area h2 {
@@ -65,11 +74,25 @@
       white-space: nowrap;
     }
 
+    /* 右側控制區塊：放登入與搜尋 */
+    .right-control-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    @media (max-width: 768px) {
+      .right-control-panel {
+        align-items: flex-start;
+      }
+    }
+
     /* 中間公告區塊：隨文字長度與寬度自動調整 */
     .center-notice-panel {
       flex: 1;
       min-width: 250px;
-      max-width: 600px;
+      max-width: 500px;
     }
 
     .info-badge {
@@ -108,7 +131,7 @@
     .side-tabs-panel {
       position: fixed;
       right: 20px;
-      top: 30px;
+      top: 160px;
       display: flex;
       flex-direction: column;
       gap: 8px;
@@ -197,6 +220,7 @@
       display: flex;
       gap: 8px;
       align-items: center;
+      justify-content: flex-end;
     }
 
     .auth-inputs {
@@ -241,7 +265,7 @@
       border: 1px solid #4f545c;
       background: #202225;
       color: #fff;
-      width: 160px;
+      width: 180px;
       font-size: 13px;
     }
 
@@ -502,11 +526,27 @@
   <div class="sticky-header-wrapper">
     <div class="header-layout">
       
-      <!-- 左側：標題、登入、搜尋 (由上到下排列) -->
-      <div class="left-control-panel">
-        <div class="title-area">
-          <h2>⭐ 米米小舖 ⭐</h2>
+      <!-- 左側群組：標題與中間公告 -->
+      <div class="header-left-group">
+        <div class="left-control-panel">
+          <div class="title-area">
+            <h2>⭐ 米米小舖 ⭐</h2>
+          </div>
         </div>
+
+        <div class="center-notice-panel">
+          <div class="info-badge">
+            <span>📕</span>
+            <span class="editable-text" id="siteDescription" contenteditable="false">本人夜班，交易需另約時間，故不接急單
+交易方式：可糖可T，比值1:1
+Discord：mimi_ouo
+加載較慢，請稍等，或重新整理頁面</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右側控制區塊：登入與搜尋 -->
+      <div class="right-control-panel">
         <div class="auth-box" id="authBox">
           <button class="auth-btn" id="showLoginBtn">登入</button>
           <div class="auth-inputs" id="authInputs">
@@ -516,17 +556,6 @@
           </div>
         </div>
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 搜尋名稱或備註...">
-      </div>
-
-      <!-- 中間：公告區塊（隨文字大小與長度自動調整） -->
-      <div class="center-notice-panel">
-        <div class="info-badge">
-          <span>📕</span>
-          <span class="editable-text" id="siteDescription" contenteditable="false">本人夜班，交易需另約時間，故不接急單
-交易方式：可糖可T，比值1:1
-Discord：mimi_ouo
-加載較慢，請稍等，或重新整理頁面</span>
-        </div>
       </div>
 
     </div>
