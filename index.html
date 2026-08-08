@@ -22,9 +22,17 @@
       max-width: 1200px;
       margin: 0 auto;
       padding: 20px;
+      /* 預留右側空間避免被懸浮分頁遮擋 */
+      padding-right: 140px; 
     }
 
-    /* 上方黏貼頂端區塊：三欄式排版（左側控制、中間公告、右側分頁） */
+    @media (max-width: 900px) {
+      body {
+        padding-right: 20px;
+      }
+    }
+
+    /* 上方黏貼頂端區塊：左側控制、中間公告 */
     .sticky-header-wrapper {
       position: sticky;
       top: 0;
@@ -42,7 +50,7 @@
       flex-wrap: wrap;
     }
 
-    /* 左側直欄：標題、登入、搜尋 */
+    /* 左側直欄：標題、登入、搜尋由上到下 */
     .left-control-panel {
       display: flex;
       flex-direction: column;
@@ -96,65 +104,66 @@
       border: 1px dashed #4f545c;
     }
 
-    /* 右側分頁區塊 */
-    .right-tabs-panel {
+    /* 右側直立懸浮分頁區塊 */
+    .side-tabs-panel {
+      position: fixed;
+      right: 20px;
+      top: 30px;
       display: flex;
       flex-direction: column;
       gap: 8px;
-      align-items: flex-end;
-    }
-
-    .tabs-container {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
+      z-index: 1100;
+      background: var(--card-bg);
+      padding: 12px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      border: 1px solid #4f545c;
     }
 
     .tab-btn, .dropdown-toggle {
-      background: var(--card-bg);
+      background: var(--bg-color);
       color: var(--text-color);
-      border: none;
-      padding: 8px 14px;
+      border: 1px solid #4f545c;
+      padding: 8px 12px;
       border-radius: 6px;
-      font-size: 14px;
+      font-size: 13px;
       cursor: pointer;
       display: flex;
       align-items: center;
+      justify-content: flex-start;
       gap: 6px;
+      width: 100px;
       white-space: nowrap;
+      box-sizing: border-box;
+    }
+
+    .tab-btn:hover, .dropdown-toggle:hover {
+      background: #4f545c;
     }
 
     .tab-btn.active {
       background: var(--accent-color);
+      border-color: var(--accent-color);
       color: #fff;
       font-weight: bold;
     }
 
     .dropdown {
       position: relative;
-      display: inline-block;
-    }
-
-    .dropdown::after {
-      content: '';
-      position: absolute;
-      top: 100%;
-      left: 0;
-      width: 100%;
-      height: 10px;
+      display: block;
+      width: 100px;
     }
 
     .dropdown-menu {
       display: none;
       position: absolute;
-      top: calc(100% + 8px);
-      right: 0;
+      top: 0;
+      right: calc(100% + 8px);
       background-color: #2f3136;
-      min-width: 150px;
+      min-width: 110px;
       box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
       border-radius: 6px;
-      z-index: 100;
+      z-index: 1200;
       padding: 4px 0;
       border: 1px solid #4f545c;
     }
@@ -165,12 +174,17 @@
     }
 
     .dropdown-item {
-      padding: 8px 14px;
+      padding: 8px 12px;
       display: flex;
       align-items: center;
       color: var(--text-color);
       cursor: pointer;
       font-size: 13px;
+      width: 100%;
+      box-sizing: border-box;
+      background: none;
+      border: none;
+      text-align: left;
     }
 
     .dropdown-item:hover {
@@ -459,11 +473,36 @@
 </head>
 <body>
 
+  <!-- 右側直立懸浮分頁 -->
+  <div class="side-tabs-panel">
+    <button class="tab-btn active" data-category="general">🏠 家具</button>
+    <button class="tab-btn" data-category="memes">🧸 熊熊</button>
+    <button class="tab-btn" data-category="pot">🪴 花盆</button>
+    
+    <div class="dropdown">
+      <button class="dropdown-toggle">💍 戒指 ▾</button>
+      <div class="dropdown-menu">
+        <button class="dropdown-item tab-btn" data-category="ring_male">👦 限男</button>
+        <button class="dropdown-item tab-btn" data-category="ring_female">👧 限女</button>
+      </div>
+    </div>
+
+    <div class="dropdown">
+      <button class="dropdown-toggle">🌱 作物 ▾</button>
+      <div class="dropdown-menu">
+        <button class="dropdown-item tab-btn" data-category="crop_male">👦 限男</button>
+        <button class="dropdown-item tab-btn" data-category="crop_female">👧 限女</button>
+      </div>
+    </div>
+
+    <button class="tab-btn" data-category="gift">🎁 贈品區</button>
+  </div>
+
   <!-- 上方黏貼頂端區塊 -->
   <div class="sticky-header-wrapper">
     <div class="header-layout">
       
-      <!-- 左側：標題、登入、搜尋 -->
+      <!-- 左側：標題、登入、搜尋 (由上到下排列) -->
       <div class="left-control-panel">
         <div class="title-area">
           <h2>⭐ 米米小舖 ⭐</h2>
@@ -479,7 +518,7 @@
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 搜尋名稱或備註...">
       </div>
 
-      <!-- 中間：公告區塊（隨文字大小自動調整） -->
+      <!-- 中間：公告區塊（隨文字大小與長度自動調整） -->
       <div class="center-notice-panel">
         <div class="info-badge">
           <span>📕</span>
@@ -487,33 +526,6 @@
 交易方式：可糖可T，比值1:1
 Discord：mimi_ouo
 加載較慢，請稍等，或重新整理頁面</span>
-        </div>
-      </div>
-
-      <!-- 右側：分頁按鈕 -->
-      <div class="right-tabs-panel">
-        <div class="tabs-container" id="tabsContainer">
-          <button class="tab-btn active" data-category="general">🏠 家具</button>
-          <button class="tab-btn" data-category="memes">🧸 熊熊</button>
-          <button class="tab-btn" data-category="pot">🪴 花盆</button>
-          
-          <div class="dropdown">
-            <button class="dropdown-toggle">💍 戒指 ▾</button>
-            <div class="dropdown-menu">
-              <div class="dropdown-item tab-btn" data-category="ring_male">👦 限男</div>
-              <div class="dropdown-item tab-btn" data-category="ring_female">👧 限女</div>
-            </div>
-          </div>
-
-          <div class="dropdown">
-            <button class="dropdown-toggle">🌱 作物 ▾</button>
-            <div class="dropdown-menu">
-              <div class="dropdown-item tab-btn" data-category="crop_male">👦 限男</div>
-              <div class="dropdown-item tab-btn" data-category="crop_female">👧 限女</div>
-            </div>
-          </div>
-
-          <button class="tab-btn" data-category="gift">🎁 贈品區</button>
         </div>
       </div>
 
