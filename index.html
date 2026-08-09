@@ -849,7 +849,7 @@
       font-size: 9px;
       width: 100%;
       text-align: center;
-      text-align-last: center; /* 讓部分瀏覽器下拉選單文字也置中 */
+      text-align-last: center;
       outline: none;
       cursor: pointer;
       font-weight: bold;
@@ -1955,6 +1955,21 @@
           `;
         }
 
+        // 判斷是否要在該分類顯示互動選單（僅限 家具子分頁 與 熊熊分頁）
+        const showInteractDropdown = (item.category === 'general_new' || item.category === 'general_misc' || item.category === 'memes');
+        
+        let interactHTML = '';
+        if (showInteractDropdown) {
+          interactHTML = `
+            <div class="interact-col">
+              <select class="interact-select ${interactVal === '有互動' ? 'has-interact' : 'no-interact'}" id="interact-${item.id}" ${!isAdmin ? 'disabled' : ''}>
+                <option value="有互動" ${interactVal === '有互動' ? 'selected' : ''}>有互動</option>
+                <option value="無互動" ${interactVal === '無互動' ? 'selected' : ''}>無互動</option>
+              </select>
+            </div>
+          `;
+        }
+
         card.innerHTML = `
           <button class="delete-btn" title="刪除商品">✕</button>
           <div class="img-wrapper">
@@ -1973,12 +1988,7 @@
                   <span class="editable-text" contenteditable="${isAdmin}" id="text-${item.id}">${textVal}</span>
                 </div>
               </div>
-              <div class="interact-col">
-                <select class="interact-select ${interactVal === '有互動' ? 'has-interact' : 'no-interact'}" id="interact-${item.id}" ${!isAdmin ? 'disabled' : ''}>
-                  <option value="有互動" ${interactVal === '有互動' ? 'selected' : ''}>有互動</option>
-                  <option value="無互動" ${interactVal === '無互動' ? 'selected' : ''}>無互動</option>
-                </select>
-              </div>
+              ${interactHTML}
               ${moveSelectHTML}
             </div>
           </div>
@@ -2096,7 +2106,6 @@
               const success = await updateItem(item.id, 'interact', newValue);
               if (success) {
                 item.interact = newValue;
-                // 即時動態切換背景色
                 interactSelectEl.className = `interact-select ${newValue === '有互動' ? 'has-interact' : 'no-interact'}`;
                 status.innerText = "修改成功！";
               } else {
