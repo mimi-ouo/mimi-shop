@@ -502,15 +502,15 @@
 
     .welcome-message {
       grid-column: 1 / -1;
-      text-align: center;
-      padding: 50px 20px;
-      font-size: 15px;
+      text-align: left; /* 修改：文字靠左 */
+      padding: 30px 10px; /* 修改：調整上下左右邊距 */
+      font-size: 16px; /* 稍微調整字體大小 */
       font-weight: bold;
       line-height: 1.8;
       border: none;
       outline: none;
-      background: var(--card-bg);
-      border-radius: 8px;
+      background: transparent; /* 修改：移除底框背景 */
+      border-radius: 0; /* 修改：移除圓角 */
       margin-top: 20px;
       animation: colorFlash 1.5s infinite;
     }
