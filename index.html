@@ -52,7 +52,6 @@
       to { transform: translateY(0); }
     }
 
-    /* 新增旋轉星星的動畫樣式 */
     @keyframes spinStar {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
@@ -61,7 +60,7 @@
     .rotating-star {
       display: inline-block;
       animation: spinStar 3s linear infinite;
-      font-size: 10px; /* 調整這裡的數字來控制星星大小，例如改成 10px 或 0.8em */
+      font-size: 10px;
     }
 
     .update-banner button {
@@ -454,7 +453,6 @@
       text-align: center;
     }
 
-    /* 區塊內排序工具列容器 */
     .section-sort-container {
       display: flex;
       justify-content: flex-end;
@@ -1285,7 +1283,7 @@
       <div class="auth-box" id="authBox">
         <button class="auth-btn" id="showLoginBtn">登入</button>
         <div class="auth-inputs" id="authInputs">
-          <input type="password" id="passwordInput" placeholder="管理員密碼">
+          <input type="password" id="password-input" placeholder="管理員密碼">
           <button class="auth-btn" id="loginBtn">確認</button>
           <button class="cancel-btn" id="cancelBtn">✕</button>
         </div>
@@ -1320,7 +1318,6 @@
         </div>
       </div>
 
-      <!-- 僅保留搜尋框在頂端 -->
       <div class="search-sort-wrapper">
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 搜尋全區名稱或備註...">
       </div>
@@ -1359,7 +1356,6 @@
     <p id="status" style="color: var(--accent-color); margin: 0; font-weight: bold;"></p>
   </div>
 
-  <!-- 排序下拉選單容器（預設隱藏，僅在一般商品分頁顯示） -->
   <div class="section-sort-container" id="sectionSortContainer" style="display: none;">
     <select id="sortSelect" class="sort-select">
       <option value="price_asc" selected>📈 價格：低 → 高</option>
@@ -1423,7 +1419,7 @@
 
     let currentCategory = ''; 
     let currentCategoryDisplayName = '尚未選擇分頁';
-    let isAdmin = localStorage.getItem('isAdmin') === 'true';
+    let isAdmin = localStorage.getItem('isAdmin') === 'true' || localStorage.getItem('isAdminLoggedIn') === 'true';
     let allData = [];
     let cartItems = new Map();
     let activeModalItem = null;
@@ -1434,8 +1430,6 @@
     let scheduleMonth = 7;
 
     let initialDataHash = '';
-
-    const ADMIN_PASSWORD = "1j6ul42l4ji3++";
 
     document.addEventListener('DOMContentLoaded', () => {
       initAuthUI();
@@ -1590,6 +1584,8 @@
         `;
         document.getElementById('logoutBtn').addEventListener('click', () => {
           localStorage.removeItem('isAdmin');
+          localStorage.removeItem('isAdminLoggedIn');
+          localStorage.removeItem('adminToken');
           location.reload();
         });
       } else {
@@ -1601,7 +1597,7 @@
         authBox.innerHTML = `
           <button class="auth-btn" id="showLoginBtn">登入</button>
           <div class="auth-inputs" id="authInputs">
-            <input type="password" id="passwordInput" placeholder="管理員密碼">
+            <input type="password" id="password-input" placeholder="管理員密碼">
             <button class="auth-btn" id="loginBtn">確認</button>
             <button class="cancel-btn" id="cancelBtn">✕</button>
           </div>
@@ -1656,13 +1652,35 @@
         showLoginBtn.style.display = 'block';
       });
 
-      loginBtn.addEventListener('click', () => {
-        const pass = document.getElementById('passwordInput').value;
-        if (pass === ADMIN_PASSWORD) {
-          localStorage.setItem('isAdmin', 'true');
-          location.reload();
-        } else {
-          alert('密碼錯誤！');
+      loginBtn.addEventListener('click', async () => {
+        const passwordInput = document.getElementById("password-input").value;
+
+        try {
+          const formData = new URLSearchParams();
+          formData.append("password", passwordInput);
+
+          const response = await fetch(SCRIPT_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded;charset=utf-8", 
+            },
+            body: formData
+          });
+
+          const result = await response.json();
+
+          if (result.success || result.status === 'success') {
+            localStorage.setItem("isAdminLoggedIn", "true");
+            localStorage.setItem("adminToken", result.token || "");
+            
+            alert("登入成功！");
+            location.reload();
+          } else {
+            alert("登入失敗：" + (result.message || "密碼錯誤"));
+          }
+        } catch (error) {
+          console.error("連線錯誤:", error);
+          alert("無法連線至伺服器，請稍後再試。");
         }
       });
     }
@@ -1719,7 +1737,6 @@
           document.getElementById('gallery').style.display = (currentCategory === 'schedule') ? 'none' : 'grid';
           document.getElementById('dropZone').style.display = (isAdmin && currentCategory !== 'schedule') ? 'block' : 'none';
 
-          // 隱藏歡迎說明頁與班表頁的排序選單容器
           const sortContainer = document.getElementById('sectionSortContainer');
           if (!currentCategory || currentCategory === 'schedule') {
             sortContainer.style.display = 'none';
