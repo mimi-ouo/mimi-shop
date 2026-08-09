@@ -114,28 +114,34 @@
     .title-area-group {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .title-discord-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
     }
 
     .title-area h2 {
       margin: 0;
-      font-size: 24px;
+      font-size: 26px;
       line-height: 1.4;
       white-space: nowrap;
       color: #ffffff;
+      background: linear-gradient(45deg, #ff3366, #ff9933, #33cc33, #3399ff, #9933ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
     }
 
     .discord-wrapper {
       display: flex;
       flex-direction: column;
-      gap: 4px;
-    }
-
-    .discord-instruction {
-      font-size: 12px;
-      font-weight: bold;
-      color: var(--success-color);
-      letter-spacing: 0.5px;
+      gap: 2px;
     }
 
     .discord-container {
@@ -151,9 +157,9 @@
       background-color: rgba(43, 115, 223, 0.15);
       border: 1px solid rgba(43, 115, 223, 0.4);
       color: #7289da;
-      padding: 4px 10px;
+      padding: 6px 12px;
       border-radius: 6px;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: bold;
       width: fit-content;
       cursor: pointer;
@@ -185,47 +191,6 @@
       50% {
         transform: translateX(6px);
       }
-    }
-
-    .center-notice-panel {
-      flex: 1;
-      min-width: 280px;
-      max-width: 100%;
-    }
-
-    .info-badge {
-      display: inline-flex;
-      align-items: flex-start;
-      gap: 6px;
-      background-color: transparent;
-      border: none;
-      color: var(--text-color);
-      padding: 0;
-      border-radius: 0;
-      font-size: 15px;
-      line-height: 1.5;
-      box-sizing: border-box;
-      text-align: left;
-      width: 100%;
-    }
-
-    .info-badge .editable-text,
-    .custom-notice-box .editable-text {
-      outline: none;
-      color: var(--text-color);
-      white-space: pre-wrap;
-      word-break: break-all;
-      font-size: 15px;
-      text-align: left;
-    }
-
-    .is-admin .info-badge .editable-text,
-    .is-admin .custom-notice-box .editable-text {
-      background: rgba(255, 255, 255, 0.1);
-      cursor: text;
-      padding: 2px 4px;
-      border-radius: 4px;
-      border: 1px dashed var(--accent-color);
     }
 
     .side-tabs-panel {
@@ -502,16 +467,21 @@
 
     .welcome-message {
       grid-column: 1 / -1;
-      text-align: left; /* 修改：文字靠左 */
-      padding: 30px 10px; /* 修改：調整上下左右邊距 */
-      font-size: 16px; /* 稍微調整字體大小 */
+      text-align: left;
+      padding: 25px 20px;
+      font-size: 15px;
       font-weight: bold;
       line-height: 1.8;
-      border: none;
-      outline: none;
-      background: transparent; /* 修改：移除底框背景 */
-      border-radius: 0; /* 修改：移除圓角 */
+      border: 1px solid var(--border-color);
+      background: var(--card-bg);
+      border-radius: 10px;
       margin-top: 20px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    .welcome-title {
+      font-size: 18px;
+      margin-bottom: 10px;
       animation: colorFlash 1.5s infinite;
     }
 
@@ -1137,30 +1107,22 @@
       <div class="header-top-row">
         <div class="left-control-panel">
           <div class="title-area-group">
-            <div class="title-area">
-              <h2>⭐ 米米小舖 ⭐</h2>
-            </div>
-            <div class="discord-wrapper">
-              <div class="discord-instruction">打勾加入購物車 購物車截圖給我</div>
-              <div class="discord-container">
-                <div class="discord-badge" id="discordCopyBtn" title="點擊複製 Discord 帳號">
-                  <span>💬</span>
-                  <span>Discord：mimi_ouo</span>
-                </div>
-                <div class="discord-hint" id="discordHint">
-                  <span>👈</span>
-                  <span id="discordHintText">點我複製</span>
+            <div class="title-discord-row">
+              <div class="title-area">
+                <h2>⭐ 米米小舖-Club MStar ⭐</h2>
+              </div>
+              <div class="discord-wrapper">
+                <div class="discord-container">
+                  <div class="discord-badge" id="discordCopyBtn" title="點擊複製 Discord 帳號">
+                    <span>💬</span>
+                    <span>Discord：mimi_ouo</span>
+                  </div>
+                  <div class="discord-hint" id="discordHint">
+                    <span>👈</span>
+                    <span id="discordHintText">點我複製</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-          
-          <div class="center-notice-panel">
-            <div class="info-badge">
-              <span>📕</span>
-              <span class="editable-text" id="siteDescription" contenteditable="false">交易方式: 可糖可T, 比值1:1
-本人夜班, 交易需另約時間, 故不接急單
-點一下可看實體圖，或DC我想看的商品</span>
             </div>
           </div>
         </div>
@@ -1256,7 +1218,7 @@
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxVrP__g-bnoVRQQrJkKLlMZDhSbFeUuTMyw6-zVRhtYkkSedoVbJXKUwN0bUyc4vs3rQ/exec";
 
-    let currentCategory = ''; // 預設不指定分頁，顯示歡迎文字
+    let currentCategory = ''; 
     let currentCategoryDisplayName = '尚未選擇分頁';
     let isAdmin = localStorage.getItem('isAdmin') === 'true';
     let allData = [];
@@ -1281,7 +1243,7 @@
       setupScheduleEvents();
       fetchData();
       updateCartButtonBadge();
-      renderGallery(); // 預設渲染歡迎畫面
+      renderGallery(); 
       
       document.getElementById('searchInput').addEventListener('input', renderGallery);
     });
@@ -1376,7 +1338,6 @@
     function initAuthUI() {
       const authBox = document.getElementById('authBox');
       const dropZone = document.getElementById('dropZone');
-      const descElem = document.getElementById('siteDescription');
       const giftDescElem = document.getElementById('giftDescription');
       const ringDescElem = document.getElementById('ringDescription');
       const cropDescElem = document.getElementById('cropDescription');
@@ -1384,7 +1345,6 @@
       if (isAdmin) {
         document.body.classList.add('is-admin');
         dropZone.style.display = currentCategory ? 'block' : 'none';
-        descElem.contentEditable = "true";
         giftDescElem.contentEditable = "true";
         ringDescElem.contentEditable = "true";
         cropDescElem.contentEditable = "true";
@@ -1399,7 +1359,6 @@
       } else {
         document.body.classList.remove('is-admin');
         dropZone.style.display = 'none';
-        descElem.contentEditable = "false";
         giftDescElem.contentEditable = "false";
         ringDescElem.contentEditable = "false";
         cropDescElem.contentEditable = "false";
@@ -1414,7 +1373,6 @@
         bindAuthEvents();
       }
 
-      setupEditableSave(descElem, 'settings_desc', 'caption');
       setupEditableSave(giftDescElem, 'settings_gift', 'caption');
       setupEditableSave(ringDescElem, 'settings_ring', 'caption');
       setupEditableSave(cropDescElem, 'settings_crop', 'caption');
@@ -1649,7 +1607,6 @@
             if (item && item.caption && elem) elem.innerText = item.caption;
           };
 
-          loadSetting('settings_desc', 'siteDescription');
           loadSetting('settings_gift', 'giftDescription');
           loadSetting('settings_ring', 'ringDescription');
           loadSetting('settings_crop', 'cropDescription');
@@ -1736,11 +1693,20 @@
 
       gallery.innerHTML = '';
 
-      // 若尚未選擇分類分頁且沒有輸入搜尋關鍵字，顯示歡迎文字
       if (!currentCategory && !keyword) {
         const welcomeDiv = document.createElement('div');
         welcomeDiv.className = 'welcome-message';
-        welcomeDiv.innerHTML = '歡迎來到米米小舖~~<br>請點擊右方分頁查看商品❤<br>需要晚上交易的寶貝可參考班表分頁';
+        welcomeDiv.innerHTML = `
+          <div class="welcome-title">✨ 歡迎來到米米小舖-Club MStar ✨</div>
+          <div>❤ 請點擊右方分頁查看各類精選商品</div>
+          <div style="margin-top: 10px; color: var(--success-color); font-size: 14px; font-weight: normal; line-height: 1.6;">
+            • <b>購物方式</b>：☑ 打勾加入購物車後，將購物車截圖給我即可！<br>
+            • <b>交易方式</b>：可糖可 T，比值 1:1<br>
+            • <b>交易時間</b>：本人夜班，交易需另約時間，故不接急單<br>
+            • <b>貼心提醒</b>：點擊商品圖片可查看實體放大圖，或至 DC 尋找我想看的商品！<br>
+            • <b>夜班寶貝</b>：需要夜間交易可參考右方「米米班表」分頁查詢休假與上班日❤
+          </div>
+        `;
         gallery.appendChild(welcomeDiv);
         return;
       }
@@ -1834,7 +1800,7 @@
               <select class="move-category-select" id="move-${item.id}">
                 <option value="" disabled selected>📦 移動到...</option>
                 <option value="general_new">✨ 本月新品</option>
-                <option value="general_misc">🧸 哩哩摳摳</option>
+                <option value="general_misc">📦 哩哩摳摳</option>
                 <option value="memes">🧸 熊熊</option>
                 <option value="pot">🪴 花盆</option>
                 <option value="ring_male">💍 戒指 (限男)</option>
