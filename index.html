@@ -120,7 +120,7 @@
 
     .title-area h2 {
       margin: 0;
-      font-size: 22px;
+      font-size: 24px;
       line-height: 1.4;
       white-space: nowrap;
       color: #ffffff;
@@ -947,7 +947,7 @@
       align-items: center;
     }
 
-    /* 米米班表專用樣式 - 字體改為20px與智慧滿版 */
+    /* 米米班表專用樣式 - 依照要求調整字體與顏色 */
     .schedule-container {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -968,6 +968,7 @@
     .schedule-header h3 {
       margin: 0;
       color: #fff;
+      font-size: 24px;
     }
     .schedule-nav-btns {
       display: flex;
@@ -996,7 +997,7 @@
       font-weight: bold;
       color: var(--success-color);
       padding: 6px 0;
-      font-size: 13px;
+      font-size: 18px;
     }
     .calendar-cell {
       background: var(--bg-color);
@@ -1027,18 +1028,19 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      color: #ffffff !important;
     }
-    /* 上班：藍色系維持 */
+    /* 上班：藍色系，不透明度 100% (#2b73df) */
     .badge-work {
-      background-color: rgba(43, 115, 223, 0.25);
-      border: 1px solid rgba(43, 115, 223, 0.5);
-      color: #7289da;
+      background-color: #2b73df;
+      border: 1px solid #4a8ff5;
+      color: #ffffff !important;
     }
-    /* 休假：黃色系 */
+    /* 休假：紅色系 (#ff4d4d) */
     .badge-off {
-      background-color: rgba(255, 215, 0, 0.2);
-      border: 1px solid rgba(255, 215, 0, 0.5);
-      color: #ffdf4d;
+      background-color: #ff4d4d;
+      border: 1px solid #ff6666;
+      color: #ffffff !important;
     }
   </style>
 </head>
@@ -1563,7 +1565,7 @@
 
         cell.innerHTML = `
           <div class="calendar-date-num" ${isToday ? 'style="color:var(--warning-color);"' : ''}>${i}${isToday ? ' (今天)' : ''}</div>
-          <div class="calendar-badge ${work ? 'badge-work' : 'badge-off'}">${work ? '💼 上班' : '🏠 休假'}</div>
+          <div class="calendar-badge ${work ? 'badge-work' : 'badge-off'}">${work ? '🫠 上班' : '😍 休假'}</div>
         `;
         gridElem.appendChild(cell);
       }
@@ -1577,7 +1579,7 @@
         const work = isWorkDay(d);
         cell.innerHTML = `
           <div class="calendar-date-num">${i}</div>
-          <div class="calendar-badge ${work ? 'badge-work' : 'badge-off'}">${work ? '💼 上班' : '🏠 休假'}</div>
+          <div class="calendar-badge ${work ? 'badge-work' : 'badge-off'}">${work ? '🫠 上班' : '😍 休假'}</div>
         `;
         gridElem.appendChild(cell);
       }
@@ -2276,3 +2278,4 @@
   </script>
 </body>
 </html>
+```[cite: 14]
