@@ -1853,7 +1853,6 @@
       }
     }
 
-    // 排序邏輯：原排序優先，相同時比對說明區 (caption) 讓相同說明排在一起
     function compareItems(a, b) {
       const sortVal = document.getElementById('sortSelect').value;
       const priceA = parseFloat(a.price) || 0;
@@ -1875,7 +1874,6 @@
         primaryDiff = timeB - timeA;
       }
 
-      // 如果主要條件（價格或時間）相同，則以說明區 (caption) 進行排序
       if (primaryDiff === 0) {
         const captionA = String(a.caption || '');
         const captionB = String(b.caption || '');
@@ -2023,8 +2021,11 @@
             `;
           }
 
+          // 如果不是管理員且狀態為「已出售」，則隱藏打勾格子
+          let checkboxHTML = (!isSold) ? `<input type="checkbox" class="cart-checkbox" id="cart-chk-${item.id}" ${isChecked ? 'checked' : ''} title="加入購物車" />` : '';
+
           badgeHTML = `
-            <input type="checkbox" class="cart-checkbox" id="cart-chk-${item.id}" ${isChecked ? 'checked' : ''} title="加入購物車" />
+            ${checkboxHTML}
             ${topRightHTML}
           `;
         }
@@ -2068,6 +2069,8 @@
           `;
         }
 
+        let priceColStyle = (!isAdmin && isSold) ? 'display: none;' : '';
+
         card.innerHTML = `
           <button class="delete-btn" title="刪除商品">✕</button>
           <div class="img-wrapper">
@@ -2078,7 +2081,7 @@
           <div class="img-info">
             <div class="caption-container">
               <div class="caption-row-top">
-                <div class="price-col">
+                <div class="price-col" style="${priceColStyle}">
                   <span class="currency-symbol">$</span>
                   <span class="editable-price" contenteditable="${isAdmin}" id="price-${item.id}" maxlength="3">${priceVal}</span>
                 </div>
@@ -2187,6 +2190,7 @@
                   selectEl.classList.add('is-sold');
                 }
                 status.innerText = "修改成功！";
+                renderGallery(); 
               } else {
                 status.innerText = "儲存失敗，請重試";
               }
