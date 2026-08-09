@@ -52,6 +52,7 @@
       to { transform: translateY(0); }
     }
 
+    /* 新增旋轉星星的動畫樣式 */
     @keyframes spinStar {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
@@ -60,7 +61,7 @@
     .rotating-star {
       display: inline-block;
       animation: spinStar 3s linear infinite;
-      font-size: 10px;
+      font-size: 10px; /* 調整這裡的數字來控制星星大小，例如改成 10px 或 0.8em */
     }
 
     .update-banner button {
@@ -453,6 +454,7 @@
       text-align: center;
     }
 
+    /* 區塊內排序工具列容器 */
     .section-sort-container {
       display: flex;
       justify-content: flex-end;
@@ -1318,6 +1320,7 @@
         </div>
       </div>
 
+      <!-- 僅保留搜尋框在頂端 -->
       <div class="search-sort-wrapper">
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 搜尋全區名稱或備註...">
       </div>
@@ -1356,6 +1359,7 @@
     <p id="status" style="color: var(--accent-color); margin: 0; font-weight: bold;"></p>
   </div>
 
+  <!-- 排序下拉選單容器（預設隱藏，僅在一般商品分頁顯示） -->
   <div class="section-sort-container" id="sectionSortContainer" style="display: none;">
     <select id="sortSelect" class="sort-select">
       <option value="price_asc" selected>📈 價格：低 → 高</option>
@@ -1415,7 +1419,7 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxVrP__g-bnoVRQQrJkKLlMZDhSbFeUuTMyw6-zVRhtYkkSedoVbJXKUwN0bUyc4vs3rQ/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwaWfhd9E_UzA-Kzxr1A9otQbeRWDlzzZLDs1wTuPmwX8sXiD06Y_4a5rskicRkzX_uNQ/exec";
 
     let currentCategory = ''; 
     let currentCategoryDisplayName = '尚未選擇分頁';
@@ -1656,27 +1660,25 @@
         const passwordInput = document.getElementById("password-input").value;
 
         try {
-          const formData = new URLSearchParams();
-          formData.append("password", passwordInput);
-
           const response = await fetch(SCRIPT_URL, {
             method: "POST",
             headers: {
-              "Content-Type": "application/x-www-form-urlencoded;charset=utf-8", 
+              "Content-Type": "text/plain;charset=utf-8", 
             },
-            body: formData
+            body: JSON.stringify({ password: passwordInput })
           });
 
           const result = await response.json();
 
-          if (result.success || result.status === 'success') {
+          if (result.success) {
             localStorage.setItem("isAdminLoggedIn", "true");
-            localStorage.setItem("adminToken", result.token || "");
+            localStorage.setItem("adminToken", passwordInput); // 修正：將密碼直接存入 adminToken
+            localStorage.setItem("isAdmin", "true");
             
             alert("登入成功！");
             location.reload();
           } else {
-            alert("登入失敗：" + (result.message || "密碼錯誤"));
+            alert("登入失敗：" + result.message);
           }
         } catch (error) {
           console.error("連線錯誤:", error);
@@ -1902,7 +1904,19 @@
 
     async function updateItemById(id, field, value) {
       try {
-        const response = await fetch(`${SCRIPT_URL}?action=updateItem&id=${id}&field=${field}&value=${encodeURIComponent(value)}`);
+        const token = localStorage.getItem('adminToken') || '';
+        const payload = {
+          action: 'updateItem',
+          id: id,
+          field: field,
+          value: value,
+          password: token
+        };
+        const response = await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
         const result = await response.json();
         return result.status === 'success';
       } catch (err) {
@@ -2333,7 +2347,19 @@
 
     async function updateItem(id, field, value) {
       try {
-        const response = await fetch(`${SCRIPT_URL}?action=updateItem&id=${id}&field=${field}&value=${encodeURIComponent(value)}`);
+        const token = localStorage.getItem('adminToken') || '';
+        const payload = {
+          action: 'updateItem',
+          id: id,
+          field: field,
+          value: value,
+          password: token
+        };
+        const response = await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
         const result = await response.json();
         return result.status === 'success';
       } catch (err) {
@@ -2343,12 +2369,26 @@
     }
 
     async function deleteItem(id) {
-      await fetch(`${SCRIPT_URL}?action=deleteItem&id=${id}`);
-      allData = allData.filter(item => String(item.id) !== String(id));
-      cartItems.delete(String(id));
-      updateCartButtonBadge();
-      renderGallery();
-      calculateTotal();
+      try {
+        const token = localStorage.getItem('adminToken') || '';
+        const payload = {
+          action: 'deleteItem',
+          id: id,
+          password: token
+        };
+        await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+        allData = allData.filter(item => String(item.id) !== String(id));
+        cartItems.delete(String(id));
+        updateCartButtonBadge();
+        renderGallery();
+        calculateTotal();
+      } catch (err) {
+        console.error("刪除失敗", err);
+      }
     }
 
     function setupModalEvents() {
@@ -2499,21 +2539,25 @@
         try {
           const compressedDataUrl = await compressImage(e.target.result, 800, 0.85);
           const base64Data = compressedDataUrl.split(',')[1];
+          const token = localStorage.getItem('adminToken') || '';
 
-          const formData = new URLSearchParams();
-          formData.append('action', 'addItem');
-          formData.append('category', 'album_item');
-          formData.append('caption', activeModalItem.caption + ' (相片)');
-          formData.append('price', '0');
-          formData.append('quantity', '數量: 1');
-          formData.append('interact', '無互動');
-          formData.append('note', activeModalItem.id);
-          formData.append('mimeType', 'image/jpeg');
-          formData.append('imageBase64', base64Data);
+          const payload = {
+            action: 'addItem',
+            category: 'album_item',
+            caption: activeModalItem.caption + ' (相片)',
+            price: '0',
+            quantity: '數量: 1',
+            interact: '無互動',
+            note: activeModalItem.id,
+            mimeType: 'image/jpeg',
+            imageBase64: base64Data,
+            password: token
+          };
 
           const response = await fetch(SCRIPT_URL, {
             method: 'POST',
-            body: formData
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payload)
           });
           const result = await response.json();
           if (result.status === 'success') {
@@ -2598,20 +2642,24 @@
           allData.unshift(tempItem);
           renderGallery();
 
-          const formData = new URLSearchParams();
-          formData.append('action', 'addItem');
-          formData.append('category', currentCategory);
-          formData.append('caption', defaultTime);
-          formData.append('price', '');
-          formData.append('quantity', '數量: 1');
-          formData.append('interact', '無互動');
-          formData.append('note', '');
-          formData.append('mimeType', 'image/jpeg');
-          formData.append('imageBase64', base64Data);
+          const token = localStorage.getItem('adminToken') || '';
+          const payload = {
+            action: 'addItem',
+            category: currentCategory,
+            caption: defaultTime,
+            price: '',
+            quantity: '數量: 1',
+            interact: '無互動',
+            note: '',
+            mimeType: 'image/jpeg',
+            imageBase64: base64Data,
+            password: token
+          };
 
           const response = await fetch(SCRIPT_URL, {
             method: 'POST',
-            body: formData
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payload)
           });
           const result = await response.json();
           if (result.status === 'success') {
