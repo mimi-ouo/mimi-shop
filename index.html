@@ -1608,6 +1608,12 @@
           if (currentCategory !== 'schedule') {
             renderGallery();
           }
+
+          // 點擊分頁或子分頁後，自動收合懸浮區
+          const sideTabsPanel = document.getElementById('sideTabsPanel');
+          const collapseToggleBtn = document.getElementById('collapseToggleBtn');
+          sideTabsPanel.classList.add('collapsed');
+          collapseToggleBtn.innerText = "📂 展開 ▴";
         });
       });
     }
