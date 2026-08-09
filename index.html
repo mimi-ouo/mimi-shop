@@ -1226,10 +1226,18 @@
         <div class="dropdown-menu">
           <button class="dropdown-item tab-btn" data-category="general_new">✨ 本月新品</button>
           <button class="dropdown-item tab-btn" data-category="general_misc">📦 哩哩摳摳</button>
+          <button class="dropdown-item tab-btn" data-category="general_consumable">🧪 消耗品</button>
         </div>
       </div>
 
-      <button class="tab-btn" data-category="memes">🧸 熊熊</button>
+      <div class="dropdown" id="dropdown-animal">
+        <button class="dropdown-toggle" data-dropdown="dropdown-animal">🐾 小動物 ▾</button>
+        <div class="dropdown-menu">
+          <button class="dropdown-item tab-btn" data-category="memes">🧸 熊熊</button>
+          <button class="dropdown-item tab-btn" data-category="animal_other">📦 其他</button>
+        </div>
+      </div>
+
       <button class="tab-btn" data-category="pot">🪴 花盆</button>
       
       <div class="dropdown" id="dropdown-ring">
@@ -1775,7 +1783,7 @@
         }
 
         cell.innerHTML = `
-          <div class="calendar-date-num" ${isToday ? 'style="color:var(--warning-color);"' : ''}>${i}${isToday ? ' 　今天' : ''}</div>
+          <div class="calendar-date-num" ${isToday ? 'style="color:var(--warning-color);"' : ''}>${i}${isToday ? '   今天' : ''}</div>
           <div class="calendar-badge ${work ? 'badge-work' : 'badge-off'}">${work ? '🫠 上班' : '😍 休假'}</div>
         `;
         gridElem.appendChild(cell);
@@ -2021,7 +2029,6 @@
             `;
           }
 
-          // 如果不是管理員且狀態為「已出售」，則隱藏打勾格子
           let checkboxHTML = (!isSold) ? `<input type="checkbox" class="cart-checkbox" id="cart-chk-${item.id}" ${isChecked ? 'checked' : ''} title="加入購物車" />` : '';
 
           badgeHTML = `
@@ -2036,14 +2043,16 @@
         let interactVal = item.interact || '無互動';
 
         let moveSelectHTML = '';
-        if (isAdmin && (currentCategory === 'general_new' || currentCategory === 'general_misc')) {
+        if (isAdmin && (currentCategory === 'general_new' || currentCategory === 'general_misc' || currentCategory === 'general_consumable')) {
           moveSelectHTML = `
             <div class="interact-col">
               <select class="move-category-select" id="move-${item.id}">
                 <option value="" disabled selected>📦 移動到...</option>
                 <option value="general_new">✨ 本月新品</option>
                 <option value="general_misc">📦 哩哩摳摳</option>
+                <option value="general_consumable">🧪 消耗品</option>
                 <option value="memes">🧸 熊熊</option>
+                <option value="animal_other">📦 其他 (小動物)</option>
                 <option value="pot">🪴 花盆</option>
                 <option value="ring_male">💍 戒指 (限男)</option>
                 <option value="ring_female">💍 戒指 (限女)</option>
@@ -2055,7 +2064,7 @@
           `;
         }
 
-        const showInteractSelect = (item.category === 'general_new' || item.category === 'general_misc' || item.category === 'memes' || item.category === 'gift');
+        const showInteractSelect = (item.category === 'general_new' || item.category === 'general_misc' || item.category === 'memes' || item.category === 'animal_other' || item.category === 'gift');
         
         let interactHTML = '';
         if (showInteractSelect) {
