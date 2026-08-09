@@ -52,6 +52,17 @@
       to { transform: translateY(0); }
     }
 
+    /* 新增旋轉星星的動畫樣式 */
+    @keyframes spinStar {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .rotating-star {
+      display: inline-block;
+      animation: spinStar 3s linear infinite;
+    }
+
     .update-banner button {
       background: #fff;
       color: #ff3366;
@@ -1796,7 +1807,7 @@
         }
 
         cell.innerHTML = `
-          <div class="calendar-date-num" ${isToday ? 'style="color:var(--warning-color);"' : ''}>${i}${isToday ? '　今天' : ''}</div>
+          <div class="calendar-date-num" ${isToday ? 'style="color:var(--warning-color);"' : ''}>${i}${isToday ? ' <span class="rotating-star">⭐</span> 今天' : ''}</div>
           <div class="calendar-badge ${work ? 'badge-work' : 'badge-off'}">${work ? '🫠 上班' : '😍 休假'}</div>
         `;
         gridElem.appendChild(cell);
