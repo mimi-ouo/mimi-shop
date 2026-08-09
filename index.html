@@ -59,7 +59,6 @@
       background-color: #cc3d3d;
     }
 
-    /* 其他樣式維持原樣 ... */
     #backToTopBtn {
       position: fixed;
       bottom: 30px;
@@ -606,7 +605,6 @@
       outline: none;
     }
 
-    /* 管理端下拉選單：對應狀態色彩調整 */
     .status-select.is-sold {
       background-color: #ff4d4d !important;
       border-color: #ff4d4d !important;
@@ -948,6 +946,100 @@
       width: 100%;
       align-items: center;
     }
+
+    /* 米米班表專用樣式 - 字體改為20px與智慧滿版 */
+    .schedule-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+      box-sizing: border-box;
+      display: none;
+    }
+    .schedule-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .schedule-header h3 {
+      margin: 0;
+      color: #fff;
+    }
+    .schedule-nav-btns {
+      display: flex;
+      gap: 8px;
+    }
+    .schedule-btn {
+      background: var(--bg-color);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .schedule-btn:hover {
+      background: #2a2a2a;
+      border-color: var(--accent-color);
+    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+    .calendar-weekday {
+      text-align: center;
+      font-weight: bold;
+      color: var(--success-color);
+      padding: 6px 0;
+      font-size: 13px;
+    }
+    .calendar-cell {
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      min-height: 105px;
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-sizing: border-box;
+    }
+    .calendar-cell.other-month {
+      opacity: 0.35;
+    }
+    .calendar-date-num {
+      font-size: 15px;
+      font-weight: bold;
+    }
+    .calendar-badge {
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+      padding: 8px 4px;
+      border-radius: 4px;
+      margin-top: 4px;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* 上班：藍色系維持 */
+    .badge-work {
+      background-color: rgba(43, 115, 223, 0.25);
+      border: 1px solid rgba(43, 115, 223, 0.5);
+      color: #7289da;
+    }
+    /* 休假：黃色系 */
+    .badge-off {
+      background-color: rgba(255, 215, 0, 0.2);
+      border: 1px solid rgba(255, 215, 0, 0.5);
+      color: #ffdf4d;
+    }
   </style>
 </head>
 <body>
@@ -983,6 +1075,7 @@
       </div>
 
       <button class="tab-btn" data-category="gift">🎁 贈品區</button>
+      <button class="tab-btn" data-category="schedule">📅 米米班表</button>
     </div>
 
     <div class="auth-section-wrapper">
@@ -1072,6 +1165,28 @@
 
   <div class="gallery" id="gallery"></div>
 
+  <!-- 米米班表專用容器 -->
+  <div class="schedule-container" id="scheduleContainer">
+    <div class="schedule-header">
+      <h3 id="scheduleMonthTitle">2026年 8月 班表</h3>
+      <div class="schedule-nav-btns">
+        <button class="schedule-btn" id="prevMonthBtn">◀ 上個月</button>
+        <button class="schedule-btn" id="todayMonthBtn">今天</button>
+        <button class="schedule-btn" id="nextMonthBtn">下個月 ▶</button>
+      </div>
+    </div>
+    <div class="calendar-grid">
+      <div class="calendar-weekday">日</div>
+      <div class="calendar-weekday">一</div>
+      <div class="calendar-weekday">二</div>
+      <div class="calendar-weekday">三</div>
+      <div class="calendar-weekday">四</div>
+      <div class="calendar-weekday">五</div>
+      <div class="calendar-weekday">六</div>
+    </div>
+    <div class="calendar-grid" id="calendarDaysGrid" style="margin-top: 6px;"></div>
+  </div>
+
   <div class="modal-overlay" id="albumModal">
     <div class="modal-content" id="albumModalContent">
       <div class="modal-header">
@@ -1110,6 +1225,9 @@
     let currentAlbumList = [];
     let currentAlbumIndex = 0;
 
+    let scheduleYear = 2026;
+    let scheduleMonth = 7; // 7 = 8月
+
     const ADMIN_PASSWORD = "1j6ul42l4ji3++";
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -1120,6 +1238,7 @@
       setupModalEvents();
       setupBackToTop();
       setupClearCartBtn();
+      setupScheduleEvents();
       fetchData();
       updateCartButtonBadge();
       
@@ -1355,11 +1474,113 @@
           document.getElementById('cropNoticeContainer').style.display = (currentCategory === 'crop_male' || currentCategory === 'crop_female') ? 'block' : 'none';
 
           document.getElementById('cartSummary').style.display = (currentCategory === 'cart') ? 'flex' : 'none';
+          document.getElementById('scheduleContainer').style.display = (currentCategory === 'schedule') ? 'block' : 'none';
+          document.getElementById('gallery').style.display = (currentCategory === 'schedule') ? 'none' : 'grid';
+          document.getElementById('dropZone').style.display = (isAdmin && currentCategory !== 'schedule') ? 'block' : 'none';
+
+          if (currentCategory === 'schedule') {
+            renderSchedule();
+          }
 
           document.getElementById('searchInput').value = '';
-          renderGallery();
+          if (currentCategory !== 'schedule') {
+            renderGallery();
+          }
         });
       });
+    }
+
+    function setupScheduleEvents() {
+      document.getElementById('prevMonthBtn').addEventListener('click', () => {
+        scheduleMonth--;
+        if (scheduleMonth < 0) {
+          scheduleMonth = 11;
+          scheduleYear--;
+        }
+        renderSchedule();
+      });
+
+      document.getElementById('nextMonthBtn').addEventListener('click', () => {
+        scheduleMonth++;
+        if (scheduleMonth > 11) {
+          scheduleMonth = 0;
+          scheduleYear++;
+        }
+        renderSchedule();
+      });
+
+      document.getElementById('todayMonthBtn').addEventListener('click', () => {
+        const now = new Date();
+        scheduleYear = now.getFullYear();
+        scheduleMonth = now.getMonth();
+        renderSchedule();
+      });
+    }
+
+    function isWorkDay(date) {
+      const baseDate = new Date(2026, 7, 8); 
+      const diffTime = date.getTime() - baseDate.getTime();
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+      const mod = ((diffDays % 4) + 4) % 4;
+      return mod === 2 || mod === 3;
+    }
+
+    function renderSchedule() {
+      const titleElem = document.getElementById('scheduleMonthTitle');
+      const gridElem = document.getElementById('calendarDaysGrid');
+      
+      titleElem.innerText = `${scheduleYear}年 ${scheduleMonth + 1}月 班表`;
+      gridElem.innerHTML = '';
+
+      const firstDayIndex = new Date(scheduleYear, scheduleMonth, 1).getDay();
+      const totalDays = new Date(scheduleYear, scheduleMonth + 1, 0).getDate();
+      const prevTotalDays = new Date(scheduleYear, scheduleMonth, 0).getDate();
+
+      for (let i = firstDayIndex - 1; i >= 0; i--) {
+        const dayNum = prevTotalDays - i;
+        const cell = document.createElement('div');
+        cell.className = 'calendar-cell other-month';
+        const d = new Date(scheduleYear, scheduleMonth - 1, dayNum);
+        const work = isWorkDay(d);
+        cell.innerHTML = `
+          <div class="calendar-date-num">${dayNum}</div>
+          <div class="calendar-badge ${work ? 'badge-work' : 'badge-off'}">${work ? '💼 上班' : '🏠 休假'}</div>
+        `;
+        gridElem.appendChild(cell);
+      }
+
+      for (let i = 1; i <= totalDays; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'calendar-cell';
+        const d = new Date(scheduleYear, scheduleMonth, i);
+        const work = isWorkDay(d);
+        
+        const today = new Date();
+        const isToday = d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate();
+        if (isToday) {
+          cell.style.borderColor = 'var(--accent-color)';
+        }
+
+        cell.innerHTML = `
+          <div class="calendar-date-num" ${isToday ? 'style="color:var(--warning-color);"' : ''}>${i}${isToday ? ' (今天)' : ''}</div>
+          <div class="calendar-badge ${work ? 'badge-work' : 'badge-off'}">${work ? '💼 上班' : '🏠 休假'}</div>
+        `;
+        gridElem.appendChild(cell);
+      }
+
+      const totalCells = firstDayIndex + totalDays;
+      const remainingCells = (totalCells % 7 === 0) ? 0 : 7 - (totalCells % 7);
+      for (let i = 1; i <= remainingCells; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'calendar-cell other-month';
+        const d = new Date(scheduleYear, scheduleMonth + 1, i);
+        const work = isWorkDay(d);
+        cell.innerHTML = `
+          <div class="calendar-date-num">${i}</div>
+          <div class="calendar-badge ${work ? 'badge-work' : 'badge-off'}">${work ? '💼 上班' : '🏠 休假'}</div>
+        `;
+        gridElem.appendChild(cell);
+      }
     }
 
     async function fetchData() {
@@ -1383,7 +1604,9 @@
           loadSetting('settings_ring', 'ringDescription');
           loadSetting('settings_crop', 'cropDescription');
 
-          renderGallery();
+          if (currentCategory !== 'schedule') {
+            renderGallery();
+          }
           calculateTotal();
 
           if (activeModalItem) {
@@ -1829,7 +2052,6 @@
       const albumImages = rawData.filter(i => i.category === 'album_item' && String(i.note) === String(activeModalItem.id));
       
       currentAlbumList = albumImages;
-      
       currentAlbumIndex = currentAlbumList.length > 0 ? Math.min(index, currentAlbumList.length - 1) : 0;
 
       updateModalView();
@@ -2027,7 +2249,7 @@
 
     document.addEventListener('paste', (e) => {
       const modal = document.getElementById('albumModal');
-      if (!isAdmin || document.activeElement.isContentEditable || (modal && modal.style.display === 'flex')) return;
+      if (!isAdmin || document.activeElement.isContentEditable || (modal && modal.style.display === 'flex') || currentCategory === 'schedule') return;
       
       const items = e.clipboardData?.items;
       if (!items) return;
@@ -2046,7 +2268,7 @@
       e.preventDefault();
       dropZone.classList.remove('dragover');
       const modal = document.getElementById('albumModal');
-      if (modal && modal.style.display === 'flex') return;
+      if ((modal && modal.style.display === 'flex') || currentCategory === 'schedule') return;
       if (isAdmin && e.dataTransfer.files.length > 0) {
         handleImageFile(e.dataTransfer.files[0]);
       }
