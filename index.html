@@ -463,11 +463,25 @@
 
     .gallery {
       display: grid;
-      /* 優化：卡片寬度改為 112px，間距縮小為 5px，讓手機一行完美塞下三張卡片 */
-      grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
-      gap: 5px;
+      /* 預設電腦版卡片寬度為 140px，小於 768px 時切換為 112px */
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 8px;
       align-items: start;
       margin-top: 20px;
+    }
+
+    /* 螢幕尺寸小於 768px 時的響應式設定 */
+    @media (max-width: 768px) {
+      .gallery {
+        grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+        gap: 5px;
+      }
+      .img-card, .img-wrapper {
+        width: 112px !important;
+      }
+      .img-wrapper {
+        height: 112px !important;
+      }
     }
 
     /* 歡迎區全新精緻排版與風格優化 */
@@ -583,7 +597,7 @@
     }
 
     .img-card {
-      width: 112px; /* 優化：卡片寬度加大至 112px */
+      width: 140px; /* 預設電腦版卡片寬度 */
       background-color: var(--card-bg);
       border-radius: 6px;
       overflow: hidden;
@@ -604,8 +618,8 @@
     }
 
     .img-wrapper {
-      width: 112px; /* 優化：對應圖片容器寬度 */
-      height: 112px; /* 優化：等比例調整高度 */
+      width: 140px; /* 預設電腦版圖片容器寬度 */
+      height: 140px; /* 預設電腦版圖片容器高度 */
       position: relative;
       background-color: #1a1a1a;
       display: flex;
