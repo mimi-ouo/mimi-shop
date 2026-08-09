@@ -500,6 +500,29 @@
       margin-top: 20px;
     }
 
+    .welcome-message {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 50px 20px;
+      font-size: 15px;
+      font-weight: bold;
+      line-height: 1.8;
+      border: none;
+      outline: none;
+      background: var(--card-bg);
+      border-radius: 8px;
+      margin-top: 20px;
+      animation: colorFlash 1.5s infinite;
+    }
+
+    @keyframes colorFlash {
+      0% { color: #ff3366; }
+      25% { color: #ff9933; }
+      50% { color: #33cc33; }
+      75% { color: #3399ff; }
+      100% { color: #9933ff; }
+    }
+
     .img-card {
       width: 120px;
       background-color: var(--card-bg);
@@ -1066,9 +1089,9 @@
 
     <div class="collapse-content" id="collapseContent">
       <div class="dropdown" id="dropdown-furniture">
-        <button class="dropdown-toggle active" data-dropdown="dropdown-furniture" id="furnitureToggleBtn">🏠 家具 ▾</button>
+        <button class="dropdown-toggle" data-dropdown="dropdown-furniture" id="furnitureToggleBtn">🏠 家具 ▾</button>
         <div class="dropdown-menu">
-          <button class="dropdown-item tab-btn active" data-category="general_new">✨ 本月新品</button>
+          <button class="dropdown-item tab-btn" data-category="general_new">✨ 本月新品</button>
           <button class="dropdown-item tab-btn" data-category="general_misc">📦 哩哩摳摳</button>
         </div>
       </div>
@@ -1177,7 +1200,7 @@
   </div>
 
   <div class="drop-zone" id="dropZone">
-    <p style="font-size: 16px; margin-bottom: 8px;">💡 當前分頁：<b id="currentTabName">✨ 本月新品</b>（Ctrl + V 貼上圖片 / 拖曳上傳）</p>
+    <p style="font-size: 16px; margin-bottom: 8px;">💡 當前分頁：<b id="currentTabName">尚未選擇分頁</b>（Ctrl + V 貼上圖片 / 拖曳上傳）</p>
     <p id="status" style="color: var(--accent-color); margin: 0; font-weight: bold;"></p>
   </div>
 
@@ -1233,8 +1256,8 @@
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxVrP__g-bnoVRQQrJkKLlMZDhSbFeUuTMyw6-zVRhtYkkSedoVbJXKUwN0bUyc4vs3rQ/exec";
 
-    let currentCategory = 'general_new';
-    let currentCategoryDisplayName = '✨ 本月新品';
+    let currentCategory = ''; // 預設不指定分頁，顯示歡迎文字
+    let currentCategoryDisplayName = '尚未選擇分頁';
     let isAdmin = localStorage.getItem('isAdmin') === 'true';
     let allData = [];
     let cartItems = new Map();
@@ -1258,6 +1281,7 @@
       setupScheduleEvents();
       fetchData();
       updateCartButtonBadge();
+      renderGallery(); // 預設渲染歡迎畫面
       
       document.getElementById('searchInput').addEventListener('input', renderGallery);
     });
@@ -1359,7 +1383,7 @@
 
       if (isAdmin) {
         document.body.classList.add('is-admin');
-        dropZone.style.display = 'block';
+        dropZone.style.display = currentCategory ? 'block' : 'none';
         descElem.contentEditable = "true";
         giftDescElem.contentEditable = "true";
         ringDescElem.contentEditable = "true";
@@ -1630,7 +1654,7 @@
           loadSetting('settings_ring', 'ringDescription');
           loadSetting('settings_crop', 'cropDescription');
 
-          if (currentCategory !== 'schedule') {
+          if (currentCategory && currentCategory !== 'schedule') {
             renderGallery();
           }
           calculateTotal();
@@ -1710,6 +1734,17 @@
       const gallery = document.getElementById('gallery');
       const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
 
+      gallery.innerHTML = '';
+
+      // 若尚未選擇分類分頁且沒有輸入搜尋關鍵字，顯示歡迎文字
+      if (!currentCategory && !keyword) {
+        const welcomeDiv = document.createElement('div');
+        welcomeDiv.className = 'welcome-message';
+        welcomeDiv.innerHTML = '歡迎來到米米小舖~~<br>請點擊右方分頁查看商品♥';
+        gallery.appendChild(welcomeDiv);
+        return;
+      }
+
       const filtered = allData.filter(item => {
         if (keyword) {
           const caption = String(item.caption || '').toLowerCase();
@@ -1723,7 +1758,6 @@
       });
       
       filtered.sort(compareItems);
-      gallery.innerHTML = '';
 
       filtered.forEach((item) => {
         const card = document.createElement('div');
@@ -2316,7 +2350,7 @@
 
     document.addEventListener('paste', (e) => {
       const modal = document.getElementById('albumModal');
-      if (!isAdmin || document.activeElement.isContentEditable || (modal && modal.style.display === 'flex') || currentCategory === 'schedule') return;
+      if (!isAdmin || document.activeElement.isContentEditable || (modal && modal.style.display === 'flex') || currentCategory === 'schedule' || !currentCategory) return;
       
       const items = e.clipboardData?.items;
       if (!items) return;
@@ -2335,7 +2369,7 @@
       e.preventDefault();
       dropZone.classList.remove('dragover');
       const modal = document.getElementById('albumModal');
-      if ((modal && modal.style.display === 'flex') || currentCategory === 'schedule') return;
+      if ((modal && modal.style.display === 'flex') || currentCategory === 'schedule' || !currentCategory) return;
       if (isAdmin && e.dataTransfer.files.length > 0) {
         handleImageFile(e.dataTransfer.files[0]);
       }
