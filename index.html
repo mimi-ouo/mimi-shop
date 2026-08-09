@@ -31,7 +31,6 @@
       margin-right: auto;
     }
 
-    /* 更新提示條樣式 */
     .update-banner {
       position: fixed;
       top: 0;
@@ -68,7 +67,6 @@
       background: #f0f0f0;
     }
 
-    /* 購物車金額顯示與操作區 - 預設不顯示，由 JS 依據分頁動態開啟 */
     .cart-summary {
       background: var(--card-bg);
       border: 1px solid var(--cart-color);
@@ -226,12 +224,8 @@
     }
 
     @keyframes hintBounce {
-      0%, 100% {
-        transform: translateX(0);
-      }
-      50% {
-        transform: translateX(6px);
-      }
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(6px); }
     }
 
     .side-tabs-panel {
@@ -448,14 +442,33 @@
       text-align: center;
     }
 
+    .search-sort-wrapper {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      width: 100%;
+    }
+
     .search-input {
       padding: 8px 12px;
       border-radius: 6px;
       border: 1px solid var(--border-color);
       background: var(--card-bg);
       color: var(--text-color);
-      width: 100%;
+      flex: 1;
       font-size: 13px;
+      box-sizing: border-box;
+    }
+
+    .sort-select {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background: var(--card-bg);
+      color: var(--text-color);
+      font-size: 13px;
+      cursor: pointer;
+      outline: none;
       box-sizing: border-box;
     }
 
@@ -1008,9 +1021,7 @@
       padding: 4px 8px;
       border-radius: 4px;
     }
-    .modal-close-btn:hover {
-      background: rgba(255,255,255,0.1);
-    }
+    .modal-close-btn:hover { background: rgba(255,255,255,0.1); }
 
     .modal-body {
       padding: 20px;
@@ -1067,9 +1078,7 @@
       border-radius: 4px;
       transition: background 0.2s;
     }
-    .modal-nav-btn:hover {
-      background: rgba(255, 255, 255, 0.3);
-    }
+    .modal-nav-btn:hover { background: rgba(255, 255, 255, 0.3); }
     .modal-prev-btn { left: 10px; }
     .modal-next-btn { right: 10px; }
 
@@ -1165,9 +1174,7 @@
       justify-content: space-between;
       box-sizing: border-box;
     }
-    .calendar-cell.other-month {
-      opacity: 0.35;
-    }
+    .calendar-cell.other-month { opacity: 0.35; }
     .calendar-date-num {
       font-size: 15px;
       font-weight: bold;
@@ -1199,7 +1206,6 @@
 </head>
 <body>
 
-  <!-- 訪客端有更新時的提示條 -->
   <div class="update-banner" id="updateBanner">
     ✨ 偵測到管理端有新的更新內容！
     <button onclick="location.reload()">立即重新整理</button>
@@ -1285,8 +1291,15 @@
         </div>
       </div>
 
-      <div class="search-panel">
+      <!-- 精簡後的搜尋與排序工具列 -->
+      <div class="search-sort-wrapper">
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 搜尋全區名稱或備註...">
+        <select id="sortSelect" class="sort-select">
+          <option value="price_asc" selected>📈 價格：低 → 高</option>
+          <option value="price_desc">📉 價格：高 → 低</option>
+          <option value="time_desc">⏱️ 上傳時間：新 → 舊</option>
+          <option value="time_asc">⏳ 上傳時間：舊 → 新</option>
+        </select>
       </div>
 
     </div>
@@ -1387,7 +1400,6 @@
     let scheduleYear = 2026;
     let scheduleMonth = 7;
 
-    // 用於比對資料是否有更新的校驗碼或資料長度/內容摘要
     let initialDataHash = '';
 
     const ADMIN_PASSWORD = "1j6ul42l4ji3++";
@@ -1402,26 +1414,26 @@
       setupClearCartBtn();
       setupScheduleEvents();
       
-      // 重新連入網頁時自動抓取最新資料
       fetchData(true); 
 
-      // 啟動背景輪詢檢測更新（每 10 秒檢查一次）
-      setInterval(checkForUpdates, 10000);
+      if (!isAdmin) {
+        setInterval(checkForUpdates, 10000);
+      }
 
       updateCartButtonBadge();
       renderGallery(); 
       
       document.getElementById('searchInput').addEventListener('input', renderGallery);
+      document.getElementById('sortSelect').addEventListener('change', renderGallery);
     });
 
-    // 產生資料內容的簡單雜湊或 JSON 字串供比對用
     function computeDataHash(data) {
-      return JSON.stringify(data.map(i => ({ id: i.id, caption: i.caption, price: i.price, quantity: i.quantity, interact: i.interact })));
+      return JSON.stringify(data.map(i => i.id).sort());
     }
 
-    // 定期檢查後端資料是否有變化
     async function checkForUpdates() {
-      // 若管理員正在編輯或開啟彈窗，暫時不打擾或可照常背景檢查
+      if (isAdmin) return;
+
       try {
         const response = await fetch(`${SCRIPT_URL}?action=getData`);
         const result = await response.json();
@@ -1431,7 +1443,6 @@
           const newHash = computeDataHash(filtered);
 
           if (initialDataHash && newHash !== initialDataHash) {
-            // 顯示更新提示條
             document.getElementById('updateBanner').style.display = 'block';
           }
         }
@@ -1764,7 +1775,7 @@
         }
 
         cell.innerHTML = `
-          <div class="calendar-date-num" ${isToday ? 'style="color:var(--warning-color);"' : ''}>${i}${isToday ? '  今天' : ''}</div>
+          <div class="calendar-date-num" ${isToday ? 'style="color:var(--warning-color);"' : ''}>${i}${isToday ? ' 　今天' : ''}</div>
           <div class="calendar-badge ${work ? 'badge-work' : 'badge-off'}">${work ? '🫠 上班' : '😍 休假'}</div>
         `;
         gridElem.appendChild(cell);
@@ -1842,32 +1853,36 @@
       }
     }
 
-    function hasChinese(str) {
-      return /[\u4e00-\u9fa5]/.test(str);
-    }
-
+    // 排序邏輯：原排序優先，相同時比對說明區 (caption) 讓相同說明排在一起
     function compareItems(a, b) {
+      const sortVal = document.getElementById('sortSelect').value;
       const priceA = parseFloat(a.price) || 0;
       const priceB = parseFloat(b.price) || 0;
+      
+      const idA = isNaN(a.id) ? 0 : Number(a.id);
+      const idB = isNaN(b.id) ? 0 : Number(b.id);
+      const timeA = a.timestamp || idA;
+      const timeB = b.timestamp || idB;
 
-      if (priceA !== priceB) {
-        return priceA - priceB;
+      let primaryDiff = 0;
+      if (sortVal === 'price_asc') {
+        primaryDiff = priceA - priceB;
+      } else if (sortVal === 'price_desc') {
+        primaryDiff = priceB - priceA;
+      } else if (sortVal === 'time_asc') {
+        primaryDiff = timeA - timeB;
+      } else {
+        primaryDiff = timeB - timeA;
       }
 
-      const capA = String(a.caption || '').trim();
-      const capB = String(b.caption || '').trim();
+      // 如果主要條件（價格或時間）相同，則以說明區 (caption) 進行排序
+      if (primaryDiff === 0) {
+        const captionA = String(a.caption || '');
+        const captionB = String(b.caption || '');
+        return captionA.localeCompare(captionB, 'zh-TW');
+      }
 
-      if (!capA && !capB) return 0;
-      if (!capA) return 1;
-      if (!capB) return -1;
-
-      const aHasChinese = hasChinese(capA);
-      const bHasChinese = hasChinese(capB);
-
-      if (aHasChinese && !bHasChinese) return -1;
-      if (!aHasChinese && bHasChinese) return 1;
-
-      return capA.localeCompare(capB, 'zh-Hant', { numeric: true, sensitivity: 'base' });
+      return primaryDiff;
     }
 
     function generateVisitorQtyOptions(adminQtyStr, selectedQty) {
