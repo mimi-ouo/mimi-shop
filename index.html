@@ -21,9 +21,15 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: var(--bg-color);
       color: var(--text-color);
-      max-width: 1200px;
-      margin: 0 auto;
+      width: 100%;
+      box-sizing: border-box;
+      margin: 0;
       padding: 20px;
+      /* 移除右側為了懸浮視窗預留的 140px 空白區塊 */
+      padding-right: 20px;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     /* 購物車金額顯示與操作區 - 預設不顯示，由 JS 依據分頁動態開啟 */
@@ -120,10 +126,9 @@
 
     .title-discord-row {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 15px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
     }
 
     .title-area h2 {
@@ -459,7 +464,7 @@
 
     .gallery {
       display: grid;
-      grid-template-columns: repeat(auto-fill, 120px);
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
       gap: 12px;
       align-items: start;
       margin-top: 20px;
