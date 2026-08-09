@@ -463,14 +463,12 @@
 
     .gallery {
       display: grid;
-      /* 預設電腦版卡片寬度為 140px，小於 768px 時切換為 112px */
       grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
       gap: 8px;
       align-items: start;
       margin-top: 20px;
     }
 
-    /* 螢幕尺寸小於 768px 時的響應式設定 */
     @media (max-width: 768px) {
       .gallery {
         grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
@@ -484,7 +482,6 @@
       }
     }
 
-    /* 歡迎區全新精緻排版與風格優化 */
     .welcome-message {
       grid-column: 1 / -1;
       text-align: left;
@@ -597,7 +594,7 @@
     }
 
     .img-card {
-      width: 140px; /* 預設電腦版卡片寬度 */
+      width: 140px;
       background-color: var(--card-bg);
       border-radius: 6px;
       overflow: hidden;
@@ -618,8 +615,8 @@
     }
 
     .img-wrapper {
-      width: 140px; /* 預設電腦版圖片容器寬度 */
-      height: 140px; /* 預設電腦版圖片容器高度 */
+      width: 140px;
+      height: 140px;
       position: relative;
       background-color: #1a1a1a;
       display: flex;
@@ -842,17 +839,34 @@
       justify-content: center;
     }
 
+    /* 互動選單：文字置中與預設背景 */
     .interact-select {
-      background-color: #222;
+      background-color: #2b2b2b;
       color: var(--text-color);
       border: 1px solid var(--border-color);
       border-radius: 3px;
-      padding: 1px 2px;
+      padding: 2px 4px;
       font-size: 9px;
       width: 100%;
       text-align: center;
+      text-align-last: center; /* 讓部分瀏覽器下拉選單文字也置中 */
       outline: none;
       cursor: pointer;
+      font-weight: bold;
+    }
+
+    /* 有互動選項的背景顏色優化 */
+    .interact-select option[value="有互動"],
+    .interact-select.has-interact {
+      background-color: #1b4d3e !important;
+      color: #79efc3 !important;
+    }
+
+    /* 無互動選項的背景顏色優化 */
+    .interact-select option[value="無互動"],
+    .interact-select.no-interact {
+      background-color: #333333 !important;
+      color: #b0b0b0 !important;
     }
 
     .move-category-select {
@@ -1960,7 +1974,7 @@
                 </div>
               </div>
               <div class="interact-col">
-                <select class="interact-select" id="interact-${item.id}" ${!isAdmin ? 'disabled' : ''}>
+                <select class="interact-select ${interactVal === '有互動' ? 'has-interact' : 'no-interact'}" id="interact-${item.id}" ${!isAdmin ? 'disabled' : ''}>
                   <option value="有互動" ${interactVal === '有互動' ? 'selected' : ''}>有互動</option>
                   <option value="無互動" ${interactVal === '無互動' ? 'selected' : ''}>無互動</option>
                 </select>
@@ -2082,6 +2096,8 @@
               const success = await updateItem(item.id, 'interact', newValue);
               if (success) {
                 item.interact = newValue;
+                // 即時動態切換背景色
+                interactSelectEl.className = `interact-select ${newValue === '有互動' ? 'has-interact' : 'no-interact'}`;
                 status.innerText = "修改成功！";
               } else {
                 status.innerText = "儲存失敗，請重試";
