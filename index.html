@@ -442,6 +442,15 @@
       text-align: center;
     }
 
+    /* 區塊內排序工具列容器 */
+    .section-sort-container {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      width: 100%;
+    }
+
     .search-sort-wrapper {
       display: flex;
       gap: 10px;
@@ -516,7 +525,7 @@
       grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
       gap: 8px;
       align-items: start;
-      margin-top: 20px;
+      margin-top: 10px;
     }
 
     @media (max-width: 768px) {
@@ -1234,7 +1243,7 @@
         <button class="dropdown-toggle" data-dropdown="dropdown-animal">🐾 小動物 ▾</button>
         <div class="dropdown-menu">
           <button class="dropdown-item tab-btn" data-category="memes">🧸 熊熊</button>
-          <button class="dropdown-item tab-btn" data-category="animal_other">🐇 其他</button>
+          <button class="dropdown-item tab-btn" data-category="animal_other">📦 其他</button>
         </div>
       </div>
 
@@ -1299,15 +1308,9 @@
         </div>
       </div>
 
-      <!-- 精簡後的搜尋與排序工具列 -->
+      <!-- 僅保留搜尋框在頂端 -->
       <div class="search-sort-wrapper">
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 搜尋全區名稱或備註...">
-        <select id="sortSelect" class="sort-select">
-          <option value="price_asc" selected>📈 價格：低 → 高</option>
-          <option value="price_desc">📉 價格：高 → 低</option>
-          <option value="time_desc">⏱️ 上傳時間：新 → 舊</option>
-          <option value="time_asc">⏳ 上傳時間：舊 → 新</option>
-        </select>
       </div>
 
     </div>
@@ -1342,6 +1345,16 @@
   <div class="drop-zone" id="dropZone">
     <p style="font-size: 16px; margin-bottom: 8px;">💡 當前分頁：<b id="currentTabName">尚未選擇分頁</b>（Ctrl + V 貼上圖片 / 拖曳上傳）</p>
     <p id="status" style="color: var(--accent-color); margin: 0; font-weight: bold;"></p>
+  </div>
+
+  <!-- 將排序下拉選單放到每個分頁的商品區最上方 -->
+  <div class="section-sort-container">
+    <select id="sortSelect" class="sort-select">
+      <option value="price_asc" selected>📈 價格：低 → 高</option>
+      <option value="price_desc">📉 價格：高 → 低</option>
+      <option value="time_desc">⏱️ 上傳時間：新 → 舊</option>
+      <option value="time_asc">⏳ 上傳時間：舊 → 新</option>
+    </select>
   </div>
 
   <div class="gallery" id="gallery"></div>
@@ -1935,7 +1948,7 @@
             </div>
             
             <div class="welcome-item">
-              <div class="welcome-label">🕒 交易時間</div>
+              <div class="welcome-label">📅 交易時間</div>
               <div class="welcome-desc">本人夜班，需要晚上交易可參考右方「米米班表」分頁查詢休假與上班日❤</div>
             </div>
             
@@ -1951,7 +1964,7 @@
           </div>
           <div class="welcome-footer-action">
             <div class="welcome-sweet-tip">謝謝寶貝看完~現在~</div>
-            <div class="welcome-action-btn">❤ 點擊右側分頁開始選購 ❤</div>
+            <div class="welcome-action-btn">❤ 點擊右方分頁開始選購 ❤</div>
           </div>
         `;
         gallery.appendChild(welcomeDiv);
