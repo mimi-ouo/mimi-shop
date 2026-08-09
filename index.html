@@ -26,7 +26,7 @@
       padding: 20px;
     }
 
-    /* 購物車金額顯示與操作區 */
+    /* 購物車金額顯示與操作區 - 預設不顯示，由 JS 依據分頁動態開啟 */
     .cart-summary {
       background: var(--card-bg);
       border: 1px solid var(--cart-color);
@@ -38,7 +38,6 @@
       text-align: center;
       font-weight: bold;
       font-size: 18px;
-      display: flex;
       justify-content: center;
       align-items: center;
       gap: 15px;
@@ -582,7 +581,6 @@
       color: #121212;
     }
 
-    /* 已出售狀態：紅底白字 */
     .status-badge.is-sold {
       background-color: #ff4d4d !important;
       border-color: #ff4d4d !important;
@@ -961,7 +959,6 @@
       align-items: center;
     }
 
-    /* 米米班表專用樣式 */
     .schedule-container {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -1186,7 +1183,6 @@
 
   <div class="gallery" id="gallery"></div>
 
-  <!-- 米米班表專用容器 -->
   <div class="schedule-container" id="scheduleContainer">
     <div class="schedule-header">
       <h3 id="scheduleMonthTitle">2026年 8月 班表</h3>
@@ -1798,7 +1794,6 @@
         let interactVal = item.interact || '無互動';
 
         let moveSelectHTML = '';
-        // 變更處：同步在 「✨ 本月新品 (general_new)」與「🧸 哩哩摳摳 (general_misc)」顯示移動功能
         if (isAdmin && (currentCategory === 'general_new' || currentCategory === 'general_misc')) {
           moveSelectHTML = `
             <div class="interact-col">
