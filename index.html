@@ -463,9 +463,9 @@
 
     .gallery {
       display: grid;
-      /* 調整卡片最小寬度與間距，讓手機版一行剛好塞下三個卡片 */
-      grid-template-columns: repeat(auto-fill, minmax(102px, 1fr));
-      gap: 8px;
+      /* 優化：卡片寬度改為 112px，間距縮小為 5px，讓手機一行完美塞下三張卡片 */
+      grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+      gap: 5px;
       align-items: start;
       margin-top: 20px;
     }
@@ -583,7 +583,7 @@
     }
 
     .img-card {
-      width: 100px;
+      width: 112px; /* 優化：卡片寬度加大至 112px */
       background-color: var(--card-bg);
       border-radius: 6px;
       overflow: hidden;
@@ -604,8 +604,8 @@
     }
 
     .img-wrapper {
-      width: 100px;
-      height: 100px;
+      width: 112px; /* 優化：對應圖片容器寬度 */
+      height: 112px; /* 優化：等比例調整高度 */
       position: relative;
       background-color: #1a1a1a;
       display: flex;
@@ -651,7 +651,7 @@
       padding: 1px 3px;
       font-size: 8px;
       font-weight: bold;
-      max-width: 75px;
+      max-width: 80px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
