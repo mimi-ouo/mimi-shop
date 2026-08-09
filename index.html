@@ -1564,7 +1564,7 @@
         }
 
         cell.innerHTML = `
-          <div class="calendar-date-num" ${isToday ? 'style="color:var(--warning-color);"' : ''}>${i}${isToday ? ' (今天)' : ''}</div>
+          <div class="calendar-date-num" ${isToday ? 'style="color:var(--warning-color);"' : ''}>${i}${isToday ? ' 　今天！' : ''}</div>
           <div class="calendar-badge ${work ? 'badge-work' : 'badge-off'}">${work ? '🫠 上班' : '😍 休假'}</div>
         `;
         gridElem.appendChild(cell);
