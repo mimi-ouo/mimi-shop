@@ -583,10 +583,11 @@
       color: #121212;
     }
 
+    /* 已出售狀態：紅底白字 */
     .status-badge.is-sold {
-      background-color: rgba(255, 77, 77, 0.9);
-      border-color: var(--danger-color);
-      color: #ffffff;
+      background-color: #ff4d4d !important;
+      border-color: #ff4d4d !important;
+      color: #ffffff !important;
     }
 
     .status-select {
@@ -603,6 +604,19 @@
       font-weight: bold;
       cursor: pointer;
       outline: none;
+    }
+
+    /* 管理端下拉選單：對應狀態色彩調整 */
+    .status-select.is-sold {
+      background-color: #ff4d4d !important;
+      border-color: #ff4d4d !important;
+      color: #ffffff !important;
+    }
+
+    .status-select.is-pending {
+      background-color: rgba(255, 215, 0, 0.95) !important;
+      border-color: var(--warning-color) !important;
+      color: #121212 !important;
     }
 
     .cart-checkbox {
@@ -1025,7 +1039,6 @@
     </div>
   </div>
   
-  <!-- 更新：購物車區塊新增清空按鈕 -->
   <div id="cartSummary" class="cart-summary">
     <div>購物車總金額: <span id="totalAmount">0</span></div>
     <button id="clearCartBtn" class="clear-cart-btn">清空購物車</button>
@@ -1092,7 +1105,7 @@
     let currentCategoryDisplayName = '🏠 家具';
     let isAdmin = localStorage.getItem('isAdmin') === 'true';
     let allData = [];
-    let cartItems = new Map(); // ID => QuantityString
+    let cartItems = new Map();
     let activeModalItem = null;
     let currentAlbumList = [];
     let currentAlbumIndex = 0;
@@ -1106,14 +1119,13 @@
       setupDiscordButton();
       setupModalEvents();
       setupBackToTop();
-      setupClearCartBtn(); // 新增：清空按鈕事件綁定
+      setupClearCartBtn();
       fetchData();
       updateCartButtonBadge();
       
       document.getElementById('searchInput').addEventListener('input', renderGallery);
     });
 
-    // 新增：清空購物車按鈕邏輯
     function setupClearCartBtn() {
       document.getElementById('clearCartBtn').addEventListener('click', () => {
         if (confirm('確定要清空購物車嗎？')) {
@@ -1472,7 +1484,7 @@
 
         const currentQty = item.quantity || '數量: 1';
         const isPending = String(currentQty).includes('暫售');
-        const isSold = String(currentQty).includes('售出');
+        const isSold = String(currentQty).includes('已出售');
         
         let statusClass = '';
         if (isPending) statusClass = 'is-pending';
@@ -1496,7 +1508,7 @@
             <option value="數量: 10" ${currentQty === '數量: 10' ? 'selected' : ''}>數量: 10</option>
             <option value="大量" ${currentQty === '大量' ? 'selected' : ''}>大量</option>
             <option value="暫售，待交易" ${isPending ? 'selected' : ''}>暫售，待交易</option>
-            <option value="無庫存" ${isSold ? 'selected' : ''}>無庫存</option>
+            <option value="已出售" ${isSold ? 'selected' : ''}>已出售</option>
           </select>`;
 
           if (isChecked) {
@@ -1631,7 +1643,7 @@
                 selectEl.className = 'status-select';
                 if (newValue.includes('暫售')) {
                   selectEl.classList.add('is-pending');
-                } else if (newValue.includes('售出')) {
+                } else if (newValue.includes('已出售')) {
                   selectEl.classList.add('is-sold');
                 }
                 status.innerText = "修改成功！";
