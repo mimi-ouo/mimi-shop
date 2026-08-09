@@ -31,6 +31,43 @@
       margin-right: auto;
     }
 
+    /* 更新提示條樣式 */
+    .update-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: linear-gradient(135deg, #ff3366, #ff9933);
+      color: #fff;
+      text-align: center;
+      padding: 12px;
+      font-weight: bold;
+      z-index: 99999;
+      display: none;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      animation: slideDown 0.3s ease-out;
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-100%); }
+      to { transform: translateY(0); }
+    }
+
+    .update-banner button {
+      background: #fff;
+      color: #ff3366;
+      border: none;
+      padding: 5px 15px;
+      margin-left: 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .update-banner button:hover {
+      background: #f0f0f0;
+    }
+
     /* 購物車金額顯示與操作區 - 預設不顯示，由 JS 依據分頁動態開啟 */
     .cart-summary {
       background: var(--card-bg);
@@ -839,7 +876,6 @@
       justify-content: center;
     }
 
-    /* 互動選單：文字置中與預設背景 */
     .interact-select {
       background-color: #2b2b2b;
       color: var(--text-color);
@@ -849,20 +885,18 @@
       font-size: 9px;
       width: 100%;
       text-align: center;
-      text-align-last: center; /* 讓部分瀏覽器下拉選單文字也置中 */
+      text-align-last: center;
       outline: none;
       cursor: pointer;
       font-weight: bold;
     }
 
-    /* 有互動選項的背景顏色優化 */
     .interact-select option[value="有互動"],
     .interact-select.has-interact {
       background-color: #1b4d3e !important;
       color: #79efc3 !important;
     }
 
-    /* 無互動選項的背景顏色優化 */
     .interact-select option[value="無互動"],
     .interact-select.no-interact {
       background-color: #333333 !important;
@@ -1165,6 +1199,12 @@
 </head>
 <body>
 
+  <!-- 訪客端有更新時的提示條 -->
+  <div class="update-banner" id="updateBanner">
+    ✨ 偵測到管理端有新的更新內容！
+    <button onclick="location.reload()">立即重新整理</button>
+  </div>
+
   <button id="backToTopBtn" title="回到頂部">↑ 頂部</button>
 
   <div class="side-tabs-panel" id="sideTabsPanel">
@@ -1347,6 +1387,9 @@
     let scheduleYear = 2026;
     let scheduleMonth = 7;
 
+    // 用於比對資料是否有更新的校驗碼或資料長度/內容摘要
+    let initialDataHash = '';
+
     const ADMIN_PASSWORD = "1j6ul42l4ji3++";
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -1358,12 +1401,44 @@
       setupBackToTop();
       setupClearCartBtn();
       setupScheduleEvents();
-      fetchData();
+      
+      // 重新連入網頁時自動抓取最新資料
+      fetchData(true); 
+
+      // 啟動背景輪詢檢測更新（每 10 秒檢查一次）
+      setInterval(checkForUpdates, 10000);
+
       updateCartButtonBadge();
       renderGallery(); 
       
       document.getElementById('searchInput').addEventListener('input', renderGallery);
     });
+
+    // 產生資料內容的簡單雜湊或 JSON 字串供比對用
+    function computeDataHash(data) {
+      return JSON.stringify(data.map(i => ({ id: i.id, caption: i.caption, price: i.price, quantity: i.quantity, interact: i.interact })));
+    }
+
+    // 定期檢查後端資料是否有變化
+    async function checkForUpdates() {
+      // 若管理員正在編輯或開啟彈窗，暫時不打擾或可照常背景檢查
+      try {
+        const response = await fetch(`${SCRIPT_URL}?action=getData`);
+        const result = await response.json();
+        if (result.status === 'success') {
+          const settingsIds = ['settings_desc', 'settings_gift', 'settings_ring', 'settings_crop'];
+          const filtered = result.data.filter(item => !settingsIds.includes(String(item.id)) && item.category !== 'album_item');
+          const newHash = computeDataHash(filtered);
+
+          if (initialDataHash && newHash !== initialDataHash) {
+            // 顯示更新提示條
+            document.getElementById('updateBanner').style.display = 'block';
+          }
+        }
+      } catch (err) {
+        console.error("檢查更新失敗", err);
+      }
+    }
 
     function setupClearCartBtn() {
       document.getElementById('clearCartBtn').addEventListener('click', () => {
@@ -1609,7 +1684,6 @@
             renderGallery();
           }
 
-          // 點擊分頁或子分頁後，自動收合懸浮區
           const sideTabsPanel = document.getElementById('sideTabsPanel');
           const collapseToggleBtn = document.getElementById('collapseToggleBtn');
           sideTabsPanel.classList.add('collapsed');
@@ -1711,7 +1785,7 @@
       }
     }
 
-    async function fetchData() {
+    async function fetchData(isInitial = false) {
       try {
         const response = await fetch(`${SCRIPT_URL}?action=getData`);
         const result = await response.json();
@@ -1720,6 +1794,10 @@
           
           allData = result.data.filter(item => !settingsIds.includes(String(item.id)) && item.category !== 'album_item');
           window._rawServerData = result.data;
+
+          if (isInitial) {
+            initialDataHash = computeDataHash(allData);
+          }
 
           allData.forEach(item => {
             if (item.category === 'general') {
@@ -1961,7 +2039,6 @@
           `;
         }
 
-        // 判斷是否需要顯示互動下拉選單：只在 家具兩個子分頁、熊熊、贈品區 顯示
         const showInteractSelect = (item.category === 'general_new' || item.category === 'general_misc' || item.category === 'memes' || item.category === 'gift');
         
         let interactHTML = '';
@@ -2112,7 +2189,6 @@
               const success = await updateItem(item.id, 'interact', newValue);
               if (success) {
                 item.interact = newValue;
-                // 即時動態切換背景色
                 interactSelectEl.className = `interact-select ${newValue === '有互動' ? 'has-interact' : 'no-interact'}`;
                 status.innerText = "修改成功！";
               } else {
