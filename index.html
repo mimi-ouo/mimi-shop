@@ -36,29 +36,30 @@
       margin-right: auto;
     }
 
-    /* 在線人數樣式優化排版 */
+    /* 在線人數樣式調整與標題併排 */
     .online-counter-wrapper {
       display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: 15px;
+      flex-direction: column;
+      width: fit-content;
     }
 
     .counter-box {
-      font-size: 14px;
+      font-size: 13px;
       color: var(--text-color);
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      display: inline-flex;
+      background: rgba(0, 255, 136, 0.08);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 8px 16px;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+      justify-content: space-between;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      box-sizing: border-box;
+      width: 110px;
     }
 
     #count {
-      font-size: 16px;
+      font-size: 14px;
       color: #00ff88;
       font-weight: bold;
     }
@@ -208,6 +209,15 @@
       gap: 10px;
     }
 
+    /* 讓標題與在線人數在同一列顯示 */
+    .title-with-counter {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+
     .title-area h2 {
       margin: 0;
       font-size: 26px;
@@ -223,13 +233,14 @@
     .discord-wrapper {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 6px;
     }
 
     .discord-container {
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
     .discord-badge {
@@ -1326,20 +1337,22 @@
   <div class="sticky-header-wrapper">
     <div class="header-layout">
       
-      <!-- 即時在線人數顯示區塊 (已優化排版) -->
-      <div class="online-counter-wrapper">
-        <div class="counter-box">
-          <span>🔥 目前即時在線人數：</span>
-          <span id="count">載入中...</span>
-        </div>
-      </div>
-
       <div class="header-top-row">
         <div class="left-control-panel">
           <div class="title-area-group">
             <div class="title-discord-row">
-              <div class="title-area">
-                <h2>⭐ 米米小舖 ⭐</h2>
+              <!-- 調整為標題與在線人數在同一列 -->
+              <div class="title-with-counter">
+                <div class="title-area">
+                  <h2>⭐ 米米小舖 ⭐</h2>
+                </div>
+                <!-- 即時在線人數顯示區塊 (已移至標題右側) -->
+                <div class="online-counter-wrapper">
+                  <div class="counter-box">
+                    <span>🔥 在線：</span>
+                    <span id="count">載入中...</span>
+                  </div>
+                </div>
               </div>
               <div class="discord-wrapper">
                 <div class="discord-container">
