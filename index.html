@@ -2094,7 +2094,7 @@
 
         const currentQty = item.quantity || '數量: 1';
         const isPending = String(currentQty).includes('暫售');
-        const isSold = String(currentQty).includes('已出售');
+        const isSold = String(currentQty).includes('已售出');
         
         let statusClass = '';
         if (isPending) statusClass = 'is-pending';
@@ -2118,7 +2118,7 @@
             <option value="數量: 10" ${currentQty === '數量: 10' ? 'selected' : ''}>數量: 10</option>
             <option value="大量" ${currentQty === '大量' ? 'selected' : ''}>大量</option>
             <option value="暫售，待交易" ${isPending ? 'selected' : ''}>暫售，待交易</option>
-            <option value="已出售" ${isSold ? 'selected' : ''}>已出售</option>
+            <option value="已售出" ${isSold ? 'selected' : ''}>已售出</option>
           </select>`;
 
           if (isChecked) {
@@ -2309,7 +2309,7 @@
                 selectEl.className = 'status-select';
                 if (newValue.includes('暫售')) {
                   selectEl.classList.add('is-pending');
-                } else if (newValue.includes('已出售')) {
+                } else if (newValue.includes('已售出')) {
                   selectEl.classList.add('is-sold');
                 }
                 status.innerText = "修改成功！";
