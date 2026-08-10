@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>⭐ 米米小舖-Club MStar ⭐</title>
+
+  <!-- 引入 Firebase Compat 版本 SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
   <style>
     :root {
       --bg-color: #121212;
@@ -31,6 +36,33 @@
       margin-right: auto;
     }
 
+    /* 在線人數樣式優化排版 */
+    .online-counter-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .counter-box {
+      font-size: 14px;
+      color: var(--text-color);
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+
+    #count {
+      font-size: 16px;
+      color: #00ff88;
+      font-weight: bold;
+    }
+
     .update-banner {
       position: fixed;
       top: 0;
@@ -52,7 +84,6 @@
       to { transform: translateY(0); }
     }
 
-    /* 新增旋轉星星的動畫樣式 */
     @keyframes spinStar {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
@@ -61,7 +92,7 @@
     .rotating-star {
       display: inline-block;
       animation: spinStar 3s linear infinite;
-      font-size: 10px; /* 調整這裡的數字來控制星星大小，例如改成 10px 或 0.8em */
+      font-size: 10px;
     }
 
     .update-banner button {
@@ -454,7 +485,6 @@
       text-align: center;
     }
 
-    /* 區塊內排序工具列容器 */
     .section-sort-container {
       display: flex;
       justify-content: flex-end;
@@ -1296,6 +1326,14 @@
   <div class="sticky-header-wrapper">
     <div class="header-layout">
       
+      <!-- 即時在線人數顯示區塊 (已優化排版) -->
+      <div class="online-counter-wrapper">
+        <div class="counter-box">
+          <span>🔥 目前即時在線人數：</span>
+          <span id="count">載入中...</span>
+        </div>
+      </div>
+
       <div class="header-top-row">
         <div class="left-control-panel">
           <div class="title-area-group">
@@ -1320,7 +1358,6 @@
         </div>
       </div>
 
-      <!-- 僅保留搜尋框在頂端 -->
       <div class="search-sort-wrapper">
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 搜尋全區名稱或備註...">
       </div>
@@ -1359,7 +1396,6 @@
     <p id="status" style="color: var(--accent-color); margin: 0; font-weight: bold;"></p>
   </div>
 
-  <!-- 排序下拉選單容器（預設隱藏，僅在一般商品分頁顯示） -->
   <div class="section-sort-container" id="sectionSortContainer" style="display: none;">
     <select id="sortSelect" class="sort-select">
       <option value="price_asc" selected>📈 價格：低 → 高</option>
@@ -1419,6 +1455,43 @@
   </div>
 
   <script>
+    // ================= 1. Firebase 即時在線人數初始化與監聽 =================
+    const firebaseConfig = {
+      apiKey: "AIzaSyDPapDe0cUgAhVfixTC50x9VWGtxteo4wQ",
+      authDomain: "mimi-ouo-mimishop.firebaseapp.com",
+      databaseURL: "https://mimi-ouo-mimishop-default-rtdb.firebaseio.com",
+      projectId: "mimi-ouo-mimishop",
+      storageBucket: "mimi-ouo-mimishop.firebasestorage.app",
+      messagingSenderId: "909483575893",
+      appId: "1:909483575893:web:1526adce01aa2b70f3e2dc"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const userStatusDatabaseRef = db.ref('status');
+
+    db.ref('.info/connected').on('value', function(snapshot) {
+      if (snapshot.val() === false) {
+        return;
+      }
+      const myConnectionRef = userStatusDatabaseRef.push();
+      myConnectionRef.onDisconnect().remove();
+      myConnectionRef.set({
+        online: true,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+      });
+    });
+
+    userStatusDatabaseRef.on('value', function(snapshot) {
+      const onlineCount = snapshot.numChildren();
+      const countElem = document.getElementById('count');
+      if (countElem) {
+        countElem.innerText = onlineCount;
+      }
+    });
+
+    // ================= 2. 原網站核心邏輯 =================
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxVrP__g-bnoVRQQrJkKLlMZDhSbFeUuTMyw6-zVRhtYkkSedoVbJXKUwN0bUyc4vs3rQ/exec";
 
     let currentCategory = ''; 
@@ -1719,7 +1792,6 @@
           document.getElementById('gallery').style.display = (currentCategory === 'schedule') ? 'none' : 'grid';
           document.getElementById('dropZone').style.display = (isAdmin && currentCategory !== 'schedule') ? 'block' : 'none';
 
-          // 隱藏歡迎說明頁與班表頁的排序選單容器
           const sortContainer = document.getElementById('sectionSortContainer');
           if (!currentCategory || currentCategory === 'schedule') {
             sortContainer.style.display = 'none';
