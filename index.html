@@ -19,6 +19,7 @@
       --success-color: #cccccc;
       --warning-color: #ffd700;
       --cart-color: #2b73df;
+      --wish-color: #9933ff;
       --border-color: #333333;
     }
 
@@ -118,7 +119,7 @@
       background: #f0f0f0;
     }
 
-    .cart-summary {
+    .cart-summary, .wishlist-summary {
       background: var(--card-bg);
       border: 1px solid var(--cart-color);
       color: #ffffff;
@@ -128,16 +129,21 @@
       display: none;
       text-align: center;
       font-weight: bold;
-      font-size: 18px;
+      font-size: 16px;
       justify-content: center;
       align-items: center;
       gap: 15px;
+      flex-wrap: wrap;
+    }
+    .wishlist-summary {
+      border-color: var(--wish-color);
+      background: linear-gradient(145deg, #1e1e1e, #251a2e);
     }
 
     .clear-cart-btn {
       background-color: var(--danger-color);
       color: white;
-      border: none;
+      border: nil;
       padding: 8px 15px;
       border-radius: 6px;
       cursor: pointer;
@@ -240,7 +246,6 @@
       gap: 8px;
     }
 
-    /* Discord 風格按鈕優化 */
     .discord-badge {
       display: inline-flex;
       align-items: center;
@@ -273,7 +278,6 @@
       fill: currentColor;
     }
 
-    /* 手指左右搖擺動畫 */
     @keyframes pointLeftRight {
       0%, 100% { transform: translateX(0); }
       50% { transform: translateX(-5px); }
@@ -298,18 +302,15 @@
       transition: opacity 0.3s ease, padding 0.3s ease;
     }
 
-    /* 電腦端懸浮位置：貼在商品區右側外側 + 上下凍結中間垂直置中 */
     @media (min-width: 769px) {
       .side-tabs-panel {
         top: calc(120px + (100vh - 120px - 60px) / 2);
         transform: translateY(-50%);
-        /* 改為外側定位：主視窗寬度 1200px (一半 600px) + 間距 15px */
         left: calc(50% + 615px);
         right: auto;
       }
     }
 
-    /* 手機端維持不變 */
     @media (max-width: 768px) {
       .side-tabs-panel {
         top: 10px;
@@ -396,7 +397,19 @@
       font-weight: bold;
     }
 
-    .cart-badge-count {
+    .tab-btn[data-category="wishlist"] {
+      border-color: var(--wish-color);
+      color: #b875ff;
+      justify-content: space-between;
+      position: relative;
+    }
+    .tab-btn[data-category="wishlist"].active {
+      background: var(--wish-color);
+      color: #ffffff;
+      font-weight: bold;
+    }
+
+    .cart-badge-count, .wish-badge-count {
       background-color: #ff4d4d;
       color: #ffffff;
       font-size: 10px;
@@ -408,6 +421,9 @@
       justify-content: center;
       min-width: 14px;
       line-height: 1.2;
+    }
+    .wish-badge-count {
+      background-color: var(--wish-color);
     }
 
     .dropdown {
@@ -594,25 +610,95 @@
       border-color: var(--accent-color);
     }
 
+    /* 心願清單專屬填寫設定區塊 */
+    .wishlist-panel-box {
+      background: var(--card-bg);
+      border: 1px dashed var(--wish-color);
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 15px;
+      margin-bottom: 20px;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .wishlist-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .wishlist-input-group label {
+      font-size: 13px;
+      font-weight: bold;
+      color: #b875ff;
+    }
+    .wishlist-input-group input {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-color);
+      color: var(--text-color);
+      font-size: 14px;
+    }
+    .wish-drop-area {
+      border: 2px dashed var(--wish-color);
+      background: rgba(153, 51, 255, 0.05);
+      padding: 20px;
+      text-align: center;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .wish-drop-area:hover {
+      background: rgba(153, 51, 255, 0.12);
+    }
+
+    /* 管理員心願清單：分群區塊容器樣式 */
+    .admin-wish-section {
+      background: rgba(37, 26, 46, 0.4);
+      border: 1px solid rgba(153, 51, 255, 0.3);
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 25px;
+      grid-column: 1 / -1;
+    }
+    .admin-wish-header {
+      font-size: 16px;
+      font-weight: bold;
+      color: #b875ff;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px dashed rgba(153, 51, 255, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .admin-wish-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+      align-items: start;
+    }
+
     .gallery {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
       align-items: start;
       margin-top: 10px;
-      margin-bottom: 50px; /* 留出底部在線人數的空間 */
+      margin-bottom: 50px;
     }
 
     @media (max-width: 768px) {
-      .gallery {
-        grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
-        gap: 5px;
+      .gallery, .admin-wish-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 8px;
       }
       .img-card, .img-wrapper {
-        width: 112px !important;
+        width: 100% !important;
       }
       .img-wrapper {
-        height: 112px !important;
+        height: auto !important;
       }
     }
 
@@ -729,7 +815,7 @@
     }
 
     .img-card {
-      width: 140px;
+      width: 100%;
       background-color: var(--card-bg);
       border-radius: 6px;
       overflow: hidden;
@@ -741,7 +827,6 @@
       transform: translateY(10px);
       transition: opacity 0.3s ease, transform 0.3s ease;
       border: 1px solid var(--border-color);
-      cursor: pointer;
     }
 
     .img-card.loaded {
@@ -750,8 +835,8 @@
     }
 
     .img-wrapper {
-      width: 140px;
-      height: 140px;
+      width: 100%;
+      min-height: 120px;
       position: relative;
       background-color: #1a1a1a;
       display: flex;
@@ -772,8 +857,9 @@
 
     .img-wrapper img {
       width: 100%;
-      height: 100%;
-      object-fit: cover;
+      height: auto;
+      max-height: 400px;
+      object-fit: contain;
       pointer-events: none;
       position: relative;
       z-index: 2;
@@ -873,22 +959,21 @@
     .delete-btn {
       position: absolute;
       top: 3px;
-      left: 22px;
-      background-color: rgba(0, 0, 0, 0.7);
+      left: 3px;
+      background-color: rgba(255, 77, 77, 0.9);
       color: #fff;
       border: none;
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
       cursor: pointer;
-      display: none;
+      display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 10px;
+      font-size: 11px;
       z-index: 10;
     }
-
-    .delete-btn:hover { background-color: #555555; }
+    .delete-btn:hover { background-color: #cc0000; }
 
     .img-info {
       padding: 4px;
@@ -925,7 +1010,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 32px; 
+      width: 100%; 
       flex-shrink: 0;
       gap: 1px;
       color: #ffffff;
@@ -939,31 +1024,46 @@
     }
 
     .price-col .editable-price {
-      width: 20px;
+      width: 40px;
       text-align: center;
       outline: none;
       color: #ffffff;
       font-size: 10px;
     }
 
-    .desc-col {
-      flex: 1;
-      min-width: 0;
-      border-left: 1px solid var(--border-color);
-      padding-left: 3px;
+    /* 心願清單專屬單一欄位樣式（已移除第二說明欄位） */
+    .wishlist-card-layout {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      gap: 3px;
     }
 
-    .desc-col .editable-text {
-      outline: none;
-      padding: 2px 2px;
-      border-radius: 3px;
-      color: var(--text-color);
-      word-break: break-all;
-      display: block;
-      text-align: center;
+    .wishlist-upper-box {
+      background-color: #251a2e;
+      border: 1px solid rgba(153, 51, 255, 0.4);
+      border-radius: 4px;
+      padding: 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .wishlist-upper-label {
+      font-size: 8px;
+      color: #b875ff;
+      font-weight: bold;
+    }
+
+    .wishlist-upper-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      color: #ffffff;
       font-size: 10px;
-      width: 100%;
-      box-sizing: border-box;
+      font-weight: bold;
     }
 
     .interact-col {
@@ -984,32 +1084,6 @@
       width: 100%;
       text-align: center;
       text-align-last: center;
-      outline: none;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .interact-select option[value="有互動"],
-    .interact-select.has-interact {
-      background-color: #1b4d3e !important;
-      color: #79efc3 !important;
-    }
-
-    .interact-select option[value="無互動"],
-    .interact-select.no-interact {
-      background-color: #333333 !important;
-      color: #b0b0b0 !important;
-    }
-
-    .move-category-select {
-      background-color: rgba(43, 115, 223, 0.2);
-      color: #7289da;
-      border: 1px solid rgba(43, 115, 223, 0.5);
-      border-radius: 3px;
-      padding: 1px 2px;
-      font-size: 9px;
-      width: 100%;
-      text-align: center;
       outline: none;
       cursor: pointer;
       font-weight: bold;
@@ -1042,7 +1116,6 @@
       min-height: 12px;
     }
 
-    .is-admin .desc-col .editable-text, 
     .is-admin .info-badge .editable-text, 
     .is-admin .custom-notice-box .editable-text, 
     .is-admin .admin-note-text, 
@@ -1050,8 +1123,6 @@
       background: rgba(255, 255, 255, 0.1); 
       cursor: text; 
     }
-    
-    .is-admin .img-card:hover .delete-btn { display: flex; }
 
     .modal-overlay {
       position: fixed;
@@ -1126,10 +1197,6 @@
       width: 100%;
       box-sizing: border-box;
     }
-    .modal-drop-zone.dragover {
-      background: #2a2a2a;
-      border-color: var(--accent-color);
-    }
 
     .modal-viewer-container {
       position: relative;
@@ -1177,7 +1244,7 @@
     }
 
     .modal-dot {
-      width: 100px;
+      width: 10px;
       height: 10px;
       background-color: #444;
       border-radius: 50%;
@@ -1304,6 +1371,10 @@
     <button class="tab-btn" id="cartTabBtn" data-category="cart">
       <span>🛒 購物車</span>
     </button>
+    
+    <button class="tab-btn" id="wishlistTabBtn" data-category="wishlist">
+      <span>⭐ 心願清單</span>
+    </button>
 
     <div class="collapse-content" id="collapseContent">
       <div class="dropdown" id="dropdown-furniture">
@@ -1395,6 +1466,22 @@
     <button id="clearCartBtn" class="clear-cart-btn">清空購物車</button>
   </div>
 
+  <div id="wishlistSummary" class="wishlist-summary">
+    <div>⭐ 您的專屬心願清單管理</div>
+    <div style="font-size: 12px; color: #ff99bb; font-weight: normal;">💡 提示：心願清單內容僅限本人與管理員可見</div>
+  </div>
+
+  <div class="wishlist-panel-box" id="wishlistPanelBox">
+    <div class="wishlist-input-group">
+      <label for="userDcInput">💬 您的 Discord 暱稱或聯繫方式：</label>
+      <input type="text" id="userDcInput" placeholder="例如：mimi_ouo 或 糖糖#1234">
+    </div>
+    <div class="wish-drop-area" id="wishDropArea">
+      <p style="margin: 0 0 5px 0; font-weight: bold; color: #b875ff;">🖼️ 點擊此處、拖曳圖片，或直接按 <b>Ctrl + V</b> 上傳多張許願圖片</p>
+      <p id="wishStatus" style="margin: 0; font-size: 12px; color: var(--accent-color); font-weight: bold;"></p>
+    </div>
+  </div>
+
   <div class="custom-notice-container" id="giftNoticeContainer">
     <div class="custom-notice-box">
       <span>🎁</span>
@@ -1432,7 +1519,6 @@
 
   <div class="gallery" id="gallery"></div>
 
-  <!-- 即時在線人數顯示區塊 (已移至底部固定) -->
   <div class="online-counter-wrapper">
     <div class="counter-box">
       <span>🔥 目前即時在線人數：</span>
@@ -1524,7 +1610,7 @@
       }
     });
 
-    // ================= 2. 原網站核心邏輯 =================
+    // ================= 2. 原網站核心邏輯 + 心願清單功能 =================
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxVrP__g-bnoVRQQrJkKLlMZDhSbFeUuTMyw6-zVRhtYkkSedoVbJXKUwN0bUyc4vs3rQ/exec";
 
     let currentCategory = ''; 
@@ -1538,12 +1624,10 @@
 
     let scheduleYear = 2026;
     let scheduleMonth = 7;
-
     let initialDataHash = '';
 
     const ADMIN_PASSWORD = "1313765591181";
 
-    /* 購物車 localStorage 操作函式 */
     function loadCartFromStorage() {
       try {
         const stored = localStorage.getItem('userCartItems');
@@ -1574,6 +1658,7 @@
       setupBackToTop();
       setupClearCartBtn();
       setupScheduleEvents();
+      setupWishlistEvents();
       
       fetchData(true); 
 
@@ -1582,6 +1667,7 @@
       }
 
       updateCartButtonBadge();
+      updateWishlistBadgeCount();
       renderGallery(); 
       
       document.getElementById('searchInput').addEventListener('input', renderGallery);
@@ -1589,7 +1675,8 @@
     });
 
     function computeDataHash(data) {
-      return JSON.stringify(data.map(i => i.id).sort());
+      const validItems = data.filter(i => i.category !== 'wishlist');
+      return JSON.stringify(validItems.map(i => i.id).sort());
     }
 
     async function checkForUpdates() {
@@ -1667,7 +1754,6 @@
       });
     }
 
-    /* 展開側邊選單函數 */
     function toggleSidePanel() {
       const panel = document.getElementById('sideTabsPanel');
       const toggleBtn = document.getElementById('collapseToggleBtn');
@@ -1690,6 +1776,138 @@
       calculateTotal();
     }
 
+    function updateWishlistBadgeCount() {
+      const wishBtn = document.getElementById('wishlistTabBtn');
+      const userDc = localStorage.getItem('userDcInfo') || '';
+      
+      let count = 0;
+      if (isAdmin) {
+        count = allData.filter(i => i.category === 'wishlist').length;
+      } else if (userDc) {
+        count = allData.filter(i => i.category === 'wishlist' && String(i.note).trim().toLowerCase() === userDc.trim().toLowerCase()).length;
+      }
+
+      if (count > 0) {
+        wishBtn.innerHTML = `<span>⭐ 心願清單</span><span class="wish-badge-count">${count}</span>`;
+      } else {
+        wishBtn.innerHTML = `<span>⭐ 心願清單</span>`;
+      }
+    }
+
+    // ================= 3. 心願清單事件處理與上傳智能優化 =================
+    function setupWishlistEvents() {
+      const dcInput = document.getElementById('userDcInput');
+      const savedDc = localStorage.getItem('userDcInfo');
+      if (savedDc) {
+        dcInput.value = savedDc;
+      }
+
+      dcInput.addEventListener('input', () => {
+        localStorage.setItem('userDcInfo', dcInput.value.trim());
+        updateWishlistBadgeCount();
+      });
+
+      const wishDropArea = document.getElementById('wishDropArea');
+      
+      wishDropArea.addEventListener('click', () => {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.multiple = true;
+        fileInput.onchange = (e) => {
+          handleWishFiles(e.target.files);
+        };
+        fileInput.click();
+      });
+
+      wishDropArea.addEventListener('dragover', (e) => { e.preventDefault(); wishDropArea.classList.add('dragover'); });
+      wishDropArea.addEventListener('dragleave', () => wishDropArea.classList.remove('dragover'));
+      wishDropArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        wishDropArea.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) {
+          handleWishFiles(e.dataTransfer.files);
+        }
+      });
+
+      document.addEventListener('paste', (e) => {
+        if (currentCategory !== 'wishlist') return;
+        if (document.activeElement.isContentEditable || document.activeElement.tagName === 'INPUT') return;
+        
+        const items = e.clipboardData?.items;
+        if (!items) return;
+        let files = [];
+        for (let item of items) {
+          if (item.type.includes('image')) {
+            const file = item.getAsFile();
+            if (file) files.push(file);
+          }
+        }
+        if (files.length > 0) {
+          handleWishFiles(files);
+        }
+      });
+    }
+
+    async function handleWishFiles(files) {
+      const dcInput = document.getElementById('userDcInput');
+      const userDc = dcInput.value.trim();
+
+      if (!userDc) {
+        alert('請先填寫您的 Discord 暱稱或聯繫方式，以便米米辨識您的心願清單！');
+        dcInput.focus();
+        return;
+      }
+
+      localStorage.setItem('userDcInfo', userDc);
+      const status = document.getElementById('wishStatus');
+      status.innerText = `正在處理與上傳 ${files.length} 張心願圖片...`;
+
+      for (let file of files) {
+        if (!file.type.startsWith('image/')) continue;
+        await uploadSingleWishFile(file, userDc);
+      }
+
+      status.innerText = "🎉 所有心願圖片上傳成功！";
+      await fetchData();
+      renderGallery();
+      updateWishlistBadgeCount();
+      setTimeout(() => { status.innerText = ""; }, 2500);
+    }
+
+    async function uploadSingleWishFile(file, userDc) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+          try {
+            const compressedDataUrl = await compressImage(e.target.result, 800, 0.85);
+            const base64Data = compressedDataUrl.split(',')[1];
+
+            const formData = new URLSearchParams();
+            formData.append('action', 'addItem');
+            formData.append('category', 'wishlist');
+            formData.append('caption', ''); 
+            formData.append('price', '0');                     
+            formData.append('quantity', '許願中');
+            formData.append('interact', '無互動');
+            formData.append('note', userDc); 
+            formData.append('mimeType', 'image/jpeg');
+            formData.append('imageBase64', base64Data);
+
+            await fetch(SCRIPT_URL, {
+              method: 'POST',
+              body: formData
+            });
+            resolve(true);
+          } catch (err) {
+            console.error('上傳心願圖片失敗', err);
+            resolve(false);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
     function initAuthUI() {
       const authBox = document.getElementById('authBox');
       const dropZone = document.getElementById('dropZone');
@@ -1699,7 +1917,7 @@
 
       if (isAdmin) {
         document.body.classList.add('is-admin');
-        dropZone.style.display = currentCategory ? 'block' : 'none';
+        dropZone.style.display = currentCategory && currentCategory !== 'wishlist' ? 'block' : 'none';
         giftDescElem.contentEditable = "true";
         ringDescElem.contentEditable = "true";
         cropDescElem.contentEditable = "true";
@@ -1809,7 +2027,6 @@
       document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
-          
           window.scrollTo({ top: 0, behavior: 'smooth' });
 
           document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1826,7 +2043,7 @@
           }
 
           currentCategory = btn.getAttribute('data-category');
-          currentCategoryDisplayName = btn.getAttribute('data-category') === 'cart' ? '🛒 購物車' : btn.innerText.trim();
+          currentCategoryDisplayName = btn.getAttribute('data-category') === 'cart' ? '🛒 購物車' : (btn.getAttribute('data-category') === 'wishlist' ? '⭐ 心願清單' : btn.innerText.trim());
           document.getElementById('currentTabName').innerText = currentCategoryDisplayName;
           
           document.getElementById('giftNoticeContainer').style.display = (currentCategory === 'gift') ? 'block' : 'none';
@@ -1834,12 +2051,15 @@
           document.getElementById('cropNoticeContainer').style.display = (currentCategory === 'crop_male' || currentCategory === 'crop_female') ? 'block' : 'none';
 
           document.getElementById('cartSummary').style.display = (currentCategory === 'cart') ? 'flex' : 'none';
+          document.getElementById('wishlistSummary').style.display = (currentCategory === 'wishlist') ? 'flex' : 'none';
+          document.getElementById('wishlistPanelBox').style.display = (currentCategory === 'wishlist') ? 'flex' : 'none';
+          
           document.getElementById('scheduleContainer').style.display = (currentCategory === 'schedule') ? 'block' : 'none';
           document.getElementById('gallery').style.display = (currentCategory === 'schedule') ? 'none' : 'grid';
-          document.getElementById('dropZone').style.display = (isAdmin && currentCategory !== 'schedule') ? 'block' : 'none';
+          document.getElementById('dropZone').style.display = (isAdmin && currentCategory !== 'schedule' && currentCategory !== 'wishlist') ? 'block' : 'none';
 
           const sortContainer = document.getElementById('sectionSortContainer');
-          if (!currentCategory || currentCategory === 'schedule') {
+          if (!currentCategory || currentCategory === 'schedule' || currentCategory === 'wishlist') {
             sortContainer.style.display = 'none';
           } else {
             sortContainer.style.display = 'flex';
@@ -1854,7 +2074,6 @@
             renderGallery();
           }
 
-          // 只有手機端點擊分頁後才會收合選單
           if (window.innerWidth <= 768) {
             const sideTabsPanel = document.getElementById('sideTabsPanel');
             const collapseToggleBtn = document.getElementById('collapseToggleBtn');
@@ -1992,6 +2211,7 @@
             renderGallery();
           }
           calculateTotal();
+          updateWishlistBadgeCount();
 
           if (activeModalItem) {
             const updated = window._rawServerData.find(i => String(i.id) === String(activeModalItem.id));
@@ -2094,13 +2314,13 @@
             </div>
             
             <div class="welcome-item">
-              <div class="welcome-label">💡 貼心提醒</div>
-              <div class="welcome-desc">點擊商品圖片可查看實體圖(大多暫未上傳)，或到 DC 告訴我你想看的商品！</div>
+              <div class="welcome-label">⭐ 心願清單功能</div>
+              <div class="welcome-desc">點擊右側「心願清單」，填寫DC帳號後即可直接貼上圖片許願，清單僅限本人與管理員可見！</div>
             </div>
             
             <div class="welcome-item">
-              <div class="welcome-label">⭐ 米米一不</div>
-              <div class="welcome-desc">不接急單，只接待耐心等我的寶貝嘿嘿~</div>
+              <div class="welcome-label">💡 貼心提醒</div>
+              <div class="welcome-desc">點擊商品圖片可查看實體圖(大多暫未上傳)，或到 DC 告訴我你想看的商品！</div>
             </div>
           </div>
           <div class="welcome-footer-action">
@@ -2119,6 +2339,11 @@
           return caption.includes(keyword) || note.includes(keyword);
         } else if (currentCategory === 'cart') {
           return cartItems.has(String(item.id));
+        } else if (currentCategory === 'wishlist') {
+          if (isAdmin) return item.category === 'wishlist';
+          const userDc = (localStorage.getItem('userDcInfo') || '').trim().toLowerCase();
+          if (!userDc) return false;
+          return item.category === 'wishlist' && String(item.note || '').trim().toLowerCase() === userDc;
         } else {
           return item.category === currentCategory;
         }
@@ -2126,267 +2351,346 @@
       
       filtered.sort(compareItems);
 
+      // 如果是管理員且在「心願清單」分頁，將清單依許願人（note）分組顯示在不同的獨立區塊中[cite: 9]
+      if (isAdmin && currentCategory === 'wishlist') {
+        const groupMap = new Map();
+        filtered.forEach(item => {
+          const owner = (item.note || '未具名').trim();
+          if (!groupMap.has(owner)) {
+            groupMap.set(owner, []);
+          }
+          groupMap.get(owner).push(item);
+        });
+
+        if (groupMap.size === 0) {
+          gallery.innerHTML = '<div style="grid-column: 1 / -1; text-align:center; padding: 20px; color: #888;">目前沒有任何心願清單資料</div>';
+          return;
+        }
+
+        groupMap.forEach((items, owner) => {
+          const sectionDiv = document.createElement('div');
+          sectionDiv.className = 'admin-wish-section';
+          
+          let cardsHTML = '';
+          items.forEach(item => {
+            cardsHTML += renderCardHTML(item);
+          });
+
+          sectionDiv.innerHTML = `
+            <div class="admin-wish-header">⭐ ${owner} 的心願清單 (${items.length} 件)</div>
+            <div class="admin-wish-grid">${cardsHTML}</div>
+          `;
+          gallery.appendChild(sectionDiv);
+        });
+
+        // 綁定各卡片內的動態互動事件
+        filtered.forEach(item => {
+          bindCardEvents(item);
+        });
+        return;
+      }
+
+      // 一般分頁或一般訪客視圖
       filtered.forEach((item) => {
-        const card = document.createElement('div');
-        card.className = 'img-card';
-        card.id = `card-${item.id}`;
-        card.setAttribute('data-id', item.id);
+        const cardHtml = renderCardHTML(item);
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = cardHtml;
+        const card = tempDiv.firstElementChild;
+        gallery.appendChild(card);
 
-        const currentQty = item.quantity || '數量: 1';
-        const isPending = String(currentQty).includes('暫售');
-        const isSold = String(currentQty).includes('已售出');
+        bindCardEvents(item);
+      });
+    }
+
+    function renderCardHTML(item) {
+      const currentQty = item.quantity || '數量: 1';
+      const isPending = String(currentQty).includes('暫售');
+      const isSold = String(currentQty).includes('已售出');
+      
+      let statusClass = '';
+      if (isPending) statusClass = 'is-pending';
+      else if (isSold) statusClass = 'is-sold';
+
+      let badgeHTML = '';
+      const isChecked = cartItems.has(String(item.id));
+      const selectedQty = cartItems.get(String(item.id)) || '數量: 1';
+
+      if (currentCategory === 'wishlist') {
+        badgeHTML = `<span class="status-badge" style="right:3px; left:auto; background:var(--wish-color); color:#fff;">@${item.note || '訪客'}</span>`;
+      } else if (isAdmin) {
+        let topRightHTML = `<select class="status-select ${statusClass}" id="badge-${item.id}">
+          <option value="數量: 1" ${currentQty === '數量: 1' ? 'selected' : ''}>數量: 1</option>
+          <option value="數量: 2" ${currentQty === '數量: 2' ? 'selected' : ''}>數量: 2</option>
+          <option value="數量: 3" ${currentQty === '數量: 3' ? 'selected' : ''}>數量: 3</option>
+          <option value="數量: 4" ${currentQty === '數量: 4' ? 'selected' : ''}>數量: 4</option>
+          <option value="數量: 5" ${currentQty === '數量: 5' ? 'selected' : ''}>數量: 5</option>
+          <option value="數量: 6" ${currentQty === '數量: 6' ? 'selected' : ''}>數量: 6</option>
+          <option value="數量: 7" ${currentQty === '數量: 7' ? 'selected' : ''}>數量: 7</option>
+          <option value="數量: 8" ${currentQty === '數量: 8' ? 'selected' : ''}>數量: 8</option>
+          <option value="數量: 9" ${currentQty === '數量: 9' ? 'selected' : ''}>數量: 9</option>
+          <option value="數量: 10" ${currentQty === '數量: 10' ? 'selected' : ''}>數量: 10</option>
+          <option value="大量" ${currentQty === '大量' ? 'selected' : ''}>大量</option>
+          <option value="暫售，待交易" ${isPending ? 'selected' : ''}>暫售，待交易</option>
+          <option value="已售出" ${isSold ? 'selected' : ''}>已售出</option>
+        </select>`;
+
+        if (isChecked) {
+          topRightHTML = `
+            <select class="cart-qty-select" id="cart-qty-${item.id}">
+              ${generateVisitorQtyOptions(currentQty, selectedQty)}
+            </select>
+          `;
+        }
+
+        badgeHTML = `
+          <input type="checkbox" class="cart-checkbox" id="cart-chk-${item.id}" ${isChecked ? 'checked' : ''} title="加入購物車" />
+          ${topRightHTML}
+        `;
+      } else {
+        let topRightHTML = `<span class="status-badge ${statusClass}" style="right:3px; left:auto;" id="badge-${item.id}">${currentQty}</span>`;
+        if (isChecked) {
+          topRightHTML = `
+            <select class="cart-qty-select" id="cart-qty-${item.id}">
+              ${generateVisitorQtyOptions(currentQty, selectedQty)}
+            </select>
+          `;
+        }
+
+        let checkboxHTML = (!isSold) ? `<input type="checkbox" class="cart-checkbox" id="cart-chk-${item.id}" ${isChecked ? 'checked' : ''} title="加入購物車" />` : '';
+
+        badgeHTML = `
+          ${checkboxHTML}
+          ${topRightHTML}
+        `;
+      }
+
+      let priceVal = item.price || '';
+      let interactVal = item.interact || '無互動';
+
+      let moveSelectHTML = '';
+      if (isAdmin && (currentCategory === 'general_new' || currentCategory === 'general_misc' || currentCategory === 'general_consumable')) {
+        moveSelectHTML = `
+          <div class="interact-col">
+            <select class="move-category-select" id="move-${item.id}">
+              <option value="" disabled selected>📦 移動到...</option>
+              <option value="general_new">✨ 本月新品</option>
+              <option value="general_misc">📦 哩哩摳摳</option>
+              <option value="general_consumable">🧪 消耗品</option>
+              <option value="memes">🧸 熊熊</option>
+              <option value="animal_other">📦 其他 (小動物)</option>
+              <option value="pot">🪴 花盆</option>
+              <option value="ring_male">💍 戒指 (限男)</option>
+              <option value="ring_female">💍 戒指 (限女)</option>
+              <option value="crop_male">🌱 作物 (限男)</option>
+              <option value="crop_female">🌱 作物 (限女)</option>
+              <option value="gift">🎁 贈品區</option>
+            </select>
+          </div>
+        `;
+      }
+
+      const showInteractSelect = (item.category === 'general_new' || item.category === 'general_misc' || item.category === 'memes' || item.category === 'animal_other' || item.category === 'gift');
+      
+      let interactHTML = '';
+      if (showInteractSelect) {
+        interactHTML = `
+          <div class="interact-col">
+            <select class="interact-select ${interactVal === '有互動' ? 'has-interact' : 'no-interact'}" id="interact-${item.id}" ${!isAdmin ? 'disabled' : ''}>
+              <option value="有互動" ${interactVal === '有互動' ? 'selected' : ''}>有互動</option>
+              <option value="無互動" ${interactVal === '無互動' ? 'selected' : ''}>無互動</option>
+            </select>
+          </div>
+        `;
+      }
+
+      let priceColStyle = (!isAdmin && (isSold || currentCategory === 'wishlist')) ? 'display: none;' : '';
+
+      const canDeleteWish = (currentCategory === 'wishlist' && (isAdmin || String(item.note).trim().toLowerCase() === (localStorage.getItem('userDcInfo') || '').trim().toLowerCase()));
+
+      let infoInnerContent = '';
+      if (currentCategory === 'wishlist') {
+        const isOwnerOrAdmin = (isAdmin || String(item.note).trim().toLowerCase() === (localStorage.getItem('userDcInfo') || '').trim().toLowerCase());
         
-        let statusClass = '';
-        if (isPending) statusClass = 'is-pending';
-        else if (isSold) statusClass = 'is-sold';
-
-        let badgeHTML = '';
-        const isChecked = cartItems.has(String(item.id));
-        const selectedQty = cartItems.get(String(item.id)) || '數量: 1';
-
-        if (isAdmin) {
-          let topRightHTML = `<select class="status-select ${statusClass}" id="badge-${item.id}">
-            <option value="數量: 1" ${currentQty === '數量: 1' ? 'selected' : ''}>數量: 1</option>
-            <option value="數量: 2" ${currentQty === '數量: 2' ? 'selected' : ''}>數量: 2</option>
-            <option value="數量: 3" ${currentQty === '數量: 3' ? 'selected' : ''}>數量: 3</option>
-            <option value="數量: 4" ${currentQty === '數量: 4' ? 'selected' : ''}>數量: 4</option>
-            <option value="數量: 5" ${currentQty === '數量: 5' ? 'selected' : ''}>數量: 5</option>
-            <option value="數量: 6" ${currentQty === '數量: 6' ? 'selected' : ''}>數量: 6</option>
-            <option value="數量: 7" ${currentQty === '數量: 7' ? 'selected' : ''}>數量: 7</option>
-            <option value="數量: 8" ${currentQty === '數量: 8' ? 'selected' : ''}>數量: 8</option>
-            <option value="數量: 9" ${currentQty === '數量: 9' ? 'selected' : ''}>數量: 9</option>
-            <option value="數量: 10" ${currentQty === '數量: 10' ? 'selected' : ''}>數量: 10</option>
-            <option value="大量" ${currentQty === '大量' ? 'selected' : ''}>大量</option>
-            <option value="暫售，待交易" ${isPending ? 'selected' : ''}>暫售，待交易</option>
-            <option value="已售出" ${isSold ? 'selected' : ''}>已售出</option>
-          </select>`;
-
-          if (isChecked) {
-            topRightHTML = `
-              <select class="cart-qty-select" id="cart-qty-${item.id}">
-                ${generateVisitorQtyOptions(currentQty, selectedQty)}
-              </select>
-            `;
-          }
-
-          badgeHTML = `
-            <input type="checkbox" class="cart-checkbox" id="cart-chk-${item.id}" ${isChecked ? 'checked' : ''} title="加入購物車" />
-            ${topRightHTML}
-          `;
-        } else {
-          let topRightHTML = `<span class="status-badge ${statusClass}" style="right:3px; left:auto;" id="badge-${item.id}">${currentQty}</span>`;
-          if (isChecked) {
-            topRightHTML = `
-              <select class="cart-qty-select" id="cart-qty-${item.id}">
-                ${generateVisitorQtyOptions(currentQty, selectedQty)}
-              </select>
-            `;
-          }
-
-          let checkboxHTML = (!isSold) ? `<input type="checkbox" class="cart-checkbox" id="cart-chk-${item.id}" ${isChecked ? 'checked' : ''} title="加入購物車" />` : '';
-
-          badgeHTML = `
-            ${checkboxHTML}
-            ${topRightHTML}
-          `;
-        }
-
-        const fullCaption = item.caption || '';
-        let priceVal = item.price || '';
-        let textVal = fullCaption;
-        let interactVal = item.interact || '無互動';
-
-        let moveSelectHTML = '';
-        if (isAdmin && (currentCategory === 'general_new' || currentCategory === 'general_misc' || currentCategory === 'general_consumable')) {
-          moveSelectHTML = `
-            <div class="interact-col">
-              <select class="move-category-select" id="move-${item.id}">
-                <option value="" disabled selected>📦 移動到...</option>
-                <option value="general_new">✨ 本月新品</option>
-                <option value="general_misc">📦 哩哩摳摳</option>
-                <option value="general_consumable">🧪 消耗品</option>
-                <option value="memes">🧸 熊熊</option>
-                <option value="animal_other">📦 其他 (小動物)</option>
-                <option value="pot">🪴 花盆</option>
-                <option value="ring_male">💍 戒指 (限男)</option>
-                <option value="ring_female">💍 戒指 (限女)</option>
-                <option value="crop_male">🌱 作物 (限男)</option>
-                <option value="crop_female">🌱 作物 (限女)</option>
-                <option value="gift">🎁 贈品區</option>
-              </select>
+        // 已取消第二說明欄位，僅保留單一價格/金額欄位
+        infoInnerContent = `
+          <div class="wishlist-card-layout">
+            <div class="wishlist-upper-box">
+              <span class="wishlist-upper-label">希望價格 / 金額 / 無上限</span>
+              <div class="wishlist-upper-content">
+                <span class="currency-symbol">$</span>
+                <span class="editable-price" contenteditable="${isOwnerOrAdmin}" id="price-${item.id}" maxlength="10">${priceVal}</span>
+              </div>
             </div>
-          `;
-        }
-
-        const showInteractSelect = (item.category === 'general_new' || item.category === 'general_misc' || item.category === 'memes' || item.category === 'animal_other' || item.category === 'gift');
-        
-        let interactHTML = '';
-        if (showInteractSelect) {
-          interactHTML = `
-            <div class="interact-col">
-              <select class="interact-select ${interactVal === '有互動' ? 'has-interact' : 'no-interact'}" id="interact-${item.id}" ${!isAdmin ? 'disabled' : ''}>
-                <option value="有互動" ${interactVal === '有互動' ? 'selected' : ''}>有互動</option>
-                <option value="無互動" ${interactVal === '無互動' ? 'selected' : ''}>無互動</option>
-              </select>
+          </div>
+        `;
+      } else {
+        // 一般商品格子已取消第二說明欄位（原本的 desc-col 區塊），僅保留價格列
+        infoInnerContent = `
+          <div class="caption-container">
+            <div class="caption-row-top">
+              <div class="price-col" style="${priceColStyle}">
+                <span class="currency-symbol">$</span>
+                <span class="editable-price" contenteditable="${isAdmin}" id="price-${item.id}" maxlength="6">${priceVal}</span>
+              </div>
             </div>
-          `;
-        }
+            ${interactHTML}
+            ${moveSelectHTML}
+          </div>
+        `;
+      }
 
-        let priceColStyle = (!isAdmin && isSold) ? 'display: none;' : '';
-
-        card.innerHTML = `
-          <button class="delete-btn" title="刪除商品">✕</button>
+      return `
+        <div class="img-card" id="card-${item.id}" data-id="${item.id}">
+          ${canDeleteWish ? '<button class="delete-btn" title="刪除此許願">✕</button>' : (isAdmin ? '<button class="delete-btn" title="刪除商品">✕</button>' : '')}
           <div class="img-wrapper">
             <span class="loading-text">加載中</span>
             ${badgeHTML}
             <img src="${item.url}" alt="image" loading="lazy" decoding="async" />
           </div>
           <div class="img-info">
-            <div class="caption-container">
-              <div class="caption-row-top">
-                <div class="price-col" style="${priceColStyle}">
-                  <span class="currency-symbol">$</span>
-                  <span class="editable-price" contenteditable="${isAdmin}" id="price-${item.id}" maxlength="3">${priceVal}</span>
-                </div>
-                <div class="desc-col">
-                  <span class="editable-text" contenteditable="${isAdmin}" id="text-${item.id}">${textVal}</span>
-                </div>
-              </div>
-              ${interactHTML}
-              ${moveSelectHTML}
-            </div>
+            ${infoInnerContent}
           </div>
           <div class="admin-note-box">
             <div class="admin-note-label">🔒 備註</div>
             <span class="admin-note-text" contenteditable="${isAdmin}" id="note-${item.id}">${item.note || ''}</span>
           </div>
-        `;
+        </div>
+      `;
+    }
 
-        const imgEl = card.querySelector('img');
-        imgEl.addEventListener('load', () => {
-          card.classList.add('loaded');
-        });
-        if (imgEl.complete) {
-          card.classList.add('loaded');
-        }
+    function bindCardEvents(item) {
+      const card = document.getElementById(`card-${item.id}`);
+      if (!card) return;
 
-        card.addEventListener('click', (e) => {
-          if (e.target.closest('button') || e.target.closest('input') || e.target.closest('select') || e.target.closest('[contenteditable="true"]')) {
-            return;
-          }
-          openAlbumModal(item, 0);
-        });
-
-        if (isAdmin) {
-          card.querySelector('.delete-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (confirm('確定要刪除這個商品嗎？')) {
-              deleteItem(item.id);
-            }
-          });
-
-          const moveSel = card.querySelector(`#move-${item.id}`);
-          if (moveSel) {
-            moveSel.addEventListener('change', async () => {
-              const targetCat = moveSel.value;
-              if (!targetCat) return;
-              const status = document.getElementById('status');
-              status.innerText = "正在移動商品分類...";
-              
-              const success = await updateItem(item.id, 'category', targetCat);
-              if (success) {
-                item.category = targetCat;
-                status.innerText = "移動成功！";
-                renderGallery();
-              } else {
-                status.innerText = "移動失敗，請重試";
-              }
-              setTimeout(() => { status.innerText = ""; }, 1500);
-            });
-          }
-        }
-
-        const chkEl = card.querySelector(`#cart-chk-${item.id}`);
-        if (chkEl) {
-          chkEl.addEventListener('change', () => {
-            const status = document.getElementById('status');
-            if (chkEl.checked) {
-              cartItems.set(String(item.id), '數量: 1');
-              status.innerText = "🛒 已加入購物車！";
-            } else {
-              cartItems.delete(String(item.id));
-              status.innerText = "❌ 已從購物車移除";
-            }
-            saveCartToStorage();
-            setTimeout(() => { status.innerText = ""; }, 1500);
-            updateCartButtonBadge();
-            renderGallery();
-            calculateTotal();
-          });
-        }
-
-        const qtySelEl = card.querySelector(`#cart-qty-${item.id}`);
-        if (qtySelEl) {
-          qtySelEl.addEventListener('change', () => {
-            cartItems.set(String(item.id), qtySelEl.value);
-            saveCartToStorage();
-            updateCartButtonBadge();
-            calculateTotal();
-          });
-        }
-
-        gallery.appendChild(card);
-
-        if (isAdmin) {
-          const selectEl = document.getElementById(`badge-${item.id}`);
-          if (selectEl) {
-            selectEl.addEventListener('change', async () => {
-              const newValue = selectEl.value;
-              const status = document.getElementById('status');
-              status.innerText = "正在儲存至雲端...";
-              
-              const success = await updateItem(item.id, 'quantity', newValue);
-              if (success) {
-                item.quantity = newValue;
-                selectEl.className = 'status-select';
-                if (newValue.includes('暫售')) {
-                  selectEl.classList.add('is-pending');
-                } else if (newValue.includes('已售出')) {
-                  selectEl.classList.add('is-sold');
-                }
-                status.innerText = "修改成功！";
-                renderGallery(); 
-              } else {
-                status.innerText = "儲存失敗，請重試";
-              }
-              setTimeout(() => { status.innerText = ""; }, 1500);
-            });
-          }
-
-          const interactSelectEl = document.getElementById(`interact-${item.id}`);
-          if (interactSelectEl) {
-            interactSelectEl.addEventListener('change', async () => {
-              const newValue = interactSelectEl.value;
-              const status = document.getElementById('status');
-              status.innerText = "正在儲存至雲端...";
-              
-              const success = await updateItem(item.id, 'interact', newValue);
-              if (success) {
-                item.interact = newValue;
-                interactSelectEl.className = `interact-select ${newValue === '有互動' ? 'has-interact' : 'no-interact'}`;
-                status.innerText = "修改成功！";
-              } else {
-                status.innerText = "儲存失敗，請重試";
-              }
-              setTimeout(() => { status.innerText = ""; }, 1500);
-            });
-          }
-
-          bindEditable(item.id, 'caption', `text-${item.id}`);
-          bindEditable(item.id, 'price', `price-${item.id}`);
-          bindEditable(item.id, 'note', `note-${item.id}`);
-        }
+      const imgEl = card.querySelector('img');
+      imgEl.addEventListener('load', () => {
+        card.classList.add('loaded');
       });
+      if (imgEl.complete) {
+        card.classList.add('loaded');
+      }
+
+      card.addEventListener('click', (e) => {
+        if (currentCategory === 'wishlist') return; 
+        if (e.target.closest('button') || e.target.closest('input') || e.target.closest('select') || e.target.closest('[contenteditable="true"]')) {
+          return;
+        }
+        openAlbumModal(item, 0);
+      });
+
+      const deleteBtn = card.querySelector('.delete-btn');
+      if (deleteBtn) {
+        deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (confirm('確定要刪除這個項目嗎？')) {
+            deleteItem(item.id);
+          }
+        });
+      }
+
+      if (isAdmin) {
+        const moveSel = card.querySelector(`#move-${item.id}`);
+        if (moveSel) {
+          moveSel.addEventListener('change', async () => {
+            const targetCat = moveSel.value;
+            if (!targetCat) return;
+            const status = document.getElementById('status');
+            status.innerText = "正在移動商品分類...";
+            
+            const success = await updateItem(item.id, 'category', targetCat);
+            if (success) {
+              item.category = targetCat;
+              status.innerText = "移動成功！";
+              renderGallery();
+            } else {
+              status.innerText = "移動失敗，請重試";
+            }
+            setTimeout(() => { status.innerText = ""; }, 1500);
+          });
+        }
+      }
+
+      const chkEl = card.querySelector(`#cart-chk-${item.id}`);
+      if (chkEl) {
+        chkEl.addEventListener('change', () => {
+          const status = document.getElementById('status');
+          if (chkEl.checked) {
+            cartItems.set(String(item.id), '數量: 1');
+            status.innerText = "🛒 已加入購物車！";
+          } else {
+            cartItems.delete(String(item.id));
+            status.innerText = "❌ 已從購物車移除";
+          }
+          saveCartToStorage();
+          setTimeout(() => { status.innerText = ""; }, 1500);
+          updateCartButtonBadge();
+          renderGallery();
+          calculateTotal();
+        });
+      }
+
+      const qtySelEl = card.querySelector(`#cart-qty-${item.id}`);
+      if (qtySelEl) {
+        qtySelEl.addEventListener('change', () => {
+          cartItems.set(String(item.id), qtySelEl.value);
+          saveCartToStorage();
+          updateCartButtonBadge();
+          calculateTotal();
+        });
+      }
+
+      if (isAdmin || currentCategory === 'wishlist') {
+        const selectEl = document.getElementById(`badge-${item.id}`);
+        if (selectEl) {
+          selectEl.addEventListener('change', async () => {
+            const newValue = selectEl.value;
+            const status = document.getElementById('status');
+            status.innerText = "正在儲存至雲端...";
+            
+            const success = await updateItem(item.id, 'quantity', newValue);
+            if (success) {
+              item.quantity = newValue;
+              selectEl.className = 'status-select';
+              if (newValue.includes('暫售')) {
+                selectEl.classList.add('is-pending');
+              } else if (newValue.includes('已售出')) {
+                selectEl.classList.add('is-sold');
+              }
+              status.innerText = "修改成功！";
+              renderGallery(); 
+            } else {
+              status.innerText = "儲存失敗，請重試";
+            }
+            setTimeout(() => { status.innerText = ""; }, 1500);
+          });
+        }
+
+        const interactSelectEl = document.getElementById(`interact-${item.id}`);
+        if (interactSelectEl && isAdmin) {
+          interactSelectEl.addEventListener('change', async () => {
+            const newValue = interactSelectEl.value;
+            const status = document.getElementById('status');
+            status.innerText = "正在儲存至雲端...";
+            
+            const success = await updateItem(item.id, 'interact', newValue);
+            if (success) {
+              item.interact = newValue;
+              interactSelectEl.className = `interact-select ${newValue === '有互動' ? 'has-interact' : 'no-interact'}`;
+              status.innerText = "修改成功！";
+            } else {
+              status.innerText = "儲存失敗，請重試";
+            }
+            setTimeout(() => { status.innerText = ""; }, 1500);
+          });
+        }
+
+        if (isAdmin || currentCategory === 'wishlist') {
+          bindEditable(item.id, 'price', `price-${item.id}`);
+          if (isAdmin) {
+            bindEditable(item.id, 'note', `note-${item.id}`);
+          }
+        }
+      }
     }
 
     function bindEditable(id, field, elementId) {
@@ -2395,19 +2699,11 @@
       let originalValue = "";
 
       el.addEventListener('focus', () => {
-        if (!isAdmin) return;
         originalValue = el.innerText.trim();
       });
 
       el.addEventListener('blur', async () => {
-        if (!isAdmin) return;
         let newValue = el.innerText.trim();
-        
-        if (field === 'price') {
-          newValue = newValue.replace(/\D/g, '').slice(0, 3);
-          el.innerText = newValue;
-        }
-
         if (newValue === originalValue) return;
 
         const targetItem = allData.find(item => String(item.id) === String(id));
@@ -2422,7 +2718,7 @@
         if (success) {
           originalValue = newValue;
           status.innerText = "修改成功！";
-          if (field === 'caption' || field === 'price') {
+          if (field === 'price') {
             renderGallery();
             calculateTotal();
           }
@@ -2454,6 +2750,7 @@
       cartItems.delete(String(id));
       saveCartToStorage();
       updateCartButtonBadge();
+      updateWishlistBadgeCount();
       renderGallery();
       calculateTotal();
     }
@@ -2529,6 +2826,7 @@
     }
 
     function openAlbumModal(item, index = 0) {
+      if (currentCategory === 'wishlist') return; 
       activeModalItem = item;
       const modal = document.getElementById('albumModal');
       const modalDropZone = document.getElementById('modalDropZone');
@@ -2643,7 +2941,7 @@
       reader.readAsDataURL(file);
     }
 
-    function compressImage(srcUrl, maxSize = 400, quality = 0.8) {
+    function compressImage(srcUrl, maxSize = 800, quality = 0.85) {
       return new Promise((resolve, reject) => {
         const img = new Image();
         img.crossOrigin = "Anonymous";
@@ -2685,7 +2983,7 @@
       const reader = new FileReader();
       reader.onload = async function(e) {
         try {
-          const compressedDataUrl = await compressImage(e.target.result, 400, 0.8);
+          const compressedDataUrl = await compressImage(e.target.result, 800, 0.85);
           const base64Data = compressedDataUrl.split(',')[1];
           const defaultTime = String(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
           const tempId = 'temp_' + new Date().getTime();
@@ -2723,44 +3021,21 @@
           const result = await response.json();
           if (result.status === 'success') {
             status.innerText = "上傳成功！";
-            fetchData();
-            setTimeout(() => status.innerText = "", 1500);
+            await fetchData();
+          } else {
+            status.innerText = "上傳失敗";
+            allData = allData.filter(i => i.id !== tempId);
+            renderGallery();
           }
+          setTimeout(() => { status.innerText = ""; }, 1500);
         } catch (err) {
-          status.innerText = "上傳失敗";
           console.error(err);
-          fetchData();
+          status.innerText = "上傳錯誤";
+          setTimeout(() => { status.innerText = ""; }, 1500);
         }
       };
       reader.readAsDataURL(file);
     }
-
-    document.addEventListener('paste', (e) => {
-      const modal = document.getElementById('albumModal');
-      if (!isAdmin || document.activeElement.isContentEditable || (modal && modal.style.display === 'flex') || currentCategory === 'schedule' || !currentCategory) return;
-      
-      const items = e.clipboardData?.items;
-      if (!items) return;
-      for (let item of items) {
-        if (item.type.includes('image')) {
-          handleImageFile(item.getAsFile());
-          break;
-        }
-      }
-    });
-
-    const dropZone = document.getElementById('dropZone');
-    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-    dropZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropZone.classList.remove('dragover');
-      const modal = document.getElementById('albumModal');
-      if ((modal && modal.style.display === 'flex') || currentCategory === 'schedule' || !currentCategory) return;
-      if (isAdmin && e.dataTransfer.files.length > 0) {
-        handleImageFile(e.dataTransfer.files[0]);
-      }
-    });
   </script>
 </body>
 </html>
