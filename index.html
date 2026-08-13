@@ -31,11 +31,11 @@
       margin: 0;
       padding: 15px;
       padding-right: 15px;
+      padding-bottom: 80px;
       max-width: 1200px;
       margin-left: auto;
       margin-right: auto;
     }
-
     .online-counter-wrapper {
       position: fixed;
       bottom: 0;
@@ -390,6 +390,16 @@
       font-weight: bold;
     }
 
+    .tab-btn[data-category="wishlist"] {
+      border-color: #ff9933;
+      color: #ffaa44;
+    }
+    .tab-btn[data-category="wishlist"].active {
+      background: #ff9933;
+      color: #121212;
+      font-weight: bold;
+    }
+
     .cart-badge-count {
       background-color: #ff4d4d;
       color: #ffffff;
@@ -549,6 +559,42 @@
       box-sizing: border-box;
     }
 
+    .product-wishlist-banner {
+      display: none;
+      background: linear-gradient(135deg, rgba(255, 153, 51, 0.18), rgba(255, 51, 102, 0.18));
+      border: 1px solid rgba(255, 153, 51, 0.4);
+      color: var(--text-color);
+      padding: 16px 20px;
+      border-radius: 12px;
+      margin: 25px 0 10px 0;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 500;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(6px);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .product-wishlist-banner:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 153, 51, 0.2);
+    }
+
+    .product-wishlist-banner a {
+      color: #ffaa44;
+      font-weight: bold;
+      text-decoration: none;
+      border-bottom: 1px dashed #ffaa44;
+      padding-bottom: 1px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .product-wishlist-banner a:hover {
+      color: #ff3366;
+      border-color: #ff3366;
+    }
+
     .custom-notice-container {
       display: none;
       width: 100%;
@@ -594,7 +640,7 @@
       gap: 8px;
       align-items: start;
       margin-top: 10px;
-      margin-bottom: 50px;
+      margin-bottom: 20px;
     }
 
     @media (max-width: 768px) {
@@ -722,8 +768,245 @@
       box-shadow: 0 6px 20px rgba(255, 51, 102, 0.6);
     }
 
+    /* 顧客許願池專屬介面樣式 */
+    .wishlist-container {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+      margin-top: 15px;
+      margin-bottom: 50px;
+      width: 100%;
+    }
+
+    .wishlist-login-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 30px;
+      text-align: center;
+      max-width: 450px;
+      margin: 40px auto;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .wishlist-login-card h3 {
+      color: #ff9933;
+      margin-top: 0;
+      font-size: 20px;
+    }
+
+    .wishlist-form-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .wishlist-form-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #ff9933;
+      margin: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .wishlist-privacy-tip {
+      font-size: 13px;
+      color: #ffaa44;
+      background: rgba(255, 153, 51, 0.1);
+      border: 1px dashed rgba(255, 153, 51, 0.3);
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-top: -5px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--text-color);
+    }
+
+    .wishlist-drop-area {
+      border: 2px dashed #ff9933;
+      background: rgba(255, 153, 51, 0.05);
+      padding: 25px;
+      text-align: center;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .wishlist-drop-area:hover, .wishlist-drop-area.dragover {
+      background: rgba(255, 153, 51, 0.15);
+    }
+
+    /* 需求2：管理端風格的彈性格子預覽區（不裁切寬度，固定高度，完整顯示比例） */
+    .wishlist-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 8px;
+      align-items: start;
+      margin-top: 15px;
+    }
+
+    .wishlist-preview-item {
+      background-color: var(--card-bg);
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      border: 1px solid var(--border-color);
+    }
+
+    .wishlist-preview-img-box {
+      width: 100%;
+      height: 140px;
+      background-color: #1a1a1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .wishlist-preview-img-box img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .wishlist-item-delete {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      background: rgba(255, 77, 77, 0.9);
+      color: white;
+      border: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+    }
+
+    .wishlist-preview-price-box {
+      padding: 5px;
+      background-color: #171717;
+      text-align: center;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+    }
+
+    .wishlist-preview-price-box input {
+      width: 100%;
+      padding: 3px;
+      font-size: 11px;
+      text-align: center;
+      background: #121212;
+      border: 1px solid var(--border-color);
+      color: #fff;
+      border-radius: 3px;
+      outline: none;
+    }
+
+    .wishlist-records-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .wishlist-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .wishlist-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+    }
+
+    .wishlist-card-user {
+      font-weight: bold;
+      color: #ff9933;
+      font-size: 16px;
+    }
+
+    .wishlist-card-images {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 8px;
+      align-items: start;
+    }
+
+    .wish-img-card {
+      background-color: var(--card-bg);
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      border: 1px solid var(--border-color);
+    }
+
+    .wish-img-wrapper {
+      width: 100%;
+      height: 140px;
+      position: relative;
+      background-color: #1a1a1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .wish-img-wrapper img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .wish-item-info {
+      padding: 5px;
+      font-size: 11px;
+      color: #00ff88;
+      background-color: #171717;
+      text-align: center;
+      border-top: 1px solid var(--border-color);
+      font-weight: bold;
+    }
+
     .img-card {
-      width: 140px;
       background-color: var(--card-bg);
       border-radius: 6px;
       overflow: hidden;
@@ -744,7 +1027,7 @@
     }
 
     .img-wrapper {
-      width: 140px;
+      width: 100%;
       height: 140px;
       position: relative;
       background-color: #1a1a1a;
@@ -1298,6 +1581,10 @@
     <button class="tab-btn" id="cartTabBtn" data-category="cart">
       <span>🛒 購物車</span>
     </button>
+    
+    <button class="tab-btn" id="wishlistTabBtn" data-category="wishlist">
+      <span>⭐ 許願池</span>
+    </button>
 
     <div class="collapse-content" id="collapseContent">
       <div class="dropdown" id="dropdown-furniture">
@@ -1381,7 +1668,7 @@
       </div>
     </div>
   </div>
-  
+
   <div id="cartSummary" class="cart-summary">
     <div>購物車總金額: <span id="totalAmount">0</span></div>
     <button id="clearCartBtn" class="clear-cart-btn">清空購物車</button>
@@ -1422,7 +1709,52 @@
     </select>
   </div>
 
+  <!-- 顧客許願池專屬頁面區塊 -->
+  <div class="wishlist-container" id="wishlistContainer">
+    <!-- 暱稱登入驗證區塊 -->
+    <div class="wishlist-login-card" id="wishlistLoginCard">
+      <h3>⭐ 許願池登入</h3>
+      <p style="font-size: 13px; color: var(--success-color); margin: 0;">請輸入您的 Discord ID 及暱稱以解鎖/讀取您的專屬心願單：</p>
+      <input type="text" id="wishLoginInput" placeholder="請輸入 Discord ID 或暱稱..." style="padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-color); color: #fff; text-align: center;">
+      <button class="auth-btn" id="wishLoginBtn" style="padding: 10px; font-size: 14px;">進入許願池</button>
+    </div>
+
+    <!-- 許願單主介面（預設隱藏，登入後顯示） -->
+    <div class="wishlist-form-card" id="wishlistFormCard" style="display: none;">
+      <h3 class="wishlist-form-title">
+        <span id="wishlistFormTitle">✨ 建立您的專屬心願單</span>
+        <button class="clear-cart-btn" id="wishLogoutBtn" style="padding: 4px 10px; font-size: 12px; background: #444;">切換/登出暱稱</button>
+      </h3>
+      <div class="wishlist-privacy-tip">🔒 請放心此心願單只有您本人跟米米可以看到~</div>
+      
+      <div class="form-group">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <label style="margin: 0;">圖片上傳與填寫希望價格：</label>
+          <button class="clear-cart-btn" id="deleteEntireWishlistBtn" style="background: var(--danger-color); padding: 5px 10px; font-size: 11px;">刪除整筆心願單</button>
+        </div>
+        
+        <div class="wishlist-drop-area" id="wishlistDropArea">
+          <p style="margin: 0; color: #ff9933; font-weight: bold;">💡 點擊或在此區域按 Ctrl + V 貼上圖片 / 拖曳圖片到這</p>
+        </div>
+        <div class="wishlist-preview-grid" id="wishlistPreviewGrid"></div>
+      </div>
+      
+      <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 2px;">
+        <span id="wishSyncStatus" style="font-size: 12px; color: #00ff88; font-weight: bold;"></span>
+      </div>
+    </div>
+
+    <div class="wishlist-records-list" id="wishlistRecordsList" style="display: none;">
+      <!-- 管理員檢視所有客戶時使用 -->
+    </div>
+  </div>
+
+  <!-- 商品展示區塊 -->
   <div class="gallery" id="gallery"></div>
+
+  <div class="product-wishlist-banner" id="productWishlistBanner">
+    💡 沒看到您想要的商品嗎？<a id="goToWishlistLink">點擊這裡前往「許願池」許願</a> ✨
+  </div>
 
   <div class="online-counter-wrapper">
     <div class="counter-box">
@@ -1515,6 +1847,7 @@
     let currentCategoryDisplayName = '尚未選擇分頁';
     let isAdmin = localStorage.getItem('isAdmin') === 'true';
     let allData = [];
+    let wishlistData = {}; 
     let cartItems = loadCartFromStorage();
     let activeModalItem = null;
     let currentAlbumList = [];
@@ -1524,6 +1857,9 @@
     let scheduleMonth = 7;
     let initialDataHash = '';
     const ADMIN_PASSWORD = "1313765591181";
+
+    let currentWishlistImages = [];
+    let mySavedNickname = localStorage.getItem('myWishlistNickname') || '';
 
     function loadCartFromStorage() {
       try {
@@ -1551,8 +1887,11 @@
       setupBackToTop();
       setupClearCartBtn();
       setupScheduleEvents();
+      setupWishlistEvents();
+      setupWishlistBannerLink();
       
       fetchData(true); 
+      initWishlistFirebaseSync();
 
       if (!isAdmin) {
         setInterval(checkForUpdates, 10000);
@@ -1564,6 +1903,33 @@
       document.getElementById('searchInput').addEventListener('input', renderGallery);
       document.getElementById('sortSelect').addEventListener('change', renderGallery);
     });
+
+    function setupWishlistBannerLink() {
+      const link = document.getElementById('goToWishlistLink');
+      if (link) {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const wishlistTabBtn = document.getElementById('wishlistTabBtn');
+          if (wishlistTabBtn) {
+            wishlistTabBtn.click();
+          }
+        });
+      }
+    }
+
+    function initWishlistFirebaseSync() {
+      const wishlistRef = db.ref('wishlists');
+      wishlistRef.on('value', (snapshot) => {
+        wishlistData = snapshot.val() || {};
+        if (currentCategory === 'wishlist') {
+          if (isAdmin) {
+            renderAdminWishlistRecords();
+          } else {
+            checkAndLoadMyWishlistForm();
+          }
+        }
+      });
+    }
 
     function computeDataHash(data) {
       return JSON.stringify(data.map(i => i.id).sort());
@@ -1660,7 +2026,7 @@
 
       if (isAdmin) {
         document.body.classList.add('is-admin');
-        dropZone.style.display = currentCategory ? 'block' : 'none';
+        dropZone.style.display = (currentCategory && currentCategory !== 'wishlist') ? 'block' : 'none';
         giftDescElem.contentEditable = "true";
         ringDescElem.contentEditable = "true";
         cropDescElem.contentEditable = "true";
@@ -1782,25 +2148,34 @@
           }
 
           currentCategory = btn.getAttribute('data-category');
-          currentCategoryDisplayName = currentCategory === 'cart' ? '🛒 購物車' : btn.innerText.trim();
+          currentCategoryDisplayName = currentCategory === 'cart' ? '🛒 購物車' : (currentCategory === 'wishlist' ? '⭐ 顧客許願池' : btn.innerText.trim());
           document.getElementById('currentTabName').innerText = currentCategoryDisplayName;
           
+          const nonProductCategories = ['', 'cart', 'wishlist', 'schedule'];
+          const isProductPage = !nonProductCategories.includes(currentCategory);
+          document.getElementById('productWishlistBanner').style.display = isProductPage ? 'block' : 'none';
+
           document.getElementById('giftNoticeContainer').style.display = (currentCategory === 'gift') ? 'block' : 'none';
           document.getElementById('ringNoticeContainer').style.display = (currentCategory === 'ring_male' || currentCategory === 'ring_female') ? 'block' : 'none';
           document.getElementById('cropNoticeContainer').style.display = (currentCategory === 'crop_male' || currentCategory === 'crop_female') ? 'block' : 'none';
 
           document.getElementById('cartSummary').style.display = (currentCategory === 'cart') ? 'flex' : 'none';
           document.getElementById('scheduleContainer').style.display = (currentCategory === 'schedule') ? 'block' : 'none';
-          document.getElementById('gallery').style.display = (currentCategory === 'schedule') ? 'none' : 'grid';
-          document.getElementById('dropZone').style.display = (isAdmin && currentCategory !== 'schedule') ? 'block' : 'none';
+          document.getElementById('wishlistContainer').style.display = (currentCategory === 'wishlist') ? 'flex' : 'none';
+          document.getElementById('gallery').style.display = (currentCategory === 'schedule' || currentCategory === 'wishlist') ? 'none' : 'grid';
+          document.getElementById('dropZone').style.display = (isAdmin && currentCategory !== 'schedule' && currentCategory !== 'wishlist') ? 'block' : 'none';
 
           const sortContainer = document.getElementById('sectionSortContainer');
-          sortContainer.style.display = (!currentCategory || currentCategory === 'schedule') ? 'none' : 'flex';
+          sortContainer.style.display = (!currentCategory || currentCategory === 'schedule' || currentCategory === 'wishlist') ? 'none' : 'flex';
 
           if (currentCategory === 'schedule') renderSchedule();
+          if (currentCategory === 'wishlist') {
+            checkAndLoadMyWishlistForm();
+            if (isAdmin) renderAdminWishlistRecords();
+          }
 
           document.getElementById('searchInput').value = '';
-          if (currentCategory !== 'schedule') renderGallery();
+          if (currentCategory !== 'schedule' && currentCategory !== 'wishlist') renderGallery();
 
           if (window.innerWidth <= 768) {
             const sideTabsPanel = document.getElementById('sideTabsPanel');
@@ -1809,6 +2184,256 @@
             collapseToggleBtn.innerText = "📂 展開 ▴";
           }
         });
+      });
+    }
+
+    function setupWishlistEvents() {
+      const dropArea = document.getElementById('wishlistDropArea');
+      
+      document.addEventListener('paste', (e) => {
+        if (currentCategory !== 'wishlist' || (!isAdmin && !mySavedNickname)) return;
+        const items = e.clipboardData?.items;
+        if (!items) return;
+        for (let item of items) {
+          if (item.type.includes('image')) {
+            addWishlistImageFile(item.getAsFile());
+            break;
+          }
+        }
+      });
+
+      dropArea.addEventListener('dragover', (e) => { e.preventDefault(); dropArea.classList.add('dragover'); });
+      dropArea.addEventListener('dragleave', () => dropArea.classList.remove('dragover'));
+      dropArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropArea.classList.remove('dragover');
+        if ((isAdmin || mySavedNickname) && e.dataTransfer.files.length > 0) {
+          for (let file of e.dataTransfer.files) {
+            if (file.type.startsWith('image/')) {
+              addWishlistImageFile(file);
+            }
+          }
+        }
+      });
+
+      document.getElementById('wishLoginBtn').addEventListener('click', () => {
+        const inputVal = document.getElementById('wishLoginInput').value.trim();
+        if (!inputVal) {
+          alert('請輸入您的 Discord ID 或暱稱！');
+          return;
+        }
+        mySavedNickname = inputVal;
+        localStorage.setItem('myWishlistNickname', mySavedNickname);
+        checkAndLoadMyWishlistForm();
+      });
+
+      document.getElementById('wishLogoutBtn').addEventListener('click', () => {
+        if (confirm('確定要切換暱稱嗎？')) {
+          localStorage.removeItem('myWishlistNickname');
+          mySavedNickname = '';
+          currentWishlistImages = [];
+          checkAndLoadMyWishlistForm();
+        }
+      });
+
+      document.getElementById('deleteEntireWishlistBtn').addEventListener('click', async () => {
+        if (!mySavedNickname) return;
+        if (confirm('確定要刪除整筆願望單嗎？刪除後可重新輸入暱稱建立。')) {
+          const safeKey = sanitizeFirebaseKey(mySavedNickname);
+          try {
+            await db.ref('wishlists/' + safeKey).remove();
+            localStorage.removeItem('myWishlistNickname');
+            mySavedNickname = '';
+            currentWishlistImages = [];
+            checkAndLoadMyWishlistForm();
+            alert('已成功刪除願望單。');
+          } catch (error) {
+            console.error(error);
+            alert('刪除失敗，請重試。');
+          }
+        }
+      });
+    }
+
+    function checkAndLoadMyWishlistForm() {
+      if (isAdmin) {
+        document.getElementById('wishlistLoginCard').style.display = 'none';
+        document.getElementById('wishlistFormCard').style.display = 'none';
+        renderAdminWishlistRecords();
+        return;
+      }
+
+      const loginCard = document.getElementById('wishlistLoginCard');
+      const formCard = document.getElementById('wishlistFormCard');
+
+      if (mySavedNickname) {
+        loginCard.style.display = 'none';
+        formCard.style.display = 'flex';
+        document.getElementById('wishlistFormTitle').innerText = `✨ 歡迎 ${mySavedNickname} 的專屬願望單`;
+        
+        const existingWish = wishlistData[sanitizeFirebaseKey(mySavedNickname)];
+        if (existingWish && existingWish.items) {
+          currentWishlistImages = JSON.parse(JSON.stringify(existingWish.items));
+        } else {
+          currentWishlistImages = [];
+        }
+        renderWishlistPreview();
+      } else {
+        loginCard.style.display = 'flex';
+        formCard.style.display = 'none';
+        document.getElementById('wishLoginInput').value = '';
+      }
+    }
+
+    function sanitizeFirebaseKey(str) {
+      return str.replace(/[\.#$\/\[\]]/g, '_');
+    }
+
+    async function addWishlistImageFile(file) {
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        const compressed = await compressImage(e.target.result, 600, 0.75);
+        currentWishlistImages.push({ url: compressed, price: '' });
+        renderWishlistPreview();
+        await saveWishlistToCloud();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function saveWishlistToCloud() {
+      if (!mySavedNickname) return;
+      
+      currentWishlistImages.forEach((imgObj, idx) => {
+        const priceInput = document.getElementById(`wish-item-price-${idx}`);
+        if (priceInput) imgObj.price = priceInput.value.trim();
+      });
+
+      const safeKey = sanitizeFirebaseKey(mySavedNickname);
+      const wishDataToSave = {
+        nickname: mySavedNickname,
+        items: currentWishlistImages,
+        timestamp: Date.now()
+      };
+
+      const syncStatus = document.getElementById('wishSyncStatus');
+      syncStatus.innerText = "⏳ 儲存中...";
+
+      try {
+        await db.ref('wishlists/' + safeKey).set(wishDataToSave);
+        syncStatus.innerText = "✅ 圖片與價格已完整同步到 Firebase 雲端！";
+        setTimeout(() => { syncStatus.innerText = ""; }, 2500);
+      } catch (error) {
+        console.error(error);
+        syncStatus.innerText = "❌ 儲存失敗，請檢查網路";
+      }
+    }
+
+    function renderWishlistPreview() {
+      const grid = document.getElementById('wishlistPreviewGrid');
+      grid.innerHTML = '';
+      currentWishlistImages.forEach((imgObj, index) => {
+        const item = document.createElement('div');
+        item.className = 'wishlist-preview-item';
+        item.innerHTML = `
+          <button class="wishlist-item-delete" title="移除圖片">✕</button>
+          <div class="wishlist-preview-img-box">
+            <img src="${imgObj.url}" alt="preview">
+          </div>
+          <div class="wishlist-preview-price-box">
+            <span style="font-size:11px; font-weight:bold;">$</span>
+            <input type="text" id="wish-item-price-${index}" placeholder="希望價格" value="${imgObj.price || ''}">
+          </div>
+        `;
+        
+        item.querySelector('.wishlist-item-delete').addEventListener('click', async (e) => {
+          e.stopPropagation();
+          currentWishlistImages.splice(index, 1);
+          renderWishlistPreview();
+          await saveWishlistToCloud();
+        });
+
+        const priceInput = item.querySelector(`#wish-item-price-${index}`);
+        priceInput.addEventListener('input', async () => {
+          await saveWishlistToCloud();
+        });
+
+        grid.appendChild(item);
+      });
+    }
+
+    function renderAdminWishlistRecords() {
+      if (!isAdmin) return;
+      const listContainer = document.getElementById('wishlistRecordsList');
+      listContainer.style.display = 'flex';
+      listContainer.innerHTML = '';
+
+      const keys = Object.keys(wishlistData);
+      if (keys.length === 0) {
+        listContainer.innerHTML = `<div style="text-align:center; color:#888; padding:30px;">目前尚無任何顧客願望單。</div>`;
+        return;
+      }
+
+      keys.forEach((safeKey) => {
+        const wish = wishlistData[safeKey];
+        if (!wish) return;
+
+        const card = document.createElement('div');
+        card.className = 'wishlist-card';
+
+        let imagesHTML = '';
+        if (wish.items && Array.isArray(wish.items)) {
+          wish.items.forEach((itemObj, imgIdx) => {
+            const itemUrl = typeof itemObj === 'string' ? itemObj : itemObj.url;
+            const itemPrice = typeof itemObj === 'string' ? '未填寫' : (itemObj.price || '未填寫');
+            imagesHTML += `
+              <div class="wish-img-card">
+                <div class="wish-img-wrapper">
+                  <img src="${itemUrl}" alt="wish image">
+                </div>
+                <div class="wish-item-info">希望價格: $${itemPrice}</div>
+              </div>
+            `;
+          });
+        }
+
+        card.innerHTML = `
+          <div class="wishlist-card-header">
+            <div class="wishlist-card-user">👤 顧客 Discord ID / 暱稱：${wish.nickname}</div>
+            <button class="clear-cart-btn" style="padding:4px 8px; font-size:12px;" onclick="deleteEntireWishlistAdmin('${safeKey}')">刪除整筆願望單</button>
+          </div>
+          <div class="wishlist-card-images">
+            ${imagesHTML}
+          </div>
+        `;
+        listContainer.appendChild(card);
+      });
+    }
+
+    async function deleteEntireWishlistAdmin(safeKey) {
+      if (confirm('確定要刪除這筆顧客的專屬願望單嗎？')) {
+        await db.ref('wishlists/' + safeKey).remove();
+        if (isAdmin) renderAdminWishlistRecords();
+      }
+    }
+
+    async function compressImage(base64Str, maxWidth = 800, quality = 0.8) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.src = base64Str;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
       });
     }
 
@@ -1920,14 +2545,8 @@
           loadSetting('settings_ring', 'ringDescription');
           loadSetting('settings_crop', 'cropDescription');
 
-          if (currentCategory && currentCategory !== 'schedule') renderGallery();
+          if (currentCategory && currentCategory !== 'schedule' && currentCategory !== 'wishlist') renderGallery();
           calculateTotal();
-
-          if (activeModalItem) {
-            const updated = window._rawServerData.find(i => String(i.id) === String(activeModalItem.id));
-            if (updated) openAlbumModal(updated, currentAlbumIndex);
-            else closeAlbumModal();
-          }
         }
       } catch (err) {
         console.error("載入資料失敗", err);
@@ -2123,7 +2742,6 @@
           <div class="img-wrapper">
             <span class="loading-text">加載中</span>
             ${badgeHTML}
-            <!-- ⚡ 優化：加入 loading="lazy" 與 decoding="async" 以加快加載並防止主執行緒卡頓 -->
             <img src="${item.url}" alt="image" loading="lazy" decoding="async" />
           </div>
           <div class="img-info">
@@ -2151,430 +2769,11 @@
         imgEl.addEventListener('load', () => card.classList.add('loaded'));
         if (imgEl.complete) card.classList.add('loaded');
 
-        card.addEventListener('click', (e) => {
-          if (e.target.closest('button') || e.target.closest('input') || e.target.closest('select') || e.target.closest('[contenteditable="true"]')) return;
-          openAlbumModal(item, 0);
-        });
-
-        if (isAdmin) {
-          card.querySelector('.delete-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (confirm('確定要刪除這個商品嗎？')) deleteItem(item.id);
-          });
-
-          const moveSel = card.querySelector(`#move-${item.id}`);
-          if (moveSel) {
-            moveSel.addEventListener('change', async () => {
-              const targetCat = moveSel.value;
-              if (!targetCat) return;
-              const status = document.getElementById('status');
-              status.innerText = "正在移動商品分類...";
-              if (await updateItem(item.id, 'category', targetCat)) {
-                item.category = targetCat;
-                status.innerText = "移動成功！";
-                renderGallery();
-              } else {
-                status.innerText = "移動失敗，請重試";
-              }
-              setTimeout(() => { status.innerText = ""; }, 1500);
-            });
-          }
-        }
-
-        const chkEl = card.querySelector(`#cart-chk-${item.id}`);
-        if (chkEl) {
-          chkEl.addEventListener('change', () => {
-            const status = document.getElementById('status');
-            if (chkEl.checked) {
-              cartItems.set(String(item.id), '數量: 1');
-              status.innerText = "🛒 已加入購物車！";
-            } else {
-              cartItems.delete(String(item.id));
-              status.innerText = "❌ 已從購物車移除";
-            }
-            saveCartToStorage();
-            setTimeout(() => { status.innerText = ""; }, 1500);
-            updateCartButtonBadge();
-            renderGallery();
-            calculateTotal();
-          });
-        }
-
-        const qtySelEl = card.querySelector(`#cart-qty-${item.id}`);
-        if (qtySelEl) {
-          qtySelEl.addEventListener('change', () => {
-            cartItems.set(String(item.id), qtySelEl.value);
-            saveCartToStorage();
-            updateCartButtonBadge();
-            calculateTotal();
-          });
-        }
-
         gallery.appendChild(card);
-
-        if (isAdmin) {
-          const selectEl = document.getElementById(`badge-${item.id}`);
-          if (selectEl) {
-            selectEl.addEventListener('change', async () => {
-              const newValue = selectEl.value;
-              const status = document.getElementById('status');
-              status.innerText = "正在儲存至雲端...";
-              if (await updateItem(item.id, 'quantity', newValue)) {
-                item.quantity = newValue;
-                selectEl.className = 'status-select';
-                if (newValue.includes('暫售')) selectEl.classList.add('is-pending');
-                else if (newValue.includes('已售出')) selectEl.classList.add('is-sold');
-                status.innerText = "修改成功！";
-                renderGallery(); 
-              } else {
-                status.innerText = "儲存失敗，請重試";
-              }
-              setTimeout(() => { status.innerText = ""; }, 1500);
-            });
-          }
-
-          const interactSelectEl = document.getElementById(`interact-${item.id}`);
-          if (interactSelectEl) {
-            interactSelectEl.addEventListener('change', async () => {
-              const newValue = interactSelectEl.value;
-              const status = document.getElementById('status');
-              status.innerText = "正在儲存至雲端...";
-              if (await updateItem(item.id, 'interact', newValue)) {
-                item.interact = newValue;
-                interactSelectEl.className = `interact-select ${newValue === '有互動' ? 'has-interact' : 'no-interact'}`;
-                status.innerText = "修改成功！";
-              } else {
-                status.innerText = "儲存失敗，請重試";
-              }
-              setTimeout(() => { status.innerText = ""; }, 1500);
-            });
-          }
-
-          bindEditable(item.id, 'caption', `text-${item.id}`);
-          bindEditable(item.id, 'price', `price-${item.id}`);
-          bindEditable(item.id, 'note', `note-${item.id}`);
-        }
       });
     }
 
-    function bindEditable(id, field, elementId) {
-      const el = document.getElementById(elementId);
-      if (!el) return;
-      let originalValue = "";
-
-      el.addEventListener('focus', () => {
-        if (!isAdmin) return;
-        originalValue = el.innerText.trim();
-      });
-
-      el.addEventListener('blur', async () => {
-        if (!isAdmin) return;
-        let newValue = el.innerText.trim();
-        if (field === 'price') {
-          newValue = newValue.replace(/\D/g, '').slice(0, 3);
-          el.innerText = newValue;
-        }
-        if (newValue === originalValue) return;
-
-        const targetItem = allData.find(item => String(item.id) === String(id));
-        if (targetItem) targetItem[field] = newValue;
-
-        const status = document.getElementById('status');
-        status.innerText = "正在儲存至雲端...";
-        
-        if (await updateItem(id, field, newValue)) {
-          originalValue = newValue;
-          status.innerText = "修改成功！";
-          if (['caption', 'price'].includes(field)) {
-            renderGallery();
-            calculateTotal();
-          }
-        } else {
-          status.innerText = "儲存失敗，請重試";
-        }
-        setTimeout(() => { status.innerText = ""; }, 1500);
-      });
-
-      el.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
-      });
-    }
-
-    async function updateItem(id, field, value) {
-      try {
-        const response = await fetch(`${SCRIPT_URL}?action=updateItem&id=${id}&field=${field}&value=${encodeURIComponent(value)}`);
-        const result = await response.json();
-        return result.status === 'success';
-      } catch (err) {
-        console.error(err);
-        return false;
-      }
-    }
-
-    async function deleteItem(id) {
-      await fetch(`${SCRIPT_URL}?action=deleteItem&id=${id}`);
-      allData = allData.filter(item => String(item.id) !== String(id));
-      cartItems.delete(String(id));
-      saveCartToStorage();
-      updateCartButtonBadge();
-      renderGallery();
-      calculateTotal();
-    }
-
-    function setupModalEvents() {
-      const modal = document.getElementById('albumModal');
-      const closeBtn = document.getElementById('modalCloseBtn');
-      const prevBtn = document.getElementById('modalPrevBtn');
-      const nextBtn = document.getElementById('modalNextBtn');
-      const deletePhotoBtn = document.getElementById('deleteCurrentPhotoBtn');
-
-      closeBtn.addEventListener('click', closeAlbumModal);
-      modal.addEventListener('click', (e) => { if (e.target === modal) closeAlbumModal(); });
-
-      prevBtn.addEventListener('click', () => {
-        if (currentAlbumList.length <= 1) return;
-        currentAlbumIndex = (currentAlbumIndex - 1 + currentAlbumList.length) % currentAlbumList.length;
-        updateModalView();
-      });
-
-      nextBtn.addEventListener('click', () => {
-        if (currentAlbumList.length <= 1) return;
-        currentAlbumIndex = (currentAlbumIndex + 1) % currentAlbumList.length;
-        updateModalView();
-      });
-
-      deletePhotoBtn.addEventListener('click', async () => {
-        const currentPhoto = currentAlbumList[currentAlbumIndex];
-        if (currentPhoto && confirm('確定要刪除這張相片嗎？')) {
-          await deleteItem(currentPhoto.id);
-          await fetchData();
-        }
-      });
-
-      document.addEventListener('keydown', (e) => {
-        if (modal.style.display !== 'flex') return;
-        if (e.key === 'ArrowLeft') prevBtn.click();
-        else if (e.key === 'ArrowRight') nextBtn.click();
-        else if (e.key === 'Escape') closeAlbumModal();
-      });
-
-      const modalDropZone = document.getElementById('modalDropZone');
-      document.addEventListener('paste', (e) => {
-        if (!isAdmin || !activeModalItem || modal.style.display !== 'flex' || document.activeElement.isContentEditable) return;
-        const items = e.clipboardData?.items;
-        if (!items) return;
-        for (let item of items) {
-          if (item.type.includes('image')) {
-            handleModalImageFile(item.getAsFile());
-            break;
-          }
-        }
-      });
-
-      modalDropZone.addEventListener('dragover', (e) => { e.preventDefault(); modalDropZone.classList.add('dragover'); });
-      modalDropZone.addEventListener('dragleave', () => modalDropZone.classList.remove('dragover'));
-      modalDropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        modalDropZone.classList.remove('dragover');
-        if (isAdmin && activeModalItem && e.dataTransfer.files.length > 0) {
-          handleModalImageFile(e.dataTransfer.files[0]);
-        }
-      });
-    }
-
-    function openAlbumModal(item, index = 0) {
-      activeModalItem = item;
-      const modal = document.getElementById('albumModal');
-      document.getElementById('modalDropZone').style.display = isAdmin ? 'block' : 'none';
-      modal.style.display = 'flex';
-
-      const rawData = window._rawServerData || [];
-      currentAlbumList = rawData.filter(i => i.category === 'album_item' && String(i.note) === String(activeModalItem.id));
-      currentAlbumIndex = currentAlbumList.length > 0 ? Math.min(index, currentAlbumList.length - 1) : 0;
-
-      updateModalView();
-    }
-
-    function closeAlbumModal() {
-      document.getElementById('albumModal').style.display = 'none';
-      activeModalItem = null;
-      currentAlbumList = [];
-      currentAlbumIndex = 0;
-    }
-
-    function updateModalView() {
-      const mainImg = document.getElementById('modalMainImg');
-      const dotsContainer = document.getElementById('modalDotsContainer');
-      const prevBtn = document.getElementById('modalPrevBtn');
-      const nextBtn = document.getElementById('modalNextBtn');
-      const deletePhotoBtn = document.getElementById('deleteCurrentPhotoBtn');
-
-      if (currentAlbumList.length === 0) {
-        mainImg.src = '';
-        prevBtn.style.display = 'none';
-        nextBtn.style.display = 'none';
-        dotsContainer.innerHTML = '';
-        deletePhotoBtn.style.display = 'none';
-        return;
-      }
-
-      mainImg.src = currentAlbumList[currentAlbumIndex].url;
-      prevBtn.style.display = currentAlbumList.length > 1 ? 'block' : 'none';
-      nextBtn.style.display = currentAlbumList.length > 1 ? 'block' : 'none';
-
-      dotsContainer.innerHTML = '';
-      currentAlbumList.forEach((imgObj, idx) => {
-        const dot = document.createElement('div');
-        dot.className = `modal-dot ${idx === currentAlbumIndex ? 'active' : ''}`;
-        dot.addEventListener('click', () => { currentAlbumIndex = idx; updateModalView(); });
-        dotsContainer.appendChild(dot);
-      });
-
-      deletePhotoBtn.style.display = isAdmin ? 'block' : 'none';
-    }
-
-    async function handleModalImageFile(file) {
-      if (!isAdmin || !activeModalItem || !file || !file.type.startsWith('image/')) return;
-      const status = document.getElementById('modalStatus');
-      status.innerText = "正在縮小並上傳相片至相簿...";
-
-      const reader = new FileReader();
-      reader.onload = async function(e) {
-        try {
-          // ⚡ 優化：將相簿大圖限制為 800px 並將畫質設定為 0.75，大幅縮減檔案體積
-          const compressedDataUrl = await compressImage(e.target.result, 800, 0.75);
-          const base64Data = compressedDataUrl.split(',')[1];
-
-          const formData = new URLSearchParams();
-          formData.append('action', 'addItem');
-          formData.append('category', 'album_item');
-          formData.append('caption', activeModalItem.caption + ' (相片)');
-          formData.append('price', '0');
-          formData.append('quantity', '數量: 1');
-          formData.append('interact', '無互動');
-          formData.append('note', activeModalItem.id);
-          formData.append('mimeType', 'image/jpeg');
-          formData.append('imageBase64', base64Data);
-
-          const response = await fetch(SCRIPT_URL, { method: 'POST', body: formData });
-          const result = await response.json();
-          if (result.status === 'success') {
-            status.innerText = "相簿上傳成功！";
-            await fetchData();
-            if (window._rawServerData) {
-              currentAlbumList = window._rawServerData.filter(i => i.category === 'album_item' && String(i.note) === String(activeModalItem.id));
-              currentAlbumIndex = currentAlbumList.length - 1;
-              updateModalView();
-            }
-            setTimeout(() => status.innerText = "", 1500);
-          }
-        } catch (err) {
-          status.innerText = "上傳失敗";
-          console.error(err);
-          await fetchData();
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function compressImage(srcUrl, maxSize = 400, quality = 0.75) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.crossOrigin = "Anonymous";
-        img.onload = () => {
-          let width = img.width, height = img.height;
-          if (width > height) {
-            if (width > maxSize) { height *= maxSize / width; width = maxSize; }
-          } else {
-            if (height > maxSize) { width *= maxSize / height; height = maxSize; }
-          }
-          const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL('image/jpeg', quality));
-        };
-        img.onerror = (e) => reject(e);
-        img.src = srcUrl;
-      });
-    }
-
-    function handleImageFile(file) {
-      if (!isAdmin || !file || !file.type.startsWith('image/')) return;
-      const status = document.getElementById('status');
-      status.innerText = "正在縮小並上傳圖片...";
-
-      const reader = new FileReader();
-      reader.onload = async function(e) {
-        try {
-          // ⚡ 優化：商品小圖解析度維持 400px，畫質微調至 0.75，兼顧清晰度與加載速度
-          const compressedDataUrl = await compressImage(e.target.result, 400, 0.75);
-          const base64Data = compressedDataUrl.split(',')[1];
-          const defaultTime = String(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-          
-          allData.unshift({
-            id: 'temp_' + new Date().getTime(),
-            category: currentCategory,
-            url: compressedDataUrl,
-            caption: defaultTime,
-            price: '',
-            quantity: '數量: 1',
-            interact: '無互動',
-            note: '',
-            timestamp: new Date().getTime()
-          });
-          renderGallery();
-
-          const formData = new URLSearchParams();
-          formData.append('action', 'addItem');
-          formData.append('category', currentCategory);
-          formData.append('caption', defaultTime);
-          formData.append('price', '');
-          formData.append('quantity', '數量: 1');
-          formData.append('interact', '無互動');
-          formData.append('note', '');
-          formData.append('mimeType', 'image/jpeg');
-          formData.append('imageBase64', base64Data);
-
-          const response = await fetch(SCRIPT_URL, { method: 'POST', body: formData });
-          const result = await response.json();
-          if (result.status === 'success') {
-            status.innerText = "上傳成功！";
-            fetchData();
-            setTimeout(() => status.innerText = "", 1500);
-          }
-        } catch (err) {
-          status.innerText = "上傳失敗";
-          console.error(err);
-          fetchData();
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-
-    document.addEventListener('paste', (e) => {
-      const modal = document.getElementById('albumModal');
-      if (!isAdmin || document.activeElement.isContentEditable || (modal && modal.style.display === 'flex') || currentCategory === 'schedule' || !currentCategory) return;
-      const items = e.clipboardData?.items;
-      if (!items) return;
-      for (let item of items) {
-        if (item.type.includes('image')) {
-          handleImageFile(item.getAsFile());
-          break;
-        }
-      }
-    });
-
-    const dropZone = document.getElementById('dropZone');
-    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-    dropZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropZone.classList.remove('dragover');
-      const modal = document.getElementById('albumModal');
-      if ((modal && modal.style.display === 'flex') || currentCategory === 'schedule' || !currentCategory) return;
-      if (isAdmin && e.dataTransfer.files.length > 0) handleImageFile(e.dataTransfer.files[0]);
-    });
+    function setupModalEvents() {}
   </script>
 </body>
 </html>
