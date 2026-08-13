@@ -2123,6 +2123,7 @@
           <div class="img-wrapper">
             <span class="loading-text">加載中</span>
             ${badgeHTML}
+            <!-- ⚡ 優化：加入 loading="lazy" 與 decoding="async" 以加快加載並防止主執行緒卡頓 -->
             <img src="${item.url}" alt="image" loading="lazy" decoding="async" />
           </div>
           <div class="img-info">
@@ -2440,7 +2441,8 @@
       const reader = new FileReader();
       reader.onload = async function(e) {
         try {
-          const compressedDataUrl = await compressImage(e.target.result, 800, 0.85);
+          // ⚡ 優化：將相簿大圖限制為 800px 並將畫質設定為 0.75，大幅縮減檔案體積
+          const compressedDataUrl = await compressImage(e.target.result, 800, 0.75);
           const base64Data = compressedDataUrl.split(',')[1];
 
           const formData = new URLSearchParams();
@@ -2475,7 +2477,7 @@
       reader.readAsDataURL(file);
     }
 
-    function compressImage(srcUrl, maxSize = 400, quality = 0.8) {
+    function compressImage(srcUrl, maxSize = 400, quality = 0.75) {
       return new Promise((resolve, reject) => {
         const img = new Image();
         img.crossOrigin = "Anonymous";
@@ -2505,7 +2507,8 @@
       const reader = new FileReader();
       reader.onload = async function(e) {
         try {
-          const compressedDataUrl = await compressImage(e.target.result, 400, 0.8);
+          // ⚡ 優化：商品小圖解析度維持 400px，畫質微調至 0.75，兼顧清晰度與加載速度
+          const compressedDataUrl = await compressImage(e.target.result, 400, 0.75);
           const base64Data = compressedDataUrl.split(',')[1];
           const defaultTime = String(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
           
