@@ -102,8 +102,8 @@
 
     /* Q彈跳動微動畫 (樣式三) */
     @keyframes bounceTag {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(255, 51, 102, 0.4); }
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
     }
 
     .rotating-star {
@@ -874,43 +874,43 @@
       accent-color: var(--cart-color);
     }
 
-    /* 右下角 HOT 選單樣式 (帶微動畫 - 改為樣式三) */
+    /* 右下角 HOT 選單樣式 (帶微動畫) */
     .hot-select {
       position: absolute;
       bottom: 3px;
       right: 3px;
       z-index: 10;
-      background-color: #1e1e1e;
-      color: #ff3366;
-      border: 1px solid #ff3366;
-      border-radius: 4px;
-      padding: 3px 5px;
+      background-color: rgba(30, 30, 30, 0.95);
+      color: #ffd700;
+      border: 1px solid #ff9933;
+      border-radius: 3px;
+      padding: 1px 4px;
       font-size: 9px;
       font-weight: bold;
       cursor: pointer;
       outline: none;
     }
     .hot-select.is-hot, .hot-select option[value="HOT"] {
-      background-color: #1e1e1e !important;
-      color: #ff3366 !important;
-      border: 1px solid #ff3366 !important;
-      animation: bounceTag 1s infinite alternate ease-in-out;
+      background-color: #ff3366 !important;
+      color: #ffffff !important;
+      border-color: #ff9933 !important;
+      animation: bounceTag 1.2s ease-in-out infinite;
     }
 
-    /* 訪客端 HOT 標籤樣式 (帶微動畫 - 改為樣式三) */
+    /* 訪客端 HOT 標籤樣式 (帶微動畫) */
     .hot-badge-tag {
       position: absolute;
       bottom: 3px;
       right: 3px;
       z-index: 10;
-      background: #1e1e1e;
-      border: 1px solid #ff3366;
-      color: #ff3366;
-      font-weight: bold;
-      padding: 3px 5px;
-      border-radius: 4px;
+      background: linear-gradient(135deg, #ff3366, #ff9933);
+      color: #fff;
       font-size: 9px;
-      animation: bounceTag 1s infinite alternate ease-in-out;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      animation: bounceTag 1.2s ease-in-out infinite;
     }
 
     /* 上下分區標題與分隔線樣式 */
@@ -939,7 +939,7 @@
 
     .cart-qty-select {
       position: absolute;
-      top: 1px;
+      top: 3px;
       right: 3px;
       z-index: 10;
       background-color: rgba(30, 30, 30, 0.95);
@@ -2207,32 +2207,20 @@
       
       filtered.sort(compareItems);
 
-      // 智能分組：將「暫售」與「已售出」歸入已進入交易流程區塊
-      const inProgressList = filtered.filter(item => {
-        const q = String(item.quantity || '');
+      const isTransaction = (qty) => {
+        const q = String(qty || '');
         return q.includes('暫售') || q.includes('已售出');
-      });
-      const availableList = filtered.filter(item => {
-        const q = String(item.quantity || '');
-        return !q.includes('暫售') && !q.includes('已售出');
-      });
+      };
 
-      const hotList = availableList.filter(item => item.real_img === 'HOT');
-      const normalList = availableList.filter(item => item.real_img !== 'HOT');
+      const hotList = filtered.filter(item => item.real_img === 'HOT' && !isTransaction(item.quantity));
+      const normalList = filtered.filter(item => item.real_img !== 'HOT' && !isTransaction(item.quantity));
+      const transactionList = filtered.filter(item => isTransaction(item.quantity));
 
       const hasHot = hotList.length > 0;
       const hasNormal = normalList.length > 0;
-      const hasInProgress = inProgressList.length > 0;
-      const hasMultipleSections = (hasHot ? 1 : 0) + (hasNormal ? 1 : 0) + (hasInProgress ? 1 : 0) > 1;
+      const hasTransaction = transactionList.length > 0;
 
-      const renderItemCards = (itemsToRender, sectionTitle = null) => {
-        if (sectionTitle && itemsToRender.length > 0) {
-          const titleDiv = document.createElement('div');
-          titleDiv.className = 'section-block-title';
-          titleDiv.innerHTML = sectionTitle;
-          gallery.appendChild(titleDiv);
-        }
-
+      const renderItemCards = (itemsToRender) => {
         itemsToRender.forEach((item) => {
           const card = document.createElement('div');
           const isHotItem = (item.real_img === 'HOT');
@@ -2530,28 +2518,43 @@
         });
       };
 
-      // 依序渲染各分區 (HOT、一般商品、已進入交易流程)
+      let sectionCount = 0;
+
       if (hasHot) {
-        renderItemCards(hotList, '<span style="-webkit-text-fill-color: initial;">🔥</span> HOT 熱門推薦');
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'section-block-title';
+        titleDiv.innerHTML = '🔥 HOT 熱門推薦專區';
+        gallery.appendChild(titleDiv);
+        renderItemCards(hotList);
+        sectionCount++;
       }
 
       if (hasNormal) {
-        // 修改處：只有當有 HOT 區塊時，才在一般商品上方加上分隔線
-        if (hasHot) {
+        if (sectionCount > 0) {
           const divider = document.createElement('hr');
           divider.className = 'section-divider-line';
           gallery.appendChild(divider);
         }
-        renderItemCards(normalList, null);
+        const normalTitle = document.createElement('div');
+        normalTitle.className = 'section-block-title';
+        normalTitle.innerHTML = '✨ 一般商品專區';
+        gallery.appendChild(normalTitle);
+        renderItemCards(normalList);
+        sectionCount++;
       }
 
-      if (hasInProgress) {
-        if (hasHot || hasNormal) {
+      if (hasTransaction) {
+        if (sectionCount > 0) {
           const divider = document.createElement('hr');
           divider.className = 'section-divider-line';
           gallery.appendChild(divider);
         }
-        renderItemCards(inProgressList, '<span style="-webkit-text-fill-color: initial;">🚚..</span>已進入交易流程');
+        const transactionTitle = document.createElement('div');
+        transactionTitle.className = 'section-block-title';
+        transactionTitle.innerHTML = '🤝 已進入交易流程';
+        gallery.appendChild(transactionTitle);
+        renderItemCards(transactionList);
+        sectionCount++;
       }
     }
 
@@ -2647,34 +2650,107 @@
         currentAlbumIndex = (currentAlbumIndex + 1) % currentAlbumList.length;
         updateModalView();
       });
+
+      deletePhotoBtn.addEventListener('click', async () => {
+        const currentPhoto = currentAlbumList[currentAlbumIndex];
+        if (!currentPhoto) return;
+        if (confirm('確定要刪除這張相片嗎？')) {
+          await deleteItem(currentPhoto.id);
+          await fetchData();
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (modal.style.display !== 'flex') return;
+        if (e.key === 'ArrowLeft') {
+          prevBtn.click();
+        } else if (e.key === 'ArrowRight') {
+          nextBtn.click();
+        } else if (e.key === 'Escape') {
+          closeAlbumModal();
+        }
+      });
+
+      const modalDropZone = document.getElementById('modalDropZone');
+      document.addEventListener('paste', (e) => {
+        if (!isAdmin || !activeModalItem || modal.style.display !== 'flex') return;
+        if (document.activeElement.isContentEditable) return;
+        
+        const items = e.clipboardData?.items;
+        if (!items) return;
+        for (let item of items) {
+          if (item.type.includes('image')) {
+            handleModalImageFile(item.getAsFile());
+            break;
+          }
+        }
+      });
+
+      modalDropZone.addEventListener('dragover', (e) => { e.preventDefault(); modalDropZone.classList.add('dragover'); });
+      modalDropZone.addEventListener('dragleave', () => modalDropZone.classList.remove('dragover'));
+      modalDropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        modalDropZone.classList.remove('dragover');
+        if (isAdmin && activeModalItem && e.dataTransfer.files.length > 0) {
+          handleModalImageFile(e.dataTransfer.files[0]);
+        }
+      });
     }
 
-    function openAlbumModal(item, index) {
+    function openAlbumModal(item, index = 0) {
       activeModalItem = item;
-      const rawData = window._rawServerData || allData;
-      currentAlbumList = rawData.filter(i => String(i.category) === String(item.category) && i.url);
-      currentAlbumIndex = currentAlbumList.findIndex(i => String(i.id) === String(item.id));
-      if (currentAlbumIndex === -1) currentAlbumIndex = 0;
-
       const modal = document.getElementById('albumModal');
+      const modalDropZone = document.getElementById('modalDropZone');
+
+      modalDropZone.style.display = isAdmin ? 'block' : 'none';
       modal.style.display = 'flex';
+
+      const rawData = window._rawServerData || [];
+      const albumImages = rawData.filter(i => i.category === 'album_item' && String(i.note) === String(activeModalItem.id));
+      
+      currentAlbumList = albumImages;
+      currentAlbumIndex = currentAlbumList.length > 0 ? Math.min(index, currentAlbumList.length - 1) : 0;
+
       updateModalView();
     }
 
+    function closeAlbumModal() {
+      const modal = document.getElementById('albumModal');
+      modal.style.display = 'none';
+      activeModalItem = null;
+      currentAlbumList = [];
+      currentAlbumIndex = 0;
+    }
+
     function updateModalView() {
-      if (!currentAlbumList.length) return;
-      const item = currentAlbumList[currentAlbumIndex];
       const mainImg = document.getElementById('modalMainImg');
-      const title = document.getElementById('modalTitle');
-      const deleteBtn = document.getElementById('deleteCurrentPhotoBtn');
-
-      mainImg.src = item.url;
-      title.innerText = item.caption || currentCategoryDisplayName;
-      deleteBtn.style.display = isAdmin ? 'block' : 'none';
-
       const dotsContainer = document.getElementById('modalDotsContainer');
+      const prevBtn = document.getElementById('modalPrevBtn');
+      const nextBtn = document.getElementById('modalNextBtn');
+      const deletePhotoBtn = document.getElementById('deleteCurrentPhotoBtn');
+
+      if (currentAlbumList.length === 0) {
+        mainImg.src = '';
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+        dotsContainer.innerHTML = '';
+        deletePhotoBtn.style.display = 'none';
+        return;
+      }
+
+      const currentPhoto = currentAlbumList[currentAlbumIndex];
+      mainImg.src = currentPhoto.url;
+
+      if (currentAlbumList.length > 1) {
+        prevBtn.style.display = 'block';
+        nextBtn.style.display = 'block';
+      } else {
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+      }
+
       dotsContainer.innerHTML = '';
-      currentAlbumList.forEach((el, idx) => {
+      currentAlbumList.forEach((imgObj, idx) => {
         const dot = document.createElement('div');
         dot.className = `modal-dot ${idx === currentAlbumIndex ? 'active' : ''}`;
         dot.addEventListener('click', () => {
@@ -2683,91 +2759,162 @@
         });
         dotsContainer.appendChild(dot);
       });
+
+      if (isAdmin) {
+        deletePhotoBtn.style.display = 'block';
+      }
     }
 
-    function closeAlbumModal() {
-      const modal = document.getElementById('albumModal');
-      modal.style.display = 'none';
-      activeModalItem = null;
+    async function handleModalImageFile(file) {
+      if (!isAdmin || !activeModalItem || !file || !file.type.startsWith('image/')) return;
+      const status = document.getElementById('modalStatus');
+      status.innerText = "正在縮小並上傳相片至相簿...";
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        try {
+          const compressedDataUrl = await compressImage(e.target.result, 800, 0.85);
+          const base64Data = compressedDataUrl.split(',')[1];
+
+          const formData = new URLSearchParams();
+          formData.append('action', 'addItem');
+          formData.append('category', 'album_item');
+          formData.append('caption', activeModalItem.caption + ' (相片)');
+          formData.append('price', '0');
+          formData.append('quantity', '數量: 1');
+          formData.append('interact', '無互動');
+          formData.append('note', activeModalItem.id);
+          formData.append('mimeType', 'image/jpeg');
+          formData.append('imageBase64', base64Data);
+
+          const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: formData
+          });
+          const result = await response.json();
+          if (result.status === 'success') {
+            status.innerText = "相簿上傳成功！";
+            await fetchData();
+            if (window._rawServerData) {
+              const updatedAlbumImages = window._rawServerData.filter(i => i.category === 'album_item' && String(i.note) === String(activeModalItem.id));
+              currentAlbumList = updatedAlbumImages;
+              currentAlbumIndex = currentAlbumList.length - 1;
+              updateModalView();
+            }
+            setTimeout(() => status.innerText = "", 1500);
+          }
+        } catch (err) {
+          status.innerText = "上傳失敗";
+          console.error(err);
+          await fetchData();
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function compressImage(srcUrl, maxSize = 400, quality = 0.8) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxSize) {
+              height *= maxSize / width;
+              width = maxSize;
+            }
+          } else {
+            if (height > maxSize) {
+              width *= maxSize / height;
+              height = maxSize;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve(compressedDataUrl);
+        };
+        img.onerror = (e) => reject(e);
+        img.src = srcUrl;
+      });
+    }
+
+    function handleImageFile(file) {
+      if (!isAdmin || !file || !file.type.startsWith('image/')) return;
+      if (!currentCategory || currentCategory === 'cart' || currentCategory === 'schedule') {
+        alert('請先選擇一個商品分頁再上傳圖片！');
+        return;
+      }
+      const status = document.getElementById('status');
+      status.innerText = "正在縮小並上傳圖片...";
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        try {
+          const compressedDataUrl = await compressImage(e.target.result, 800, 0.85);
+          const base64Data = compressedDataUrl.split(',')[1];
+
+          const formData = new URLSearchParams();
+          formData.append('action', 'addItem');
+          formData.append('category', currentCategory);
+          formData.append('caption', '');
+          formData.append('price', '0');
+          formData.append('quantity', '數量: 1');
+          formData.append('interact', '無互動');
+          formData.append('real_img', '一般');
+          formData.append('mimeType', 'image/jpeg');
+          formData.append('imageBase64', base64Data);
+
+          const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: formData
+          });
+          const result = await response.json();
+          if (result.status === 'success') {
+            status.innerText = "上傳成功！";
+            await fetchData();
+            setTimeout(() => status.innerText = "", 1500);
+          } else {
+            status.innerText = "上傳失敗";
+          }
+        } catch (err) {
+          status.innerText = "上傳失敗";
+          console.error(err);
+        }
+      };
+      reader.readAsDataURL(file);
     }
 
     function setupDropZone() {
       const dropZone = document.getElementById('dropZone');
-      const modalDropZone = document.getElementById('modalDropZone');
-
-      ['dragenter', 'dragover'].forEach(eventName => {
-        dropZone.addEventListener(eventName, (e) => {
-          e.preventDefault();
-          dropZone.classList.add('dragover');
-        }, false);
-      });
-
-      ['dragleave', 'drop'].forEach(eventName => {
-        dropZone.addEventListener(eventName, (e) => {
-          e.preventDefault();
-          dropZone.classList.remove('dragover');
-        }, false);
-      });
-
-      dropZone.addEventListener('drop', (e) => {
-        const files = e.dataTransfer.files;
-        handleFiles(files);
-      });
-
       document.addEventListener('paste', (e) => {
-        if (!isAdmin || !currentCategory || currentCategory === 'schedule') return;
-        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+        if (!isAdmin || !currentCategory || currentCategory === 'cart' || currentCategory === 'schedule') return;
+        if (document.activeElement.isContentEditable) return;
+        const items = e.clipboardData?.items;
+        if (!items) return;
         for (let item of items) {
-          if (item.type.indexOf('image') === 0) {
-            const file = item.getAsFile();
-            if (file) handleFiles([file]);
+          if (item.type.includes('image')) {
+            handleImageFile(item.getAsFile());
+            break;
           }
         }
       });
-    }
 
-    function handleFiles(files) {
-      if (!isAdmin || !currentCategory || currentCategory === 'schedule') return;
-      const status = document.getElementById('status');
-      status.innerText = `正在上傳 ${files.length} 張圖片...`;
-
-      Array.from(files).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = async function(e) {
-          const base64Data = e.target.result;
-          const newItem = {
-            id: Date.now().toString() + Math.floor(Math.random() * 1000),
-            category: currentCategory,
-            url: base64Data,
-            caption: '新商品',
-            price: '99',
-            quantity: '數量: 1',
-            interact: '無互動',
-            note: '',
-            real_img: '一般',
-            timestamp: Date.now()
-          };
-
-          try {
-            const response = await fetch(SCRIPT_URL, {
-              method: 'POST',
-              body: JSON.stringify({ action: 'addItem', item: newItem })
-            });
-            const result = await response.json();
-            if (result.status === 'success') {
-              status.innerText = "上傳成功！";
-              allData.push(newItem);
-              renderGallery();
-            } else {
-              status.innerText = "上傳失敗";
-            }
-          } catch (err) {
-            console.error(err);
-            status.innerText = "上傳發生錯誤";
-          }
-          setTimeout(() => { status.innerText = ""; }, 1500);
-        };
-        reader.readAsDataURL(file);
+      dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+      dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (isAdmin && e.dataTransfer.files.length > 0) {
+          handleImageFile(e.dataTransfer.files[0]);
+        }
       });
     }
   </script>
