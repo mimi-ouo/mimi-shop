@@ -884,8 +884,8 @@
       color: #ff3366;
       border: 1px solid #ff3366;
       border-radius: 4px;
-      padding: 3px 8px;
-      font-size: 10px;
+      padding: 3px 5px;
+      font-size: 9px;
       font-weight: bold;
       cursor: pointer;
       outline: none;
@@ -894,7 +894,7 @@
       background-color: #1e1e1e !important;
       color: #ff3366 !important;
       border: 1px solid #ff3366 !important;
-      animation: bounceTag 0.5s infinite alternate ease-in-out;
+      animation: bounceTag 1s infinite alternate ease-in-out;
     }
 
     /* 訪客端 HOT 標籤樣式 (帶微動畫 - 改為樣式三) */
@@ -2207,15 +2207,29 @@
       
       filtered.sort(compareItems);
 
-      const hotList = filtered.filter(item => item.real_img === 'HOT');
-      const normalList = filtered.filter(item => item.real_img !== 'HOT');
-      const hasHot = hotList.length > 0;
+      // 智能分組：將「暫售」與「已售出」歸入已進入交易流程區塊
+      const inProgressList = filtered.filter(item => {
+        const q = String(item.quantity || '');
+        return q.includes('暫售') || q.includes('已售出');
+      });
+      const availableList = filtered.filter(item => {
+        const q = String(item.quantity || '');
+        return !q.includes('暫售') && !q.includes('已售出');
+      });
 
-      const renderItemCards = (itemsToRender, isHotSection = false) => {
-        if (isHotSection && itemsToRender.length > 0) {
+      const hotList = availableList.filter(item => item.real_img === 'HOT');
+      const normalList = availableList.filter(item => item.real_img !== 'HOT');
+
+      const hasHot = hotList.length > 0;
+      const hasNormal = normalList.length > 0;
+      const hasInProgress = inProgressList.length > 0;
+      const hasMultipleSections = (hasHot ? 1 : 0) + (hasNormal ? 1 : 0) + (hasInProgress ? 1 : 0) > 1;
+
+      const renderItemCards = (itemsToRender, sectionTitle = null) => {
+        if (sectionTitle && itemsToRender.length > 0) {
           const titleDiv = document.createElement('div');
           titleDiv.className = 'section-block-title';
-          titleDiv.innerHTML = '🔥 HOT 熱門推薦專區';
+          titleDiv.innerHTML = sectionTitle;
           gallery.appendChild(titleDiv);
         }
 
@@ -2516,21 +2530,28 @@
         });
       };
 
+      // 依序渲染各分區 (HOT、一般商品、已進入交易流程)
       if (hasHot) {
-        renderItemCards(hotList, true);
+        renderItemCards(hotList, '<span style="-webkit-text-fill-color: initial;">🔥</span> HOT 熱門推薦');
+      }
 
-        const divider = document.createElement('hr');
-        divider.className = 'section-divider-line';
-        gallery.appendChild(divider);
+      if (hasNormal) {
+        // 修改處：只有當有 HOT 區塊時，才在一般商品上方加上分隔線
+        if (hasHot) {
+          const divider = document.createElement('hr');
+          divider.className = 'section-divider-line';
+          gallery.appendChild(divider);
+        }
+        renderItemCards(normalList, null);
+      }
 
-        const normalTitle = document.createElement('div');
-        normalTitle.className = 'section-block-title';
-        normalTitle.innerHTML = '✨ 一般商品專區';
-        gallery.appendChild(normalTitle);
-
-        renderItemCards(normalList, false);
-      } else {
-        renderItemCards(filtered, false);
+      if (hasInProgress) {
+        if (hasHot || hasNormal) {
+          const divider = document.createElement('hr');
+          divider.className = 'section-divider-line';
+          gallery.appendChild(divider);
+        }
+        renderItemCards(inProgressList, '<span style="-webkit-text-fill-color: initial;">🚚..</span>已進入交易流程');
       }
     }
 
