@@ -103,7 +103,7 @@
     /* Q彈跳動微動畫 (樣式三) */
     @keyframes bounceTag {
       0% { transform: translateY(0); }
-      100% { transform: translateY(-4px); box-shadow: 0 4px 10px rgba(255, 51, 102, 0.4); }
+      100% { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(255, 51, 102, 0.4); }
     }
 
     .rotating-star {
@@ -894,7 +894,7 @@
       background-color: #1e1e1e !important;
       color: #ff3366 !important;
       border: 1px solid #ff3366 !important;
-      animation: bounceTag 1s infinite alternate ease-in-out;
+      animation: bounceTag 0.5s infinite alternate ease-in-out;
     }
 
     /* 訪客端 HOT 標籤樣式 (帶微動畫 - 改為樣式三) */
@@ -907,9 +907,9 @@
       border: 1px solid #ff3366;
       color: #ff3366;
       font-weight: bold;
-      padding: 3px 8px;
+      padding: 3px 5px;
       border-radius: 4px;
-      font-size: 10px;
+      font-size: 9px;
       animation: bounceTag 1s infinite alternate ease-in-out;
     }
 
@@ -939,7 +939,7 @@
 
     .cart-qty-select {
       position: absolute;
-      top: 3px;
+      top: 1px;
       right: 3px;
       z-index: 10;
       background-color: rgba(30, 30, 30, 0.95);
