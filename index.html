@@ -921,7 +921,7 @@
       animation: bounceTag 1.2s ease-in-out infinite;
     }
 
-    /* 上下分區標題與分隔線樣式 */
+    /* 上下分區標題與分隔線樣式 (無漸層設定) */
     .section-block-title {
       grid-column: 1 / -1;
       font-size: 16px;
@@ -930,10 +930,18 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      background: linear-gradient(45deg, #ff3366, #ff9933, #ffd700);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 2px 8px rgba(255, 51, 102, 0.2);
+    }
+
+    .section-block-title.hot-title {
+      color: #ff5533; /* HOT區橘紅色 */
+    }
+
+    .section-block-title.normal-title {
+      color: #ffffff; /* 商品區白色 */
+    }
+
+    .section-block-title.transaction-title {
+      color: #999999; /* 第三區灰色 */
     }
 
     .section-divider-line {
@@ -1401,39 +1409,39 @@
       <div class="dropdown" id="dropdown-furniture">
         <button class="dropdown-toggle" data-dropdown="dropdown-furniture" id="furnitureToggleBtn">🏠 家具 ▾</button>
         <div class="dropdown-menu">
-          <button class="dropdown-item tab-btn" data-category="general_new"><span style="color: initial;">✨</span> 本周新品</button>
-          <button class="dropdown-item tab-btn" data-category="general_misc"><span style="color: initial;">🖼️</span> 家具擺設</button>
-          <button class="dropdown-item tab-btn" data-category="general_consumable"><span style="color: initial;">🧪</span> 消耗品</button>
+          <button class="dropdown-item tab-btn" data-category="general_new">✨ 本周新品</button>
+          <button class="dropdown-item tab-btn" data-category="general_misc">🖼️ 家具擺設</button>
+          <button class="dropdown-item tab-btn" data-category="general_consumable">🧪 消耗品</button>
         </div>
       </div>
 
       <div class="dropdown" id="dropdown-animal">
         <button class="dropdown-toggle" data-dropdown="dropdown-animal">🐾 小動物 ▾</button>
         <div class="dropdown-menu">
-          <button class="dropdown-item tab-btn" data-category="memes"><span style="color: initial;">🧸</span> 熊熊</button>
-          <button class="dropdown-item tab-btn" data-category="animal_other"><span style="color: initial;">🐧</span> 其他</button>
+          <button class="dropdown-item tab-btn" data-category="memes">🧸 熊熊</button>
+          <button class="dropdown-item tab-btn" data-category="animal_other">🐧 其他</button>
         </div>
       </div>
 
-      <button class="tab-btn" data-category="pot"><span style="color: initial;">🪴</span> 花盆</button>
+      <button class="tab-btn" data-category="pot">🪴 花盆</button>
       
       <div class="dropdown" id="dropdown-ring">
         <button class="dropdown-toggle" data-dropdown="dropdown-ring">💍 戒指 ▾</button>
         <div class="dropdown-menu">
-          <button class="dropdown-item tab-btn" data-category="ring_male"><span style="color: initial;">👦</span> 限男</button>
-          <button class="dropdown-item tab-btn" data-category="ring_female"><span style="color: initial;">👧</span> 限女</button>
+          <button class="dropdown-item tab-btn" data-category="ring_male">👦 限男</button>
+          <button class="dropdown-item tab-btn" data-category="ring_female">👧 限女</button>
         </div>
       </div>
 
       <div class="dropdown" id="dropdown-crop">
-        <button class="dropdown-toggle" data-dropdown="dropdown-crop"><span style="color: initial;">🌱</span> 作物 ▾</button>
+        <button class="dropdown-toggle" data-dropdown="dropdown-crop">🌱 作物 ▾</button>
         <div class="dropdown-menu">
-          <button class="dropdown-item tab-btn" data-category="crop_male"><span style="color: initial;">👦</span> 限男</button>
-          <button class="dropdown-item tab-btn" data-category="crop_female"><span style="color: initial;">👧</span> 限女</button>
+          <button class="dropdown-item tab-btn" data-category="crop_male">👦 限男</button>
+          <button class="dropdown-item tab-btn" data-category="crop_female">👧 限女</button>
         </div>
       </div>
 
-      <button class="tab-btn" data-category="gift"><span style="color: initial;">🎁</span> 甩賣區</button>
+      <button class="tab-btn" data-category="gift">🎁 甩賣區</button>
       <button class="tab-btn" data-category="schedule">📅 米米班表</button>
     </div>
 
@@ -2531,8 +2539,8 @@
 
       if (hasHot) {
         const titleDiv = document.createElement('div');
-        titleDiv.className = 'section-block-title';
-        titleDiv.innerHTML = '<span style="-webkit-text-fill-color: initial;">🔥</span> HOT 熱門';
+        titleDiv.className = 'section-block-title hot-title';
+        titleDiv.innerHTML = '🔥 HOT 熱門';
         gallery.appendChild(titleDiv);
         renderItemCards(hotList);
         sectionCount++;
@@ -2545,7 +2553,7 @@
           gallery.appendChild(divider);
         }
         const normalTitle = document.createElement('div');
-        normalTitle.className = 'section-block-title';
+        normalTitle.className = 'section-block-title normal-title';
         normalTitle.innerHTML = currentCategoryDisplayName;
         gallery.appendChild(normalTitle);
         renderItemCards(normalList);
@@ -2559,8 +2567,8 @@
           gallery.appendChild(divider);
         }
         const transactionTitle = document.createElement('div');
-        transactionTitle.className = 'section-block-title';
-        transactionTitle.innerHTML = '<span style="-webkit-text-fill-color: initial;">🚚..</span> 已進入交易流程';
+        transactionTitle.className = 'section-block-title transaction-title';
+        transactionTitle.innerHTML = '🚚.. 已進入交易流程';
         gallery.appendChild(transactionTitle);
         renderItemCards(transactionList);
         sectionCount++;
