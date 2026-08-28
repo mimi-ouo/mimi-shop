@@ -874,7 +874,7 @@
       accent-color: var(--cart-color);
     }
 
-    /* 右下角 HOT 選單樣式 (帶微動畫) */
+    /* 右下角 HOT 選單樣式 (黑底 + 粉橘色漸層邊框與文字) */
     .hot-select {
       position: absolute;
       bottom: 3px;
@@ -882,7 +882,7 @@
       z-index: 10;
       background-color: rgba(30, 30, 30, 0.95);
       color: #ffd700;
-      border: 1px solid #ff9933;
+      border: 1px solid #444444;
       border-radius: 3px;
       padding: 1px 4px;
       font-size: 9px;
@@ -891,25 +891,27 @@
       outline: none;
     }
     .hot-select.is-hot, .hot-select option[value="HOT"] {
-      background-color: #ff3366 !important;
-      color: #ffffff !important;
-      border-color: #ff9933 !important;
+      background: linear-gradient(135deg, #2b2b2b, #121212) !important;
+      color: #ff7744 !important;
+      border-color: #ff5533 !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
       animation: bounceTag 1.2s ease-in-out infinite;
     }
 
-    /* 訪客端 HOT 標籤樣式 (帶微動畫) */
+    /* 訪客端 HOT 標籤樣式 (黑底保持不變，邊框與字體改為粉橘色漸層風格) */
     .hot-badge-tag {
       position: absolute;
       bottom: 3px;
       right: 3px;
       z-index: 10;
-      background: linear-gradient(135deg, #ff3366, #ff9933);
-      color: #fff;
+      background: linear-gradient(135deg, #2b2b2b, #121212);
+      color: #ff7744;
       font-size: 9px;
       font-weight: bold;
       padding: 2px 6px;
       border-radius: 4px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      border: 1px solid #ff5533;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
       animation: bounceTag 1.2s ease-in-out infinite;
     }
 
@@ -1259,18 +1261,19 @@
       flex-wrap: wrap;
     }
 
+    /* 調整相簿頁數圓圈大小為合適的正圓形 */
     .modal-dot {
-      width: 100px;
+      width: 10px;
       height: 10px;
       background-color: #444;
       border-radius: 50%;
       cursor: pointer;
       border: 1px solid var(--border-color);
-      transition: background-color 0.2s, transform 0.2s;
+      transition: background-color 0.2s, transform 0.2s, width 0.2s;
     }
     .modal-dot.active {
       background-color: #ffffff;
-      transform: scale(1.2);
+      transform: scale(1.3);
     }
 
     .modal-footer-action {
@@ -2523,7 +2526,7 @@
       if (hasHot) {
         const titleDiv = document.createElement('div');
         titleDiv.className = 'section-block-title';
-        titleDiv.innerHTML = '🔥 HOT 熱門推薦專區';
+        titleDiv.innerHTML = '<span style="-webkit-text-fill-color: initial;">🔥</span> HOT 熱門推薦';
         gallery.appendChild(titleDiv);
         renderItemCards(hotList);
         sectionCount++;
@@ -2537,7 +2540,7 @@
         }
         const normalTitle = document.createElement('div');
         normalTitle.className = 'section-block-title';
-        normalTitle.innerHTML = '✨ 一般商品專區';
+        normalTitle.innerHTML = '✨';
         gallery.appendChild(normalTitle);
         renderItemCards(normalList);
         sectionCount++;
@@ -2551,7 +2554,7 @@
         }
         const transactionTitle = document.createElement('div');
         transactionTitle.className = 'section-block-title';
-        transactionTitle.innerHTML = '🤝 已進入交易流程';
+        transactionTitle.innerHTML = '<span style="-webkit-text-fill-color: initial;">🚚..</span> 已進入交易流程';
         gallery.appendChild(transactionTitle);
         renderItemCards(transactionList);
         sectionCount++;
