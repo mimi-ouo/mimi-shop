@@ -244,7 +244,6 @@
       flex-wrap: wrap;
     }
 
-    /* Discord 風格按鈕優化 */
     .discord-badge {
       display: inline-flex;
       align-items: center;
@@ -271,7 +270,6 @@
       transform: translateY(-1px);
     }
 
-    /* 結合網站風格的 Tally 表單按鈕/徽章樣式 */
    .tally-badge {
       display: inline-flex;
       align-items: center;
@@ -317,18 +315,15 @@
       transition: opacity 0.3s ease, padding 0.3s ease;
     }
 
-    /* 電腦端懸浮位置：貼在商品區右側外側 + 上下凍結中間垂直置中 */
     @media (min-width: 769px) {
       .side-tabs-panel {
         top: calc(120px + (100vh - 120px - 60px) / 2);
         transform: translateY(-50%);
-        /* 改為外側定位：主視窗寬度 1200px (一半 600px) + 間距 15px */
         left: calc(50% + 615px);
         right: auto;
       }
     }
 
-    /* 手機端維持不變 */
     @media (max-width: 768px) {
       .side-tabs-panel {
         top: 10px;
@@ -619,7 +614,7 @@
       gap: 8px;
       align-items: start;
       margin-top: 10px;
-      margin-bottom: 50px; /* 留出底部在線人數的空間 */
+      margin-bottom: 50px;
     }
 
     @media (max-width: 768px) {
@@ -768,6 +763,12 @@
       transform: translateY(0);
     }
 
+    /* HOT 商品高質感邊框與陰影樣式 */
+    .img-card.is-hot {
+      border: 2px solid #ff3366;
+      box-shadow: 0 0 12px rgba(255, 51, 102, 0.4);
+    }
+
     .img-wrapper {
       width: 140px;
       height: 140px;
@@ -871,6 +872,67 @@
       height: 16px;
       cursor: pointer;
       accent-color: var(--cart-color);
+    }
+
+    /* 右下角 HOT 選單樣式 */
+    .hot-select {
+      position: absolute;
+      bottom: 3px;
+      right: 3px;
+      z-index: 10;
+      background-color: rgba(30, 30, 30, 0.95);
+      color: #ffd700;
+      border: 1px solid #ff9933;
+      border-radius: 3px;
+      padding: 1px 4px;
+      font-size: 9px;
+      font-weight: bold;
+      cursor: pointer;
+      outline: none;
+    }
+    .hot-select.is-hot, .hot-select option[value="HOT"] {
+      background-color: #ff3366 !important;
+      color: #ffffff !important;
+      border-color: #ff9933 !important;
+    }
+
+    /* 訪客端 HOT 標籤樣式 */
+    .hot-badge-tag {
+      position: absolute;
+      bottom: 3px;
+      right: 3px;
+      z-index: 10;
+      background: linear-gradient(135deg, #ff3366, #ff9933);
+      color: #fff;
+      font-size: 9px;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    /* 上下分區標題與分隔線樣式 */
+    .section-block-title {
+      grid-column: 1 / -1;
+      font-size: 16px;
+      font-weight: 800;
+      margin: 10px 0 5px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(45deg, #ff3366, #ff9933, #ffd700);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 8px rgba(255, 51, 102, 0.2);
+    }
+
+    .section-divider-line {
+      grid-column: 1 / -1;
+      border: none;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #ff3366, #ff9933, transparent);
+      margin: 15px 0;
+      width: 100%;
     }
 
     .cart-qty-select {
@@ -1388,7 +1450,6 @@
               </div>
               <div class="discord-wrapper">
                 <div class="discord-container">
-                  <!-- Discord 按鈕 -->
                   <a class="discord-badge" href="https://discord.com/users/764264607543459870" target="_blank" rel="noopener noreferrer" title="discord:mimi_ouo">
                     <svg class="discord-icon" viewBox="0 0 127.14 96.36">
                       <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0, -3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c2.64-27.38-4.51-51.11-20.14-72.13ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74c6.51,0,11.66,5.77,11.44,12.74C53.89,60,48.81,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74c6.41,0,11.62,5.77,11.43,12.74C96.12,60,91,65.69,84.69,65.69Z"/>
@@ -1396,7 +1457,6 @@
                     <span>聯絡米米</span>
                   </a>
 
-                  <!-- 整合的 Tally 填寫表單按鈕（已完美貼合網頁深色漸層風格） -->
                   <button class="tally-badge" data-tally-open="q48xO2" data-tally-align-left="1" data-tally-hide-title="1" data-tally-overlay="1" data-tally-emoji-text="✉️" data-tally-emoji-animation="heart-beat">
                     <span>💬 留言給米米</span>
                   </button>
@@ -1456,7 +1516,6 @@
 
   <div class="gallery" id="gallery"></div>
 
-  <!-- 即時在線人數顯示區塊 (已移至底部固定) -->
   <div class="online-counter-wrapper">
     <div class="counter-box">
       <span>🔥 目前即時在線人數：</span>
@@ -1512,7 +1571,6 @@
   </div>
 
   <script>
-    // ================= 1. Firebase 即時在線人數初始化與監聽 =================
     const firebaseConfig = {
       apiKey: "AIzaSyDPapDe0cUgAhVfixTC50x9VWGtxteo4wQ",
       authDomain: "mimi-ouo-mimishop.firebaseapp.com",
@@ -1548,7 +1606,6 @@
       }
     });
 
-    // ================= 2. 原網站核心邏輯 =================
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxVrP__g-bnoVRQQrJkKLlMZDhSbFeUuTMyw6-zVRhtYkkSedoVbJXKUwN0bUyc4vs3rQ/exec";
 
     let currentCategory = ''; 
@@ -1567,7 +1624,6 @@
 
     const ADMIN_PASSWORD = "1313765591181";
 
-    /* 購物車 localStorage 操作函式 */
     function loadCartFromStorage() {
       try {
         const stored = localStorage.getItem('userCartItems');
@@ -1598,6 +1654,7 @@
       setupBackToTop();
       setupClearCartBtn();
       setupScheduleEvents();
+      setupDropZone();
       
       fetchData(true); 
 
@@ -1691,7 +1748,6 @@
       });
     }
 
-    /* 展開側邊選單函數 */
     function toggleSidePanel() {
       const panel = document.getElementById('sideTabsPanel');
       const toggleBtn = document.getElementById('collapseToggleBtn');
@@ -1878,7 +1934,6 @@
             renderGallery();
           }
 
-          // 只有手機端點擊分頁後才會收合選單
           if (window.innerWidth <= 768) {
             const sideTabsPanel = document.getElementById('sideTabsPanel');
             const collapseToggleBtn = document.getElementById('collapseToggleBtn');
@@ -2150,267 +2205,331 @@
       
       filtered.sort(compareItems);
 
-      filtered.forEach((item) => {
-        const card = document.createElement('div');
-        card.className = 'img-card';
-        card.id = `card-${item.id}`;
-        card.setAttribute('data-id', item.id);
+      const hotList = filtered.filter(item => item.real_img === 'HOT');
+      const normalList = filtered.filter(item => item.real_img !== 'HOT');
+      const hasHot = hotList.length > 0;
 
-        const currentQty = item.quantity || '數量: 1';
-        const isPending = String(currentQty).includes('暫售');
-        const isSold = String(currentQty).includes('已售出');
-        
-        let statusClass = '';
-        if (isPending) statusClass = 'is-pending';
-        else if (isSold) statusClass = 'is-sold';
+      const renderItemCards = (itemsToRender, isHotSection = false) => {
+        if (isHotSection && itemsToRender.length > 0) {
+          const titleDiv = document.createElement('div');
+          titleDiv.className = 'section-block-title';
+          titleDiv.innerHTML = '🔥 HOT 熱門推薦專區';
+          gallery.appendChild(titleDiv);
+        }
 
-        let badgeHTML = '';
-        const isChecked = cartItems.has(String(item.id));
-        const selectedQty = cartItems.get(String(item.id)) || '數量: 1';
+        itemsToRender.forEach((item) => {
+          const card = document.createElement('div');
+          const isHotItem = (item.real_img === 'HOT');
+          card.className = `img-card ${isHotItem ? 'is-hot' : ''}`;
+          card.id = `card-${item.id}`;
+          card.setAttribute('data-id', item.id);
 
-        if (isAdmin) {
-          let topRightHTML = `<select class="status-select ${statusClass}" id="badge-${item.id}">
-            <option value="數量: 1" ${currentQty === '數量: 1' ? 'selected' : ''}>數量: 1</option>
-            <option value="數量: 2" ${currentQty === '數量: 2' ? 'selected' : ''}>數量: 2</option>
-            <option value="數量: 3" ${currentQty === '數量: 3' ? 'selected' : ''}>數量: 3</option>
-            <option value="數量: 4" ${currentQty === '數量: 4' ? 'selected' : ''}>數量: 4</option>
-            <option value="數量: 5" ${currentQty === '數量: 5' ? 'selected' : ''}>數量: 5</option>
-            <option value="數量: 6" ${currentQty === '數量: 6' ? 'selected' : ''}>數量: 6</option>
-            <option value="數量: 7" ${currentQty === '數量: 7' ? 'selected' : ''}>數量: 7</option>
-            <option value="數量: 8" ${currentQty === '數量: 8' ? 'selected' : ''}>數量: 8</option>
-            <option value="數量: 9" ${currentQty === '數量: 9' ? 'selected' : ''}>數量: 9</option>
-            <option value="數量: 10" ${currentQty === '數量: 10' ? 'selected' : ''}>數量: 10</option>
-            <option value="大量" ${currentQty === '大量' ? 'selected' : ''}>大量</option>
-            <option value="暫售，待交易" ${isPending ? 'selected' : ''}>暫售，待交易</option>
-            <option value="已售出" ${isSold ? 'selected' : ''}>已售出</option>
-          </select>`;
+          const currentQty = item.quantity || '數量: 1';
+          const isPending = String(currentQty).includes('暫售');
+          const isSold = String(currentQty).includes('已售出');
+          
+          let statusClass = '';
+          if (isPending) statusClass = 'is-pending';
+          else if (isSold) statusClass = 'is-sold';
 
-          if (isChecked) {
-            topRightHTML = `
-              <select class="cart-qty-select" id="cart-qty-${item.id}">
-                ${generateVisitorQtyOptions(currentQty, selectedQty)}
+          let badgeHTML = '';
+          const isChecked = cartItems.has(String(item.id));
+          const selectedQty = cartItems.get(String(item.id)) || '數量: 1';
+
+          let hotSelectHTML = '';
+          if (isAdmin) {
+            hotSelectHTML = `
+              <select class="hot-select ${isHotItem ? 'is-hot' : ''}" id="hot-sel-${item.id}">
+                <option value="一般" ${!isHotItem ? 'selected' : ''}>一般</option>
+                <option value="HOT" ${isHotItem ? 'selected' : ''}>🔥 HOT</option>
               </select>
+            `;
+          } else if (isHotItem) {
+            hotSelectHTML = `<span class="hot-badge-tag">🔥 HOT</span>`;
+          }
+
+          if (isAdmin) {
+            let topRightHTML = `<select class="status-select ${statusClass}" id="badge-${item.id}">
+              <option value="數量: 1" ${currentQty === '數量: 1' ? 'selected' : ''}>數量: 1</option>
+              <option value="數量: 2" ${currentQty === '數量: 2' ? 'selected' : ''}>數量: 2</option>
+              <option value="數量: 3" ${currentQty === '數量: 3' ? 'selected' : ''}>數量: 3</option>
+              <option value="數量: 4" ${currentQty === '數量: 4' ? 'selected' : ''}>數量: 4</option>
+              <option value="數量: 5" ${currentQty === '數量: 5' ? 'selected' : ''}>數量: 5</option>
+              <option value="數量: 6" ${currentQty === '數量: 6' ? 'selected' : ''}>數量: 6</option>
+              <option value="數量: 7" ${currentQty === '數量: 7' ? 'selected' : ''}>數量: 7</option>
+              <option value="數量: 8" ${currentQty === '數量: 8' ? 'selected' : ''}>數量: 8</option>
+              <option value="數量: 9" ${currentQty === '數量: 9' ? 'selected' : ''}>數量: 9</option>
+              <option value="數量: 10" ${currentQty === '數量: 10' ? 'selected' : ''}>數量: 10</option>
+              <option value="大量" ${currentQty === '大量' ? 'selected' : ''}>大量</option>
+              <option value="暫售，待交易" ${isPending ? 'selected' : ''}>暫售，待交易</option>
+              <option value="已售出" ${isSold ? 'selected' : ''}>已售出</option>
+            </select>`;
+
+            if (isChecked) {
+              topRightHTML = `
+                <select class="cart-qty-select" id="cart-qty-${item.id}">
+                  ${generateVisitorQtyOptions(currentQty, selectedQty)}
+                </select>
+              `;
+            }
+
+            badgeHTML = `
+              <input type="checkbox" class="cart-checkbox" id="cart-chk-${item.id}" ${isChecked ? 'checked' : ''} title="加入購物車" />
+              ${topRightHTML}
+              ${hotSelectHTML}
+            `;
+          } else {
+            let topRightHTML = `<span class="status-badge ${statusClass}" style="right:3px; left:auto;" id="badge-${item.id}">${currentQty}</span>`;
+            if (isChecked) {
+              topRightHTML = `
+                <select class="cart-qty-select" id="cart-qty-${item.id}">
+                  ${generateVisitorQtyOptions(currentQty, selectedQty)}
+                </select>
+              `;
+            }
+
+            let checkboxHTML = (!isSold) ? `<input type="checkbox" class="cart-checkbox" id="cart-chk-${item.id}" ${isChecked ? 'checked' : ''} title="加入購物車" />` : '';
+
+            badgeHTML = `
+              ${checkboxHTML}
+              ${topRightHTML}
+              ${hotSelectHTML}
             `;
           }
 
-          badgeHTML = `
-            <input type="checkbox" class="cart-checkbox" id="cart-chk-${item.id}" ${isChecked ? 'checked' : ''} title="加入購物車" />
-            ${topRightHTML}
-          `;
-        } else {
-          let topRightHTML = `<span class="status-badge ${statusClass}" style="right:3px; left:auto;" id="badge-${item.id}">${currentQty}</span>`;
-          if (isChecked) {
-            topRightHTML = `
-              <select class="cart-qty-select" id="cart-qty-${item.id}">
-                ${generateVisitorQtyOptions(currentQty, selectedQty)}
-              </select>
-            `;
-          }
+          const fullCaption = item.caption || '';
+          let priceVal = item.price || '';
+          let textVal = fullCaption;
+          let interactVal = item.interact || '無互動';
 
-          let checkboxHTML = (!isSold) ? `<input type="checkbox" class="cart-checkbox" id="cart-chk-${item.id}" ${isChecked ? 'checked' : ''} title="加入購物車" />` : '';
-
-          badgeHTML = `
-            ${checkboxHTML}
-            ${topRightHTML}
-          `;
-        }
-
-        const fullCaption = item.caption || '';
-        let priceVal = item.price || '';
-        let textVal = fullCaption;
-        let interactVal = item.interact || '無互動';
-
-        let moveSelectHTML = '';
-        if (isAdmin && (currentCategory === 'general_new' || currentCategory === 'general_misc' || currentCategory === 'general_consumable')) {
-          moveSelectHTML = `
-            <div class="interact-col">
-              <select class="move-category-select" id="move-${item.id}">
-                <option value="" disabled selected>📦 移動到...</option>
-                <option value="general_new">✨ 本月新品</option>
-                <option value="general_misc">📦 哩哩摳摳</option>
-                <option value="general_consumable">🧪 消耗品</option>
-                <option value="memes">🧸 熊熊</option>
-                <option value="animal_other">📦 其他 (小動物)</option>
-                <option value="pot">🪴 花盆</option>
-                <option value="ring_male">💍 戒指 (限男)</option>
-                <option value="ring_female">💍 戒指 (限女)</option>
-                <option value="crop_male">🌱 作物 (限男)</option>
-                <option value="crop_female">🌱 作物 (限女)</option>
-                <option value="gift">🎁 贈品區</option>
-              </select>
-            </div>
-          `;
-        }
-
-        const showInteractSelect = (item.category === 'general_new' || item.category === 'general_misc' || item.category === 'memes' || item.category === 'animal_other' || item.category === 'gift');
-        
-        let interactHTML = '';
-        if (showInteractSelect) {
-          interactHTML = `
-            <div class="interact-col">
-              <select class="interact-select ${interactVal === '有互動' ? 'has-interact' : 'no-interact'}" id="interact-${item.id}" ${!isAdmin ? 'disabled' : ''}>
-                <option value="有互動" ${interactVal === '有互動' ? 'selected' : ''}>有互動</option>
-                <option value="無互動" ${interactVal === '無互動' ? 'selected' : ''}>無互動</option>
-              </select>
-            </div>
-          `;
-        }
-
-        let priceColStyle = (!isAdmin && isSold) ? 'display: none;' : '';
-
-        card.innerHTML = `
-          <button class="delete-btn" title="刪除商品">✕</button>
-          <div class="img-wrapper">
-            <span class="loading-text">加載中</span>
-            ${badgeHTML}
-            <img src="${item.url}" alt="image" loading="lazy" decoding="async" />
-          </div>
-          <div class="img-info">
-            <div class="caption-container">
-              <div class="caption-row-top">
-                <div class="price-col" style="${priceColStyle}">
-                  <span class="currency-symbol">$</span>
-                  <span class="editable-price" contenteditable="${isAdmin}" id="price-${item.id}" maxlength="3">${priceVal}</span>
-                </div>
-                <div class="desc-col">
-                  <span class="editable-text" contenteditable="${isAdmin}" id="text-${item.id}">${textVal}</span>
-                </div>
+          let moveSelectHTML = '';
+          if (isAdmin && currentCategory && currentCategory !== 'cart' && currentCategory !== 'schedule') {
+            moveSelectHTML = `
+              <div class="interact-col">
+                <select class="move-category-select" id="move-${item.id}">
+                  <option value="" disabled selected>📦 移動到...</option>
+                  <option value="general_new">✨ 本月新品</option>
+                  <option value="general_misc">📦 哩哩摳摳</option>
+                  <option value="general_consumable">🧪 消耗品</option>
+                  <option value="memes">🧸 熊熊</option>
+                  <option value="animal_other">📦 其他 (小動物)</option>
+                  <option value="pot">🪴 花盆</option>
+                  <option value="ring_male">💍 戒指 (限男)</option>
+                  <option value="ring_female">💍 戒指 (限女)</option>
+                  <option value="crop_male">🌱 作物 (限男)</option>
+                  <option value="crop_female">🌱 作物 (限女)</option>
+                  <option value="gift">🎁 贈品區</option>
+                </select>
               </div>
-              ${interactHTML}
-              ${moveSelectHTML}
+            `;
+          }
+
+          const showInteractSelect = (item.category === 'general_new' || item.category === 'general_misc' || item.category === 'memes' || item.category === 'animal_other' || item.category === 'gift');
+          
+          let interactHTML = '';
+          if (showInteractSelect) {
+            interactHTML = `
+              <div class="interact-col">
+                <select class="interact-select ${interactVal === '有互動' ? 'has-interact' : 'no-interact'}" id="interact-${item.id}" ${!isAdmin ? 'disabled' : ''}>
+                  <option value="有互動" ${interactVal === '有互動' ? 'selected' : ''}>有互動</option>
+                  <option value="無互動" ${interactVal === '無互動' ? 'selected' : ''}>無互動</option>
+                </select>
+              </div>
+            `;
+          }
+
+          let priceColStyle = (!isAdmin && isSold) ? 'display: none;' : '';
+
+          card.innerHTML = `
+            <button class="delete-btn" title="刪除商品">✕</button>
+            <div class="img-wrapper">
+              <span class="loading-text">加載中</span>
+              ${badgeHTML}
+              <img src="${item.url}" alt="image" loading="lazy" decoding="async" />
             </div>
-          </div>
-          <div class="admin-note-box">
-            <div class="admin-note-label">🔒 備註</div>
-            <span class="admin-note-text" contenteditable="${isAdmin}" id="note-${item.id}">${item.note || ''}</span>
-          </div>
-        `;
+            <div class="img-info">
+              <div class="caption-container">
+                <div class="caption-row-top">
+                  <div class="price-col" style="${priceColStyle}">
+                    <span class="currency-symbol">$</span>
+                    <span class="editable-price" contenteditable="${isAdmin}" id="price-${item.id}" maxlength="3">${priceVal}</span>
+                  </div>
+                  <div class="desc-col">
+                    <span class="editable-text" contenteditable="${isAdmin}" id="text-${item.id}">${textVal}</span>
+                  </div>
+                </div>
+                ${interactHTML}
+                ${moveSelectHTML}
+              </div>
+            </div>
+            <div class="admin-note-box">
+              <div class="admin-note-label">🔒 備註</div>
+              <span class="admin-note-text" contenteditable="${isAdmin}" id="note-${item.id}">${item.note || ''}</span>
+            </div>
+          `;
 
-        const imgEl = card.querySelector('img');
-        imgEl.addEventListener('load', () => {
-          card.classList.add('loaded');
-        });
-        if (imgEl.complete) {
-          card.classList.add('loaded');
-        }
-
-        card.addEventListener('click', (e) => {
-          if (e.target.closest('button') || e.target.closest('input') || e.target.closest('select') || e.target.closest('[contenteditable="true"]')) {
-            return;
+          const imgEl = card.querySelector('img');
+          imgEl.addEventListener('load', () => {
+            card.classList.add('loaded');
+          });
+          if (imgEl.complete) {
+            card.classList.add('loaded');
           }
-          openAlbumModal(item, 0);
-        });
 
-        if (isAdmin) {
-          card.querySelector('.delete-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (confirm('確定要刪除這個商品嗎？')) {
-              deleteItem(item.id);
+          card.addEventListener('click', (e) => {
+            if (e.target.closest('button') || e.target.closest('input') || e.target.closest('select') || e.target.closest('[contenteditable="true"]')) {
+              return;
             }
+            openAlbumModal(item, 0);
           });
 
-          const moveSel = card.querySelector(`#move-${item.id}`);
-          if (moveSel) {
-            moveSel.addEventListener('change', async () => {
-              const targetCat = moveSel.value;
-              if (!targetCat) return;
-              const status = document.getElementById('status');
-              status.innerText = "正在移動商品分類...";
-              
-              const success = await updateItem(item.id, 'category', targetCat);
-              if (success) {
-                item.category = targetCat;
-                status.innerText = "移動成功！";
-                renderGallery();
-              } else {
-                status.innerText = "移動失敗，請重試";
+          if (isAdmin) {
+            card.querySelector('.delete-btn').addEventListener('click', (e) => {
+              e.stopPropagation();
+              if (confirm('確定要刪除這個商品嗎？')) {
+                deleteItem(item.id);
               }
-              setTimeout(() => { status.innerText = ""; }, 1500);
             });
-          }
-        }
 
-        const chkEl = card.querySelector(`#cart-chk-${item.id}`);
-        if (chkEl) {
-          chkEl.addEventListener('change', () => {
-            const status = document.getElementById('status');
-            if (chkEl.checked) {
-              cartItems.set(String(item.id), '數量: 1');
-              status.innerText = "🛒 已加入購物車！";
-            } else {
-              cartItems.delete(String(item.id));
-              status.innerText = "❌ 已從購物車移除";
-            }
-            saveCartToStorage();
-            setTimeout(() => { status.innerText = ""; }, 1500);
-            updateCartButtonBadge();
-            renderGallery();
-            calculateTotal();
-          });
-        }
-
-        const qtySelEl = card.querySelector(`#cart-qty-${item.id}`);
-        if (qtySelEl) {
-          qtySelEl.addEventListener('change', () => {
-            cartItems.set(String(item.id), qtySelEl.value);
-            saveCartToStorage();
-            updateCartButtonBadge();
-            calculateTotal();
-          });
-        }
-
-        gallery.appendChild(card);
-
-        if (isAdmin) {
-          const selectEl = document.getElementById(`badge-${item.id}`);
-          if (selectEl) {
-            selectEl.addEventListener('change', async () => {
-              const newValue = selectEl.value;
-              const status = document.getElementById('status');
-              status.innerText = "正在儲存至雲端...";
-              
-              const success = await updateItem(item.id, 'quantity', newValue);
-              if (success) {
-                item.quantity = newValue;
-                selectEl.className = 'status-select';
-                if (newValue.includes('暫售')) {
-                  selectEl.classList.add('is-pending');
-                } else if (newValue.includes('已售出')) {
-                  selectEl.classList.add('is-sold');
+            const moveSel = card.querySelector(`#move-${item.id}`);
+            if (moveSel) {
+              moveSel.addEventListener('change', async () => {
+                const targetCat = moveSel.value;
+                if (!targetCat) return;
+                const status = document.getElementById('status');
+                status.innerText = "正在移動商品分類...";
+                
+                const success = await updateItem(item.id, 'category', targetCat);
+                if (success) {
+                  item.category = targetCat;
+                  status.innerText = "移動成功！";
+                  renderGallery();
+                } else {
+                  status.innerText = "移動失敗，請重試";
                 }
-                status.innerText = "修改成功！";
-                renderGallery(); 
-              } else {
-                status.innerText = "儲存失敗，請重試";
-              }
-              setTimeout(() => { status.innerText = ""; }, 1500);
-            });
+                setTimeout(() => { status.innerText = ""; }, 1500);
+              });
+            }
+
+            const hotSel = card.querySelector(`#hot-sel-${item.id}`);
+            if (hotSel) {
+              hotSel.addEventListener('change', async () => {
+                const newHotVal = hotSel.value;
+                const status = document.getElementById('status');
+                status.innerText = "正在更新 HOT 狀態...";
+                
+                const success = await updateItem(item.id, 'real_img', newHotVal);
+                if (success) {
+                  item.real_img = newHotVal;
+                  status.innerText = "更新成功！";
+                  renderGallery();
+                } else {
+                  status.innerText = "更新失敗，請重試";
+                }
+                setTimeout(() => { status.innerText = ""; }, 1500);
+              });
+            }
           }
 
-          const interactSelectEl = document.getElementById(`interact-${item.id}`);
-          if (interactSelectEl) {
-            interactSelectEl.addEventListener('change', async () => {
-              const newValue = interactSelectEl.value;
+          const chkEl = card.querySelector(`#cart-chk-${item.id}`);
+          if (chkEl) {
+            chkEl.addEventListener('change', () => {
               const status = document.getElementById('status');
-              status.innerText = "正在儲存至雲端...";
-              
-              const success = await updateItem(item.id, 'interact', newValue);
-              if (success) {
-                item.interact = newValue;
-                interactSelectEl.className = `interact-select ${newValue === '有互動' ? 'has-interact' : 'no-interact'}`;
-                status.innerText = "修改成功！";
+              if (chkEl.checked) {
+                cartItems.set(String(item.id), '數量: 1');
+                status.innerText = "🛒 已加入購物車！";
               } else {
-                status.innerText = "儲存失敗，請重試";
+                cartItems.delete(String(item.id));
+                status.innerText = "❌ 已從購物車移除";
               }
+              saveCartToStorage();
               setTimeout(() => { status.innerText = ""; }, 1500);
+              updateCartButtonBadge();
+              renderGallery();
+              calculateTotal();
             });
           }
 
-          bindEditable(item.id, 'caption', `text-${item.id}`);
-          bindEditable(item.id, 'price', `price-${item.id}`);
-          bindEditable(item.id, 'note', `note-${item.id}`);
-        }
-      });
+          const qtySelEl = card.querySelector(`#cart-qty-${item.id}`);
+          if (qtySelEl) {
+            qtySelEl.addEventListener('change', () => {
+              cartItems.set(String(item.id), qtySelEl.value);
+              saveCartToStorage();
+              updateCartButtonBadge();
+              calculateTotal();
+            });
+          }
+
+          gallery.appendChild(card);
+
+          if (isAdmin) {
+            const selectEl = document.getElementById(`badge-${item.id}`);
+            if (selectEl) {
+              selectEl.addEventListener('change', async () => {
+                const newValue = selectEl.value;
+                const status = document.getElementById('status');
+                status.innerText = "正在儲存至雲端...";
+                
+                const success = await updateItem(item.id, 'quantity', newValue);
+                if (success) {
+                  item.quantity = newValue;
+                  selectEl.className = 'status-select';
+                  if (newValue.includes('暫售')) {
+                    selectEl.classList.add('is-pending');
+                  } else if (newValue.includes('已售出')) {
+                    selectEl.classList.add('is-sold');
+                  }
+                  status.innerText = "修改成功！";
+                  renderGallery(); 
+                } else {
+                  status.innerText = "儲存失敗，請重試";
+                }
+                setTimeout(() => { status.innerText = ""; }, 1500);
+              });
+            }
+
+            const interactSelectEl = document.getElementById(`interact-${item.id}`);
+            if (interactSelectEl) {
+              interactSelectEl.addEventListener('change', async () => {
+                const newValue = interactSelectEl.value;
+                const status = document.getElementById('status');
+                status.innerText = "正在儲存至雲端...";
+                
+                const success = await updateItem(item.id, 'interact', newValue);
+                if (success) {
+                  item.interact = newValue;
+                  interactSelectEl.className = `interact-select ${newValue === '有互動' ? 'has-interact' : 'no-interact'}`;
+                  status.innerText = "修改成功！";
+                } else {
+                  status.innerText = "儲存失敗，請重試";
+                }
+                setTimeout(() => { status.innerText = ""; }, 1500);
+              });
+            }
+
+            bindEditable(item.id, 'caption', `text-${item.id}`);
+            bindEditable(item.id, 'price', `price-${item.id}`);
+            bindEditable(item.id, 'note', `note-${item.id}`);
+          }
+        });
+      };
+
+      if (hasHot) {
+        renderItemCards(hotList, true);
+
+        const divider = document.createElement('hr');
+        divider.className = 'section-divider-line';
+        gallery.appendChild(divider);
+
+        const normalTitle = document.createElement('div');
+        normalTitle.className = 'section-block-title';
+        normalTitle.innerHTML = '✨ 一般商品專區';
+        gallery.appendChild(normalTitle);
+
+        renderItemCards(normalList, false);
+      } else {
+        renderItemCards(filtered, false);
+      }
     }
 
     function bindEditable(id, field, elementId) {
@@ -2703,40 +2822,27 @@
 
     function handleImageFile(file) {
       if (!isAdmin || !file || !file.type.startsWith('image/')) return;
+      if (!currentCategory || currentCategory === 'cart' || currentCategory === 'schedule') {
+        alert('請先選擇一個商品分頁再上傳圖片！');
+        return;
+      }
       const status = document.getElementById('status');
       status.innerText = "正在縮小並上傳圖片...";
 
       const reader = new FileReader();
       reader.onload = async function(e) {
         try {
-          const compressedDataUrl = await compressImage(e.target.result, 400, 0.8);
+          const compressedDataUrl = await compressImage(e.target.result, 800, 0.85);
           const base64Data = compressedDataUrl.split(',')[1];
-          const defaultTime = String(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-          const tempId = 'temp_' + new Date().getTime();
-
-          const tempItem = {
-            id: tempId,
-            category: currentCategory,
-            url: compressedDataUrl,
-            caption: defaultTime,
-            price: '',
-            quantity: '數量: 1',
-            interact: '無互動',
-            note: '',
-            timestamp: new Date().getTime()
-          };
-          
-          allData.unshift(tempItem);
-          renderGallery();
 
           const formData = new URLSearchParams();
           formData.append('action', 'addItem');
           formData.append('category', currentCategory);
-          formData.append('caption', defaultTime);
-          formData.append('price', '');
+          formData.append('caption', '');
+          formData.append('price', '0');
           formData.append('quantity', '數量: 1');
           formData.append('interact', '無互動');
-          formData.append('note', '');
+          formData.append('real_img', '一般');
           formData.append('mimeType', 'image/jpeg');
           formData.append('imageBase64', base64Data);
 
@@ -2747,44 +2853,44 @@
           const result = await response.json();
           if (result.status === 'success') {
             status.innerText = "上傳成功！";
-            fetchData();
+            await fetchData();
             setTimeout(() => status.innerText = "", 1500);
+          } else {
+            status.innerText = "上傳失敗";
           }
         } catch (err) {
           status.innerText = "上傳失敗";
           console.error(err);
-          fetchData();
         }
       };
       reader.readAsDataURL(file);
     }
 
-    document.addEventListener('paste', (e) => {
-      const modal = document.getElementById('albumModal');
-      if (!isAdmin || document.activeElement.isContentEditable || (modal && modal.style.display === 'flex') || currentCategory === 'schedule' || !currentCategory) return;
-      
-      const items = e.clipboardData?.items;
-      if (!items) return;
-      for (let item of items) {
-        if (item.type.includes('image')) {
-          handleImageFile(item.getAsFile());
-          break;
+    function setupDropZone() {
+      const dropZone = document.getElementById('dropZone');
+      document.addEventListener('paste', (e) => {
+        if (!isAdmin || !currentCategory || currentCategory === 'cart' || currentCategory === 'schedule') return;
+        if (document.activeElement.isContentEditable) return;
+        const items = e.clipboardData?.items;
+        if (!items) return;
+        for (let item of items) {
+          if (item.type.includes('image')) {
+            handleImageFile(item.getAsFile());
+            break;
+          }
         }
-      }
-    });
+      });
 
-    const dropZone = document.getElementById('dropZone');
-    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-    dropZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropZone.classList.remove('dragover');
-      const modal = document.getElementById('albumModal');
-      if ((modal && modal.style.display === 'flex') || currentCategory === 'schedule' || !currentCategory) return;
-      if (isAdmin && e.dataTransfer.files.length > 0) {
-        handleImageFile(e.dataTransfer.files[0]);
-      }
-    });
+      dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+      dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (isAdmin && e.dataTransfer.files.length > 0) {
+          handleImageFile(e.dataTransfer.files[0]);
+        }
+      });
+    }
   </script>
 </body>
 </html>
