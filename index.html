@@ -25,7 +25,7 @@
       --success-color: #cccccc;
       --warning-color: #ffd700;
       --cart-color: #2b73df;
-      --border-color: #333333;
+      --border-color: #3f3f46;
     }
 
     body {
@@ -627,7 +627,7 @@
     }
 
     .cancel-btn {
-      background: #333333;
+      background: #3f3f46;
       color: var(--text-color);
       border: none;
       padding: 4px;
@@ -1112,16 +1112,21 @@
 
     .caption-row-top {
       display: flex;
-      align-items: center;
+      flex-direction: column;
+      align-items: stretch;
       width: 100%;
-      gap: 3px;
+      gap: 2px;
     }
 
     .price-col {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 32px; 
+      width: 100%;
+      min-height: 17px;
+      box-sizing: border-box;
+      padding-bottom: 2px;
+      border-bottom: 1px solid var(--border-color);
       flex-shrink: 0;
       gap: 1px;
       color: #ffffff;
@@ -1143,10 +1148,10 @@
     }
 
     .desc-col {
-      flex: 1;
+      width: 100%;
       min-width: 0;
-      border-left: 1px solid var(--border-color);
-      padding-left: 3px;
+      box-sizing: border-box;
+      padding-left: 0;
     }
 
     .desc-col .editable-text {
@@ -1185,16 +1190,64 @@
       font-weight: bold;
     }
 
-    .interact-select option[value="有互動"],
-    .interact-select.has-interact {
-      background-color: #1b4d3e !important;
-      color: #79efc3 !important;
+    /* 訪客端：互動方式顯示為不可操作的標籤，隱藏下拉箭頭與外框 */
+    .interact-select:disabled {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      border: none;
+      outline: none;
+      box-shadow: none;
+      cursor: default;
+      opacity: 1;
+      background-image: none !important;
+      pointer-events: none;
     }
 
-    .interact-select option[value="無互動"],
-    .interact-select.no-interact {
-      background-color: #333333 !important;
-      color: #b0b0b0 !important;
+    /* 訪客端標籤保留各互動方式原本的顏色 */
+    .interact-select:disabled.option-none {
+      background-color: #3f3f46 !important;
+      color: #d4d4d8 !important;
+    }
+
+    .interact-select:disabled.option-single {
+      background-color: #064e3b !important;
+      color: #6ee7b7 !important;
+    }
+
+    .interact-select:disabled.option-double {
+      background-color: #5b21b6 !important;
+      color: #e9d5ff !important;
+    }
+
+    .interact-select:disabled.option-multi {
+      background-color: #9a3412 !important;
+      color: #fed7aa !important;
+    }
+
+    /* 互動方式：每種選項使用不同文字顏色與底色 */
+    .interact-select.option-none,
+    .interact-select option[value="無互動"] {
+      background-color: #3f3f46 !important;
+      color: #d4d4d8 !important;
+    }
+
+    .interact-select.option-single,
+    .interact-select option[value="單人互動"] {
+      background-color: #064e3b !important;
+      color: #6ee7b7 !important;
+    }
+
+    .interact-select.option-double,
+    .interact-select option[value="雙人互動"] {
+      background-color: #5b21b6 !important;
+      color: #e9d5ff !important;
+    }
+
+    .interact-select.option-multi,
+    .interact-select option[value="多人互動"] {
+      background-color: #9a3412 !important;
+      color: #fed7aa !important;
     }
 
     .move-category-select {
@@ -1743,13 +1796,28 @@
       font-size: 14px !important;
     }
 
-    .cart-capture-stage .price-col .editable-price,
-    .cart-capture-stage .desc-col .editable-text {
-      font-size: 14px !important;
+    .cart-capture-stage .caption-row-top {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 3px !important;
     }
 
     .cart-capture-stage .price-col {
-      width: 40px;
+      width: 100% !important;
+      min-height: 22px !important;
+      padding-bottom: 3px !important;
+      border-bottom: 1px solid var(--border-color) !important;
+    }
+
+    .cart-capture-stage .desc-col {
+      width: 100% !important;
+      padding-left: 0 !important;
+      border-left: none !important;
+    }
+
+    .cart-capture-stage .price-col .editable-price,
+    .cart-capture-stage .desc-col .editable-text {
+      font-size: 14px !important;
     }
 
     .cart-capture-stage .caption-container {
@@ -3018,7 +3086,7 @@
           const fullCaption = item.caption || '';
           let priceVal = item.price || '';
           let textVal = fullCaption;
-          let interactVal = item.interact || '無互動';
+          let interactVal = item.interact === '有互動' ? '單人互動' : (item.interact || '無互動');
 
           let moveSelectHTML = '';
           if (isAdmin && currentCategory && currentCategory !== 'cart' && currentCategory !== 'schedule') {
@@ -3048,9 +3116,11 @@
           if (showInteractSelect) {
             interactHTML = `
               <div class="interact-col">
-                <select class="interact-select ${interactVal === '有互動' ? 'has-interact' : 'no-interact'}" id="interact-${item.id}" ${!isAdmin ? 'disabled' : ''}>
-                  <option value="有互動" ${interactVal === '有互動' ? 'selected' : ''}>有互動</option>
+                <select class="interact-select ${interactVal === '無互動' ? 'option-none' : interactVal === '雙人互動' ? 'option-double' : interactVal === '多人互動' ? 'option-multi' : 'option-single'}" id="interact-${item.id}" ${!isAdmin ? 'disabled' : ''}>
                   <option value="無互動" ${interactVal === '無互動' ? 'selected' : ''}>無互動</option>
+                  <option value="單人互動" ${interactVal === '單人互動' || interactVal === '有互動' ? 'selected' : ''}>單人互動</option>
+                  <option value="雙人互動" ${interactVal === '雙人互動' ? 'selected' : ''}>雙人互動</option>
+                  <option value="多人互動" ${interactVal === '多人互動' ? 'selected' : ''}>多人互動</option>
                 </select>
               </div>
             `;
@@ -3216,7 +3286,7 @@
                 const success = await updateItem(item.id, 'interact', newValue);
                 if (success) {
                   item.interact = newValue;
-                  interactSelectEl.className = `interact-select ${newValue === '有互動' ? 'has-interact' : 'no-interact'}`;
+                  interactSelectEl.className = `interact-select ${newValue === '無互動' ? 'option-none' : newValue === '雙人互動' ? 'option-double' : newValue === '多人互動' ? 'option-multi' : 'option-single'}`;
                   status.innerText = "修改成功！";
                 } else {
                   status.innerText = "儲存失敗，請重試";
