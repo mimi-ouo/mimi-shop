@@ -12,6 +12,8 @@
 
   <!-- 引入 Tally 嵌入腳本 -->
   <script async src="https://tally.so/widgets/embed.js"></script>
+  <!-- 購物車一鍵截圖功能：用於將購物車金額與商品格子轉成圖片 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <style>
     :root {
@@ -139,9 +141,32 @@
       text-align: center;
       font-weight: bold;
       font-size: 18px;
+      flex-direction: column;
       justify-content: center;
+      align-items: stretch;
+      gap: 8px;
+    }
+
+    .cart-summary-main-row {
+      width: 100%;
+      display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 15px;
+    }
+
+    .cart-total-text {
+      flex: 1;
+      min-width: 0;
+      text-align: center;
+    }
+
+    .cart-summary-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-shrink: 0;
     }
 
     .clear-cart-btn {
@@ -1383,6 +1408,169 @@
       border: 1px solid #ff6666;
       color: #ffffff !important;
     }
+    
+    /* ==================== 購物車一鍵截圖 ==================== */
+    .cart-capture-btn {
+      background: linear-gradient(135deg, #2b73df, #5865f2);
+      color: #ffffff;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      white-space: nowrap;
+      box-shadow: 0 3px 10px rgba(43, 115, 223, 0.35);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    }
+
+    .cart-capture-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 14px rgba(43, 115, 223, 0.5);
+    }
+
+    .cart-capture-btn:disabled {
+      opacity: 0.65;
+      cursor: wait;
+      transform: none;
+    }
+
+    .cart-capture-status {
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #9ad0ff;
+      min-height: 18px;
+      margin: 0;
+      padding: 4px 8px 0;
+      text-align: center;
+      border-top: 1px solid rgba(43, 115, 223, 0.22);
+    }
+
+    @media (max-width: 600px) {
+      .cart-summary-main-row {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .cart-total-text {
+        width: 100%;
+      }
+
+      .cart-summary-actions {
+        width: 100%;
+      }
+
+      .cart-summary-actions .clear-cart-btn,
+      .cart-summary-actions .cart-capture-btn {
+        flex: 1;
+      }
+    }
+
+    /* 截圖用的暫存容器，不影響實際頁面排版 */
+    .cart-capture-stage {
+      position: fixed;
+      left: -100000px;
+      top: 0;
+      width: 1100px;
+      z-index: -1;
+      background: #121212;
+      padding: 24px;
+      box-sizing: border-box;
+      pointer-events: none;
+    }
+
+    .cart-capture-stage .cart-summary-capture {
+      display: flex !important;
+      flex-direction: column !important;
+      margin: 0 0 20px 0 !important;
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    .cart-capture-stage .cart-summary-capture .cart-summary-main-row {
+      display: flex !important;
+      flex-direction: row !important;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .cart-capture-stage .cart-summary-capture .clear-cart-btn,
+    .cart-capture-stage .cart-summary-capture .cart-capture-btn,
+    .cart-capture-stage .cart-capture-status,
+    .cart-capture-stage .cart-checkbox,
+    .cart-capture-stage .cart-qty-select,
+    .cart-capture-stage .status-select,
+    .cart-capture-stage .hot-select,
+    .cart-capture-stage .hot-badge-tag,
+    .cart-capture-stage .delete-btn,
+    .cart-capture-stage .interact-select,
+    .cart-capture-stage .move-category-select,
+    .cart-capture-stage .admin-note-box {
+      display: none !important;
+    }
+
+    .cart-capture-stage .gallery {
+      display: grid !important;
+      width: 100%;
+      margin: 0 !important;
+      gap: 10px;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      align-items: start;
+    }
+
+    .cart-capture-stage .img-card {
+      width: 100% !important;
+      opacity: 1 !important;
+      transform: none !important;
+      cursor: default !important;
+    }
+
+    .cart-capture-stage .img-wrapper {
+      width: 100% !important;
+      aspect-ratio: 1 / 1;
+      height: auto !important;
+    }
+
+    .cart-capture-stage .img-wrapper img {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover;
+      opacity: 1 !important;
+    }
+
+    .cart-capture-stage .img-info {
+      min-height: 42px;
+    }
+
+    .cart-capture-stage .price-col,
+    .cart-capture-stage .desc-col {
+      font-size: 11px !important;
+    }
+
+    .cart-capture-stage .editable-price,
+    .cart-capture-stage .editable-text {
+      background: transparent !important;
+      cursor: default !important;
+    }
+
+    .cart-capture-stage .section-block-title,
+    .cart-capture-stage .section-divider-line {
+      break-inside: avoid;
+    }
+
+    @media (max-width: 768px) {
+      .cart-capture-stage {
+        width: 760px;
+        padding: 16px;
+      }
+
+      .cart-capture-stage .gallery {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1491,8 +1679,14 @@
   </div>
   
   <div id="cartSummary" class="cart-summary">
-    <div>購物車總金額(甩賣區另計): <span id="totalAmount">0</span></div>
-    <button id="clearCartBtn" class="clear-cart-btn">清空購物車</button>
+    <div class="cart-summary-main-row">
+      <div class="cart-total-text">購物車總金額(甩賣區另計): <span id="totalAmount">0</span></div>
+      <div class="cart-summary-actions">
+        <button id="clearCartBtn" class="clear-cart-btn">清空購物車</button>
+        <button id="cartCaptureBtn" class="cart-capture-btn" type="button">📸 截圖並複製</button>
+      </div>
+    </div>
+    <div id="cartCaptureStatus" class="cart-capture-status" aria-live="polite"></div>
   </div>
 
   <div class="custom-notice-container" id="giftNoticeContainer">
@@ -1680,6 +1874,7 @@
       setupModalEvents();
       setupBackToTop();
       setupClearCartBtn();
+      setupCartCapture();
       setupScheduleEvents();
       setupDropZone();
       
@@ -1744,6 +1939,161 @@
             }
         });
         document.getElementById('totalAmount').innerText = total;
+    }
+
+    let cartCaptureStatusTimer = null;
+
+    function setCartCaptureStatus(message, isError = false, autoHide = true) {
+      const statusEl = document.getElementById('cartCaptureStatus');
+      if (!statusEl) return;
+
+      if (cartCaptureStatusTimer) {
+        clearTimeout(cartCaptureStatusTimer);
+        cartCaptureStatusTimer = null;
+      }
+
+      statusEl.innerText = message || '';
+      statusEl.style.color = isError ? '#ff9a9a' : '#9ad0ff';
+
+      if (message && autoHide) {
+        cartCaptureStatusTimer = setTimeout(() => {
+          statusEl.innerText = '';
+          cartCaptureStatusTimer = null;
+        }, 3000);
+      }
+    }
+
+    function waitForImages(root) {
+      const images = Array.from(root.querySelectorAll('img'));
+      return Promise.all(images.map((img) => {
+        if (img.complete && img.naturalWidth > 0) {
+          return Promise.resolve();
+        }
+        return new Promise((resolve) => {
+          const done = () => {
+            img.removeEventListener('load', done);
+            img.removeEventListener('error', done);
+            resolve();
+          };
+          img.addEventListener('load', done, { once: true });
+          img.addEventListener('error', done, { once: true });
+        });
+      }));
+    }
+
+    async function copyCanvasToClipboard(canvas) {
+      if (!navigator.clipboard || typeof navigator.clipboard.write !== 'function' || typeof ClipboardItem === 'undefined') {
+        throw new Error('目前瀏覽器不支援圖片剪貼簿功能，請使用最新版 Chrome / Edge，並確認網站使用 HTTPS。');
+      }
+
+      const blob = await new Promise((resolve) => {
+        canvas.toBlob(resolve, 'image/png');
+      });
+
+      if (!blob) {
+        throw new Error('圖片產生失敗，請再試一次。');
+      }
+
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ]);
+    }
+
+    function buildCartCaptureStage() {
+      const existing = document.getElementById('cartCaptureStage');
+      if (existing) existing.remove();
+
+      const stage = document.createElement('div');
+      stage.id = 'cartCaptureStage';
+      stage.className = 'cart-capture-stage';
+      stage.setAttribute('aria-hidden', 'true');
+
+      const summary = document.getElementById('cartSummary');
+      const gallery = document.getElementById('gallery');
+
+      if (!summary || !gallery) {
+        throw new Error('找不到購物車內容。');
+      }
+
+      const summaryClone = summary.cloneNode(true);
+      summaryClone.id = 'cartSummaryCapture';
+      summaryClone.classList.add('cart-summary-capture');
+
+      const galleryClone = gallery.cloneNode(true);
+      galleryClone.id = 'cartGalleryCapture';
+
+      stage.appendChild(summaryClone);
+      stage.appendChild(galleryClone);
+      document.body.appendChild(stage);
+
+      // 原商品格子使用 lazy loading；截圖副本改為 eager，避免長購物車後段圖片未載入。
+      galleryClone.querySelectorAll('img').forEach((img) => {
+        img.removeAttribute('loading');
+        img.setAttribute('loading', 'eager');
+        img.setAttribute('decoding', 'async');
+      });
+
+      return stage;
+    }
+
+    async function captureAndCopyCart() {
+      const button = document.getElementById('cartCaptureBtn');
+      if (!button) return;
+
+      if (currentCategory !== 'cart') {
+        setCartCaptureStatus('請先進入「🛒 購物車」分頁再使用截圖功能。', true);
+        return;
+      }
+
+      if (!cartItems || cartItems.size === 0) {
+        setCartCaptureStatus('購物車目前沒有商品，無法建立商品截圖。', true);
+        return;
+      }
+
+      if (typeof html2canvas !== 'function') {
+        setCartCaptureStatus('截圖元件尚未載入完成，請稍後再試一次。', true);
+        return;
+      }
+
+      button.disabled = true;
+      setCartCaptureStatus('📸 正在整理購物車圖片，請稍候...');
+
+      let stage = null;
+      try {
+        calculateTotal();
+        stage = buildCartCaptureStage();
+
+        // 讓瀏覽器先完成 DOM 排版，再進行完整商品格子截圖。
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        await waitForImages(stage);
+
+        const canvas = await html2canvas(stage, {
+          backgroundColor: '#121212',
+          useCORS: true,
+          allowTaint: false,
+          scale: Math.min(window.devicePixelRatio || 1, 2),
+          logging: false,
+          imageTimeout: 15000,
+          removeContainer: true
+        });
+
+        await copyCanvasToClipboard(canvas);
+        setCartCaptureStatus('✅ 截圖完成！購物車金額與商品格子圖片已複製到剪貼簿，可直接貼到 Discord / LINE。');
+      } catch (error) {
+        console.error('購物車截圖失敗:', error);
+        const message = error && error.message ? error.message : '截圖或複製失敗，請再試一次。';
+        setCartCaptureStatus('❌ ' + message, true);
+      } finally {
+        if (stage) stage.remove();
+        button.disabled = false;
+      }
+    }
+
+    function setupCartCapture() {
+      const button = document.getElementById('cartCaptureBtn');
+      if (!button) return;
+
+      button.addEventListener('click', captureAndCopyCart);
     }
 
     function setupBackToTop() {
@@ -1956,6 +2306,10 @@
           document.getElementById('cropNoticeContainer').style.display = (currentCategory === 'crop_male' || currentCategory === 'crop_female') ? 'block' : 'none';
 
           document.getElementById('cartSummary').style.display = (currentCategory === 'cart') ? 'flex' : 'none';
+          if (currentCategory === 'cart') {
+            calculateTotal();
+            setCartCaptureStatus('');
+          }
           document.getElementById('scheduleContainer').style.display = (currentCategory === 'schedule') ? 'block' : 'none';
           document.getElementById('gallery').style.display = (currentCategory === 'schedule') ? 'none' : 'grid';
           document.getElementById('dropZone').style.display = (isAdmin && currentCategory !== 'schedule') ? 'block' : 'none';
