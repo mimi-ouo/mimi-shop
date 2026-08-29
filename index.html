@@ -1927,16 +1927,16 @@
       <div class="dropdown" id="dropdown-ring">
         <button class="dropdown-toggle" data-dropdown="dropdown-ring">💍 戒指 ▾</button>
         <div class="dropdown-menu">
-          <button class="dropdown-item tab-btn" data-category="ring_male">♂️ 限男</button>
-          <button class="dropdown-item tab-btn" data-category="ring_female">♀️ 限女</button>
+          <button class="dropdown-item tab-btn" data-category="ring_male">👦 限男</button>
+          <button class="dropdown-item tab-btn" data-category="ring_female">👧 限女</button>
         </div>
       </div>
 
       <div class="dropdown" id="dropdown-crop">
         <button class="dropdown-toggle" data-dropdown="dropdown-crop">🌱 作物 ▾</button>
         <div class="dropdown-menu">
-          <button class="dropdown-item tab-btn" data-category="crop_male">♂️ 限男</button>
-          <button class="dropdown-item tab-btn" data-category="crop_female">♀️ 限女</button>
+          <button class="dropdown-item tab-btn" data-category="crop_male">👦 限男</button>
+          <button class="dropdown-item tab-btn" data-category="crop_female">👧 限女</button>
         </div>
       </div>
 
@@ -2043,7 +2043,7 @@
   <div class="custom-notice-container" id="cropNoticeContainer">
     <div class="custom-notice-box">
       <span>🌱</span>
-      <span class="editable-text" id="cropDescription" contenteditable="false">誕生作物只收T, 一律種植後付款</span>
+      <span class="editable-text" id="cropDescription" contenteditable="false">誕生作物只收T, 一律種植後付款<br>卡牌保S+不含基底，限男</span>
     </div>
   </div>
 
@@ -3065,6 +3065,13 @@
       const gallery = document.getElementById('gallery');
       const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
 
+      // 搜尋時為「全區搜尋」模式，不顯示目前所在分頁名稱。
+      const currentTabNameEl = document.getElementById('currentTabName');
+      const currentTabLabelEl = currentTabNameEl ? currentTabNameEl.parentElement : null;
+      if (currentTabLabelEl) {
+        currentTabLabelEl.style.display = keyword ? 'none' : '';
+      }
+
       gallery.innerHTML = '';
 
       if (!currentCategory && !keyword) {
@@ -3518,10 +3525,14 @@
             divider.className = 'section-divider-line';
             gallery.appendChild(divider);
           }
-          const normalTitle = document.createElement('div');
-          normalTitle.className = 'section-block-title normal-title';
-          normalTitle.innerHTML = currentCategoryDisplayName;
-          gallery.appendChild(normalTitle);
+          // 一般商品區：一般瀏覽時顯示目前分頁名稱；
+          // 搜尋全區時不顯示任何目前分頁名稱。
+          if (!keyword) {
+            const normalTitle = document.createElement('div');
+            normalTitle.className = 'section-block-title normal-title';
+            normalTitle.innerHTML = currentCategoryDisplayName;
+            gallery.appendChild(normalTitle);
+          }
           renderItemCards(normalList);
           sectionCount++;
         }
