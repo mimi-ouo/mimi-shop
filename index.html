@@ -8,6 +8,7 @@
   <!-- 引入 Firebase Compat 版本 SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 
   <!-- 引入 Tally 嵌入腳本 -->
   <script async src="https://tally.so/widgets/embed.js"></script>
@@ -635,7 +636,6 @@
         height: 112px !important;
       }
       
-      /* 👉 在這裡調整手機端 HOT 標籤/選單的文字大小 (可依需求自行修改數字，例如 9px、10px、11px 等) */
       .hot-badge-tag, .hot-select {
         font-size: 6px !important;
         padding: 0px 6px;
@@ -880,7 +880,6 @@
       accent-color: var(--cart-color);
     }
 
-    /* 右下角 HOT 選單樣式 (黑底 + 粉橘色漸層邊框與文字) */
     .hot-select {
       position: absolute;
       bottom: 3px;
@@ -904,7 +903,6 @@
       animation: bounceTag 1.2s ease-in-out infinite;
     }
 
-    /* 訪客端 HOT 標籤樣式 (黑底保持不變，邊框與字體改為粉橘色漸層風格) */
     .hot-badge-tag {
       position: absolute;
       bottom: 3px;
@@ -921,7 +919,6 @@
       animation: bounceTag 1.2s ease-in-out infinite;
     }
 
-    /* 上下分區標題與分隔線樣式 (無漸層設定) */
     .section-block-title {
       grid-column: 1 / -1;
       font-size: 16px;
@@ -933,15 +930,15 @@
     }
 
     .section-block-title.hot-title {
-      color: #ff5533; /* HOT區橘紅色 */
+      color: #ff5533;
     }
 
     .section-block-title.normal-title {
-      color: #ffffff; /* 商品區白色 */
+      color: #ffffff;
     }
 
     .section-block-title.transaction-title {
-      color: #999999; /* 第三區灰色 */
+      color: #999999;
     }
 
     .section-divider-line {
@@ -1275,7 +1272,6 @@
       flex-wrap: wrap;
     }
 
-    /* 調整相簿頁數圓圈大小為合適的正圓形 */
     .modal-dot {
       width: 10px;
       height: 10px;
@@ -1449,7 +1445,8 @@
       <div class="auth-box" id="authBox">
         <button class="auth-btn" id="showLoginBtn">登入</button>
         <div class="auth-inputs" id="authInputs">
-          <input type="password" id="passwordInput" placeholder="管理員密碼">
+          <input type="email" id="emailInput" placeholder="管理員 Email">
+          <input type="password" id="passwordInput" placeholder="Firebase 密碼">
           <button class="auth-btn" id="loginBtn">確認</button>
           <button class="cancel-btn" id="cancelBtn">✕</button>
         </div>
@@ -1602,6 +1599,7 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    const auth = firebase.auth();
 
     const userStatusDatabaseRef = db.ref('status');
 
@@ -1629,7 +1627,7 @@
 
     let currentCategory = ''; 
     let currentCategoryDisplayName = '尚未選擇分頁';
-    let isAdmin = localStorage.getItem('isAdmin') === 'true';
+    let isAdmin = false;
     let allData = [];
     let cartItems = loadCartFromStorage();
     let activeModalItem = null;
@@ -1640,8 +1638,6 @@
     let scheduleMonth = 7;
 
     let initialDataHash = '';
-
-    const ADMIN_PASSWORD = "1313765591181";
 
     function loadCartFromStorage() {
       try {
@@ -1666,7 +1662,19 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      initAuthUI();
+      auth.onAuthStateChanged((user) => {
+        if (user && user.email === "comtw919@gmail.com") {
+          isAdmin = true;
+        } else {
+          isAdmin = false;
+          if (user) {
+            // 如果不是指定帳號，強制登出
+            auth.signOut();
+          }
+        }
+        initAuthUI();
+      });
+
       setupTabs();
       setupCollapseToggle();
       setupModalEvents();
@@ -1807,8 +1815,9 @@
           <button class="auth-btn" id="logoutBtn" style="background:#333; color:var(--text-color);">登出</button>
         `;
         document.getElementById('logoutBtn').addEventListener('click', () => {
-          localStorage.removeItem('isAdmin');
-          location.reload();
+          auth.signOut().then(() => {
+            location.reload();
+          });
         });
       } else {
         document.body.classList.remove('is-admin');
@@ -1819,7 +1828,8 @@
         authBox.innerHTML = `
           <button class="auth-btn" id="showLoginBtn">登入</button>
           <div class="auth-inputs" id="authInputs">
-            <input type="password" id="passwordInput" placeholder="管理員密碼">
+            <input type="email" id="emailInput" placeholder="管理員 Email">
+            <input type="password" id="passwordInput" placeholder="Firebase 密碼">
             <button class="auth-btn" id="loginBtn">確認</button>
             <button class="cancel-btn" id="cancelBtn">✕</button>
           </div>
@@ -1830,6 +1840,9 @@
       setupEditableSave(giftDescElem, 'settings_gift', 'caption');
       setupEditableSave(ringDescElem, 'settings_ring', 'caption');
       setupEditableSave(cropDescElem, 'settings_crop', 'caption');
+      if (currentCategory && currentCategory !== 'schedule') {
+        renderGallery();
+      }
     }
 
     function setupEditableSave(elem, id, field) {
@@ -1864,6 +1877,8 @@
       const cancelBtn = document.getElementById('cancelBtn');
       const loginBtn = document.getElementById('loginBtn');
 
+      if (!showLoginBtn) return;
+
       showLoginBtn.addEventListener('click', () => {
         showLoginBtn.style.display = 'none';
         authInputs.style.display = 'flex';
@@ -1875,13 +1890,21 @@
       });
 
       loginBtn.addEventListener('click', () => {
+        const email = document.getElementById('emailInput').value.trim();
         const pass = document.getElementById('passwordInput').value;
-        if (pass === ADMIN_PASSWORD) {
-          localStorage.setItem('isAdmin', 'true');
-          location.reload();
-        } else {
-          alert('密碼錯誤！');
+
+        if (email !== "comtw919@gmail.com") {
+          alert('權限不足：僅限 comtw919@gmail.com 登入！');
+          return;
         }
+
+        auth.signInWithEmailAndPassword(email, pass)
+          .then((userCredential) => {
+            location.reload();
+          })
+          .catch((error) => {
+            alert('登入失敗：' + error.message);
+          });
       });
     }
 
@@ -2690,7 +2713,6 @@
 
       const modalDropZone = document.getElementById('modalDropZone');
       
-      /* 👉 修正點：在相簿內貼上時阻止事件冒泡，避免同時觸發商品新增 */
       document.addEventListener('paste', (e) => {
         if (!isAdmin || !activeModalItem || modal.style.display !== 'flex') return;
         if (document.activeElement.isContentEditable) return;
@@ -2699,7 +2721,7 @@
         if (!items) return;
         for (let item of items) {
           if (item.type.includes('image')) {
-            e.stopPropagation(); // 阻止事件向上傳遞到全域商品貼上監聽
+            e.stopPropagation();
             handleModalImageFile(item.getAsFile());
             break;
           }
@@ -2915,7 +2937,6 @@
     function setupDropZone() {
       const dropZone = document.getElementById('dropZone');
       document.addEventListener('paste', (e) => {
-        /* 👉 修正點：若當前相簿彈跳視窗是開啟狀態，則直接忽略全域貼上商品 */
         const modal = document.getElementById('albumModal');
         if (modal && modal.style.display === 'flex') return;
 
