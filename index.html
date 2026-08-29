@@ -2689,6 +2689,8 @@
       });
 
       const modalDropZone = document.getElementById('modalDropZone');
+      
+      /* 👉 修正點：在相簿內貼上時阻止事件冒泡，避免同時觸發商品新增 */
       document.addEventListener('paste', (e) => {
         if (!isAdmin || !activeModalItem || modal.style.display !== 'flex') return;
         if (document.activeElement.isContentEditable) return;
@@ -2697,6 +2699,7 @@
         if (!items) return;
         for (let item of items) {
           if (item.type.includes('image')) {
+            e.stopPropagation(); // 阻止事件向上傳遞到全域商品貼上監聽
             handleModalImageFile(item.getAsFile());
             break;
           }
@@ -2912,6 +2915,10 @@
     function setupDropZone() {
       const dropZone = document.getElementById('dropZone');
       document.addEventListener('paste', (e) => {
+        /* 👉 修正點：若當前相簿彈跳視窗是開啟狀態，則直接忽略全域貼上商品 */
+        const modal = document.getElementById('albumModal');
+        if (modal && modal.style.display === 'flex') return;
+
         if (!isAdmin || !currentCategory || currentCategory === 'cart' || currentCategory === 'schedule') return;
         if (document.activeElement.isContentEditable) return;
         const items = e.clipboardData?.items;
