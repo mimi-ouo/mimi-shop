@@ -134,9 +134,9 @@
       background: var(--card-bg);
       border: 1px solid var(--cart-color);
       color: #ffffff;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 20px;
+      padding: 10px 12px;
+      border-radius: 7px;
+      margin-bottom: 14px;
       display: none;
       text-align: center;
       font-weight: bold;
@@ -152,36 +152,111 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 15px;
+      gap: 12px;
     }
 
     .cart-total-text {
-      flex: 1;
+      flex: 1 1 auto;
       min-width: 0;
-      text-align: center;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 44px;
+      font-size: 19px;
+      line-height: 1.15;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .cart-total-text #totalAmount {
+      font-size: 29px;
+      line-height: 1;
+      margin-left: 6px;
+      font-weight: 900;
+    }
+
+    .cart-summary-right {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 5px;
     }
 
     .cart-summary-actions {
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 8px;
-      flex-shrink: 0;
+      justify-content: flex-end;
+      gap: 5px;
+      width: 100%;
     }
 
     .clear-cart-btn {
       background-color: var(--danger-color);
       color: white;
       border: none;
-      padding: 8px 15px;
-      border-radius: 6px;
+      padding: 6px 11px;
+      border-radius: 5px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: bold;
     }
     
     .clear-cart-btn:hover {
       background-color: #cc3d3d;
+    }
+
+    /* 購物車交易設定：本地儲存，不同步到雲端 */
+    .cart-preference-row {
+      width: auto;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      flex-wrap: nowrap;
+      box-sizing: border-box;
+      padding-top: 0;
+    }
+
+    .cart-preference-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 0 1 auto;
+    }
+
+    .cart-preference-label {
+      color: #cfcfcf;
+      font-size: 13px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .cart-preference-select {
+      background-color: #2b2b2b;
+      color: #ffffff;
+      border: 1px solid var(--cart-color);
+      border-radius: 5px;
+      padding: 5px 8px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      outline: none;
+      text-align: center;
+      text-align-last: center;
+      min-width: 118px;
+    }
+
+    .cart-preference-select:focus {
+      border-color: #7da9ff;
+      box-shadow: 0 0 0 2px rgba(43, 115, 223, 0.2);
+    }
+
+    .cart-preference-select option {
+      background-color: #2b2b2b;
+      color: #ffffff;
     }
 
     #backToTopBtn {
@@ -1438,12 +1513,12 @@
     .cart-capture-status {
       width: 100%;
       box-sizing: border-box;
-      font-size: 12px;
-      line-height: 1.5;
+      font-size: 11px;
+      line-height: 1.3;
       color: #9ad0ff;
-      min-height: 18px;
+      min-height: 15px;
       margin: 0;
-      padding: 4px 8px 0;
+      padding: 2px 6px 0;
       text-align: center;
       border-top: 1px solid rgba(43, 115, 223, 0.22);
     }
@@ -1451,15 +1526,45 @@
     @media (max-width: 600px) {
       .cart-summary-main-row {
         flex-direction: column;
-        gap: 10px;
+        align-items: stretch;
+        gap: 8px;
       }
 
       .cart-total-text {
         width: 100%;
+        justify-content: flex-start;
+        min-height: 40px;
+        font-size: 17px;
+      }
+
+      .cart-total-text #totalAmount {
+        font-size: 27px;
+      }
+
+      .cart-summary-right {
+        width: 100%;
+        align-items: stretch;
       }
 
       .cart-summary-actions {
         width: 100%;
+      }
+
+      .cart-preference-row {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 7px;
+      }
+
+      .cart-preference-group {
+        justify-content: space-between;
+        width: 100%;
+      }
+
+      .cart-preference-select {
+        flex: 1;
+        min-width: 0;
       }
 
       .cart-summary-actions .clear-cart-btn,
@@ -1492,12 +1597,89 @@
     .cart-capture-stage .cart-summary-capture .cart-summary-main-row {
       display: flex !important;
       flex-direction: row !important;
+      align-items: center !important;
+      justify-content: space-between !important;
       width: 100%;
       box-sizing: border-box;
+      gap: 14px;
+    }
+
+    .cart-capture-stage .cart-total-text {
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+      min-height: 54px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+      text-align: left !important;
+      font-size: 22px !important;
+      line-height: 1.2 !important;
+      white-space: nowrap !important;
+    }
+
+    .cart-capture-stage .cart-total-text #totalAmount {
+      font-size: 34px !important;
+      line-height: 1 !important;
+      margin-left: 10px !important;
+      font-weight: 900 !important;
+    }
+
+    .cart-capture-stage .cart-summary-right {
+      flex: 0 0 auto !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: flex-end !important;
+      justify-content: center !important;
+      gap: 0 !important;
+    }
+
+    .cart-capture-stage .cart-preference-row {
+      display: flex !important;
+      width: auto !important;
+      margin-top: 0 !important;
+      box-sizing: border-box;
+      justify-content: flex-end !important;
+      align-items: center !important;
+      flex-wrap: nowrap !important;
+      gap: 10px !important;
+    }
+
+    .cart-capture-stage .cart-preference-group {
+      display: flex !important;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
+
+    .cart-capture-stage .cart-preference-label {
+      font-size: 12px !important;
+      color: #cfcfcf !important;
+    }
+
+    .cart-capture-stage .cart-preference-select {
+      display: block !important;
+      min-width: 105px;
+      font-size: 15px !important;
+      padding: 4px 7px !important;
+      background-color: #2b2b2b !important;
+      color: #ffffff !important;
+      border: 1px solid #2b73df !important;
+      border-radius: 5px;
+      opacity: 1 !important;
     }
 
     .cart-capture-stage .cart-summary-capture .clear-cart-btn,
     .cart-capture-stage .cart-summary-capture .cart-capture-btn,
+
+    .cart-capture-stage .cart-summary-actions {
+      display: none !important;
+    }
+
+    .cart-capture-stage .cart-preference-select {
+      pointer-events: none !important;
+    }
     .cart-capture-stage .cart-capture-status,
     .cart-capture-stage .cart-checkbox,
     .cart-capture-stage .cart-qty-select,
@@ -1515,38 +1697,64 @@
       display: grid !important;
       width: 100%;
       margin: 0 !important;
-      gap: 10px;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 6px;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
       align-items: start;
+      grid-auto-rows: auto;
     }
 
     .cart-capture-stage .img-card {
       width: 100% !important;
+      min-width: 0 !important;
       opacity: 1 !important;
       transform: none !important;
       cursor: default !important;
+      overflow: hidden !important;
     }
 
     .cart-capture-stage .img-wrapper {
       width: 100% !important;
-      aspect-ratio: 1 / 1;
-      height: auto !important;
+      height: 150px !important;
+      aspect-ratio: auto !important;
+      min-height: 150px !important;
+      max-height: 150px !important;
+      overflow: hidden !important;
     }
 
     .cart-capture-stage .img-wrapper img {
+      display: block !important;
       width: 100% !important;
-      height: 100% !important;
-      object-fit: cover;
+      height: 150px !important;
+      min-height: 150px !important;
+      max-height: 150px !important;
+      object-fit: cover !important;
+      object-position: center !important;
       opacity: 1 !important;
     }
 
     .cart-capture-stage .img-info {
       min-height: 42px;
+      padding: 5px !important;
+      gap: 3px;
     }
 
     .cart-capture-stage .price-col,
     .cart-capture-stage .desc-col {
-      font-size: 11px !important;
+      font-size: 14px !important;
+    }
+
+    .cart-capture-stage .price-col .editable-price,
+    .cart-capture-stage .desc-col .editable-text {
+      font-size: 14px !important;
+    }
+
+    .cart-capture-stage .price-col {
+      width: 40px;
+    }
+
+    .cart-capture-stage .caption-container {
+      padding: 4px;
+      gap: 3px;
     }
 
     .cart-capture-stage .editable-price,
@@ -1566,9 +1774,36 @@
         padding: 16px;
       }
 
+      .cart-capture-stage .cart-summary-main-row {
+        flex-direction: row !important;
+        align-items: center !important;
+      }
+
+      .cart-capture-stage .cart-total-text {
+        font-size: 24px !important;
+        min-height: 60px !important;
+      }
+
+      .cart-capture-stage .cart-total-text #totalAmount {
+        font-size: 36px !important;
+      }
+
+      .cart-capture-stage .cart-preference-row {
+        flex-direction: row !important;
+        align-items: center !important;
+        flex-wrap: nowrap !important;
+      }
+
       .cart-capture-stage .gallery {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 8px;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 5px;
+      }
+
+      .cart-capture-stage .img-wrapper,
+      .cart-capture-stage .img-wrapper img {
+        height: 140px !important;
+        min-height: 140px !important;
+        max-height: 140px !important;
       }
     }
   </style>
@@ -1681,11 +1916,33 @@
   <div id="cartSummary" class="cart-summary">
     <div class="cart-summary-main-row">
       <div class="cart-total-text">購物車總金額(甩賣區另計): <span id="totalAmount">0</span></div>
-      <div class="cart-summary-actions">
-        <button id="clearCartBtn" class="clear-cart-btn">清空購物車</button>
-        <button id="cartCaptureBtn" class="cart-capture-btn" type="button">📸 截圖並複製</button>
+
+      <div class="cart-summary-right">
+        <div class="cart-preference-row" aria-label="購物車交易設定">
+          <div class="cart-preference-group">
+            <span class="cart-preference-label">💳 交易方式</span>
+            <select id="cartPaymentMethod" class="cart-preference-select">
+              <option value="💰 轉帳">💰 轉帳</option>
+              <option value="🍭 糖果">🍭 糖果</option>
+            </select>
+          </div>
+
+          <div class="cart-preference-group">
+            <span class="cart-preference-label">👤 角色性別</span>
+            <select id="cartCharacterGender" class="cart-preference-select">
+              <option value="男號">男號</option>
+              <option value="女號">女號</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="cart-summary-actions">
+          <button id="clearCartBtn" class="clear-cart-btn">清空購物車</button>
+          <button id="cartCaptureBtn" class="cart-capture-btn" type="button">📸 截圖並複製</button>
+        </div>
       </div>
     </div>
+
     <div id="cartCaptureStatus" class="cart-capture-status" aria-live="polite"></div>
   </div>
 
@@ -1824,6 +2081,8 @@
     let isAdmin = false;
     let allData = [];
     let cartItems = loadCartFromStorage();
+    let cartPaymentMethod = loadCartPreference('cartPaymentMethod', '💰 轉帳');
+    let cartCharacterGender = loadCartPreference('cartCharacterGender', '男號');
     let activeModalItem = null;
     let currentAlbumList = [];
     let currentAlbumIndex = 0;
@@ -1855,6 +2114,64 @@
       }
     }
 
+    function loadCartPreference(key, fallback) {
+      try {
+        const stored = localStorage.getItem(key);
+        return stored !== null ? stored : fallback;
+      } catch (e) {
+        console.error('讀取購物車設定失敗:', e);
+        return fallback;
+      }
+    }
+
+    function saveCartPreference(key, value) {
+      try {
+        localStorage.setItem(key, value);
+      } catch (e) {
+        console.error('儲存購物車設定失敗:', e);
+      }
+    }
+
+    function applyCartPreferencesToUI() {
+      const paymentEl = document.getElementById('cartPaymentMethod');
+      const genderEl = document.getElementById('cartCharacterGender');
+
+      if (paymentEl) {
+        paymentEl.value = cartPaymentMethod;
+        if (paymentEl.value !== cartPaymentMethod) {
+          cartPaymentMethod = paymentEl.options[0]?.value || '💰 轉帳';
+        }
+      }
+
+      if (genderEl) {
+        genderEl.value = cartCharacterGender;
+        if (genderEl.value !== cartCharacterGender) {
+          cartCharacterGender = genderEl.options[0]?.value || '男號';
+        }
+      }
+    }
+
+    function setupCartPreferences() {
+      const paymentEl = document.getElementById('cartPaymentMethod');
+      const genderEl = document.getElementById('cartCharacterGender');
+
+      applyCartPreferencesToUI();
+
+      if (paymentEl) {
+        paymentEl.addEventListener('change', () => {
+          cartPaymentMethod = paymentEl.value;
+          saveCartPreference('cartPaymentMethod', cartPaymentMethod);
+        });
+      }
+
+      if (genderEl) {
+        genderEl.addEventListener('change', () => {
+          cartCharacterGender = genderEl.value;
+          saveCartPreference('cartCharacterGender', cartCharacterGender);
+        });
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       auth.onAuthStateChanged((user) => {
         if (user && user.email === "comtw919@gmail.com") {
@@ -1874,6 +2191,7 @@
       setupModalEvents();
       setupBackToTop();
       setupClearCartBtn();
+      setupCartPreferences();
       setupCartCapture();
       setupScheduleEvents();
       setupDropZone();
@@ -2061,6 +2379,7 @@
       let stage = null;
       try {
         calculateTotal();
+        applyCartPreferencesToUI();
         stage = buildCartCaptureStage();
 
         // 讓瀏覽器先完成 DOM 排版，再進行完整商品格子截圖。
@@ -2587,16 +2906,25 @@
         return;
       }
 
+      const matchesKeyword = (item) => {
+        if (!keyword) return true;
+        const caption = String(item.caption || '').toLowerCase();
+        const note = String(item.note || '').toLowerCase();
+        return caption.includes(keyword) || note.includes(keyword);
+      };
+
+      // 一般商品分頁維持原本邏輯；只有購物車改成依商品原本的 item.category 分組。
       const filtered = allData.filter(item => {
-        if (keyword) {
-          const caption = String(item.caption || '').toLowerCase();
-          const note = String(item.note || '').toLowerCase();
-          return caption.includes(keyword) || note.includes(keyword);
-        } else if (currentCategory === 'cart') {
-          return cartItems.has(String(item.id));
-        } else {
-          return item.category === currentCategory;
+        if (currentCategory === 'cart') {
+          // 購物車搜尋只搜尋已加入購物車的商品，避免搜尋時把其他分頁商品帶進來。
+          return cartItems.has(String(item.id)) && matchesKeyword(item);
         }
+
+        if (keyword) {
+          return matchesKeyword(item);
+        }
+
+        return item.category === currentCategory;
       });
       
       filtered.sort(compareItems);
@@ -2605,14 +2933,6 @@
         const q = String(qty || '');
         return q.includes('暫售') || q.includes('已售出');
       };
-
-      const hotList = filtered.filter(item => item.real_img === 'HOT' && !isTransaction(item.quantity));
-      const normalList = filtered.filter(item => item.real_img !== 'HOT' && !isTransaction(item.quantity));
-      const transactionList = filtered.filter(item => isTransaction(item.quantity));
-
-      const hasHot = hotList.length > 0;
-      const hasNormal = normalList.length > 0;
-      const hasTransaction = transactionList.length > 0;
 
       const renderItemCards = (itemsToRender) => {
         itemsToRender.forEach((item) => {
@@ -2912,43 +3232,110 @@
         });
       };
 
-      let sectionCount = 0;
+      if (currentCategory === 'cart') {
+        // 取得左側「實際商品分頁」的順序，作為購物車分區順序。
+        // 這樣之後只要調整左側分頁順序，購物車分區也會跟著調整。
+        const categoryButtons = Array.from(
+          document.querySelectorAll('.tab-btn[data-category]')
+        ).filter(btn => {
+          const category = btn.getAttribute('data-category');
+          return category && category !== 'cart' && category !== 'schedule';
+        });
 
-      if (hasHot) {
-        const titleDiv = document.createElement('div');
-        titleDiv.className = 'section-block-title hot-title';
-        titleDiv.innerHTML = '🔥 HOT 熱門';
-        gallery.appendChild(titleDiv);
-        renderItemCards(hotList);
-        sectionCount++;
-      }
+        const categoryOrder = [];
+        const categoryNames = new Map();
 
-      if (hasNormal) {
-        if (sectionCount > 0) {
-          const divider = document.createElement('hr');
-          divider.className = 'section-divider-line';
-          gallery.appendChild(divider);
+        categoryButtons.forEach(btn => {
+          const category = btn.getAttribute('data-category');
+          if (!categoryOrder.includes(category)) {
+            categoryOrder.push(category);
+            categoryNames.set(category, btn.innerText.trim());
+          }
+        });
+
+        // 若資料中存在目前左側沒有按鈕的舊分類，仍然顯示，避免購物車商品消失。
+        filtered.forEach(item => {
+          const category = String(item.category || '');
+          if (category && !categoryOrder.includes(category)) {
+            categoryOrder.push(category);
+            categoryNames.set(category, category);
+          }
+        });
+
+        let cartSectionCount = 0;
+
+        categoryOrder.forEach(category => {
+          const categoryItems = filtered.filter(item => String(item.category || '') === category);
+          if (!categoryItems.length) return;
+
+          if (cartSectionCount > 0) {
+            const divider = document.createElement('hr');
+            divider.className = 'section-divider-line';
+            gallery.appendChild(divider);
+          }
+
+          const titleDiv = document.createElement('div');
+          titleDiv.className = 'section-block-title normal-title';
+          titleDiv.innerHTML = categoryNames.get(category) || category;
+          gallery.appendChild(titleDiv);
+
+          // 每個購物車分區內仍沿用原本的 HOT / 一般 / 交易排序邏輯。
+          const hotList = categoryItems.filter(item => item.real_img === 'HOT' && !isTransaction(item.quantity));
+          const normalList = categoryItems.filter(item => item.real_img !== 'HOT' && !isTransaction(item.quantity));
+          const transactionList = categoryItems.filter(item => isTransaction(item.quantity));
+
+          renderItemCards(hotList);
+          renderItemCards(normalList);
+          renderItemCards(transactionList);
+          cartSectionCount++;
+        });
+      } else {
+        // 非購物車分頁完全維持原本的 HOT / 一般 / 交易三段式邏輯。
+        const hotList = filtered.filter(item => item.real_img === 'HOT' && !isTransaction(item.quantity));
+        const normalList = filtered.filter(item => item.real_img !== 'HOT' && !isTransaction(item.quantity));
+        const transactionList = filtered.filter(item => isTransaction(item.quantity));
+
+        const hasHot = hotList.length > 0;
+        const hasNormal = normalList.length > 0;
+        const hasTransaction = transactionList.length > 0;
+        let sectionCount = 0;
+
+        if (hasHot) {
+          const titleDiv = document.createElement('div');
+          titleDiv.className = 'section-block-title hot-title';
+          titleDiv.innerHTML = '🔥 HOT 熱門';
+          gallery.appendChild(titleDiv);
+          renderItemCards(hotList);
+          sectionCount++;
         }
-        const normalTitle = document.createElement('div');
-        normalTitle.className = 'section-block-title normal-title';
-        normalTitle.innerHTML = currentCategoryDisplayName;
-        gallery.appendChild(normalTitle);
-        renderItemCards(normalList);
-        sectionCount++;
-      }
 
-      if (hasTransaction) {
-        if (sectionCount > 0) {
-          const divider = document.createElement('hr');
-          divider.className = 'section-divider-line';
-          gallery.appendChild(divider);
+        if (hasNormal) {
+          if (sectionCount > 0) {
+            const divider = document.createElement('hr');
+            divider.className = 'section-divider-line';
+            gallery.appendChild(divider);
+          }
+          const normalTitle = document.createElement('div');
+          normalTitle.className = 'section-block-title normal-title';
+          normalTitle.innerHTML = currentCategoryDisplayName;
+          gallery.appendChild(normalTitle);
+          renderItemCards(normalList);
+          sectionCount++;
         }
-        const transactionTitle = document.createElement('div');
-        transactionTitle.className = 'section-block-title transaction-title';
-        transactionTitle.innerHTML = '🚚.. 已進入交易流程';
-        gallery.appendChild(transactionTitle);
-        renderItemCards(transactionList);
-        sectionCount++;
+
+        if (hasTransaction) {
+          if (sectionCount > 0) {
+            const divider = document.createElement('hr');
+            divider.className = 'section-divider-line';
+            gallery.appendChild(divider);
+          }
+          const transactionTitle = document.createElement('div');
+          transactionTitle.className = 'section-block-title transaction-title';
+          transactionTitle.innerHTML = '🚚.. 已進入交易流程';
+          gallery.appendChild(transactionTitle);
+          renderItemCards(transactionList);
+          sectionCount++;
+        }
       }
     }
 
