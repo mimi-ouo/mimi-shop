@@ -1648,13 +1648,12 @@
     }
 
     .cart-capture-stage .cart-summary-capture .cart-summary-main-row {
-      display: flex !important;
-      flex-direction: row !important;
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
       align-items: center !important;
-      justify-content: space-between !important;
       width: 100%;
       box-sizing: border-box;
-      gap: 14px;
+      column-gap: 28px !important;
     }
 
     .cart-capture-stage .cart-total-text {
@@ -1687,14 +1686,27 @@
     }
 
     .cart-capture-stage .cart-preference-row {
-      display: flex !important;
-      width: auto !important;
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      width: 100% !important;
       margin-top: 0 !important;
-      box-sizing: border-box;
-      justify-content: flex-end !important;
+      box-sizing: border-box !important;
       align-items: center !important;
-      flex-wrap: nowrap !important;
-      gap: 10px !important;
+      gap: 12px !important;
+    }
+
+    .cart-capture-stage .cart-preference-group {
+      width: 100% !important;
+      min-width: 0 !important;
+      justify-content: flex-start !important;
+      box-sizing: border-box !important;
+    }
+
+    .cart-capture-stage .cart-preference-select {
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
     }
 
     .cart-capture-stage .cart-preference-group {
