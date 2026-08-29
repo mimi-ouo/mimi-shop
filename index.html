@@ -2367,22 +2367,93 @@
       }));
     }
 
+    function canvasToBlob(canvas) {
+      return new Promise((resolve, reject) => {
+        canvas.toBlob((blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error('圖片產生失敗，請再試一次。'));
+          }
+        }, 'image/png');
+      });
+    }
+
+    function isMobileDevice() {
+      return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    }
+
     async function copyCanvasToClipboard(canvas) {
       if (!navigator.clipboard || typeof navigator.clipboard.write !== 'function' || typeof ClipboardItem === 'undefined') {
-        throw new Error('目前瀏覽器不支援圖片剪貼簿功能，請使用最新版 Chrome / Edge，並確認網站使用 HTTPS。');
+        throw new Error('目前瀏覽器不支援圖片剪貼簿功能，請改用最新版 Chrome / Safari，並確認網站使用 HTTPS。');
       }
 
-      const blob = await new Promise((resolve) => {
-        canvas.toBlob(resolve, 'image/png');
-      });
-
-      if (!blob) {
-        throw new Error('圖片產生失敗，請再試一次。');
-      }
-
+      const blob = await canvasToBlob(canvas);
       await navigator.clipboard.write([
         new ClipboardItem({ 'image/png': blob })
       ]);
+    }
+
+    /*
+     * 手機端重點修正：
+     * iOS Safari / 部分 Android 瀏覽器會在 await html2canvas() 之後判定
+     * 使用者點擊的 activation 已失效，導致 navigator.clipboard.write() 被拒絕。
+     *
+     * 因此先在「點擊事件仍有效」的同步階段呼叫 clipboard.write()，
+     * ClipboardItem 裡的 PNG Blob 改用 Promise 等待後續 html2canvas 完成。
+     */
+    function startMobileSafeClipboardCapture(captureCanvasPromise) {
+      if (!navigator.clipboard ||
+          typeof navigator.clipboard.write !== 'function' ||
+          typeof ClipboardItem === 'undefined') {
+        return null;
+      }
+
+      try {
+        const blobPromise = captureCanvasPromise.then(canvasToBlob);
+        const item = new ClipboardItem({
+          'image/png': blobPromise
+        });
+
+        // 這裡刻意不要 await，必須在原始 click event 的 activation 期間呼叫。
+        return navigator.clipboard.write([item]);
+      } catch (error) {
+        console.warn('無法啟動手機剪貼簿流程:', error);
+        return null;
+      }
+    }
+
+    async function downloadCanvasImage(canvas) {
+      const blob = await canvasToBlob(canvas);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `購物車_${new Date().toISOString().slice(0, 10)}.png`;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    async function shareCanvasImage(canvas) {
+      if (!navigator.share) return false;
+
+      const blob = await canvasToBlob(canvas);
+      const file = new File([blob], `購物車_${new Date().toISOString().slice(0, 10)}.png`, {
+        type: 'image/png'
+      });
+
+      if (navigator.canShare && !navigator.canShare({ files: [file] })) {
+        return false;
+      }
+
+      await navigator.share({
+        files: [file],
+        title: '購物車截圖'
+      });
+      return true;
     }
 
     function buildCartCaptureStage() {
@@ -2450,22 +2521,72 @@
         applyCartPreferencesToUI();
         stage = buildCartCaptureStage();
 
-        // 讓瀏覽器先完成 DOM 排版，再進行完整商品格子截圖。
-        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-        await waitForImages(stage);
+        /*
+         * 先建立完整截圖 Promise。
+         * 手機端必須在 click handler 的同步階段就呼叫 clipboard.write，
+         * 不能等 html2canvas 完成後才第一次觸發 Clipboard API。
+         */
+        const captureCanvasPromise = (async () => {
+          await new Promise((resolve) =>
+            requestAnimationFrame(() =>
+              requestAnimationFrame(resolve)
+            )
+          );
+          await waitForImages(stage);
 
-        const canvas = await html2canvas(stage, {
-          backgroundColor: '#121212',
-          useCORS: true,
-          allowTaint: false,
-          scale: Math.min(window.devicePixelRatio || 1, 2),
-          logging: false,
-          imageTimeout: 15000,
-          removeContainer: true
-        });
+          return html2canvas(stage, {
+            backgroundColor: '#121212',
+            useCORS: true,
+            allowTaint: false,
+            scale: Math.min(window.devicePixelRatio || 1, 2),
+            logging: false,
+            imageTimeout: 15000,
+            removeContainer: true
+          });
+        })();
 
-        await copyCanvasToClipboard(canvas);
-        setCartCaptureStatus('✅ 截圖完成！購物車金額與商品格子圖片已複製到剪貼簿，可直接貼到 Discord / LINE。');
+        // 手機優先使用「同步啟動、非同步完成」的 ClipboardItem 流程。
+        const mobileClipboardPromise = isMobileDevice()
+          ? startMobileSafeClipboardCapture(captureCanvasPromise)
+          : null;
+
+        const canvas = await captureCanvasPromise;
+
+        if (mobileClipboardPromise) {
+          try {
+            await mobileClipboardPromise;
+            setCartCaptureStatus('✅ 截圖完成！已複製到剪貼簿，可直接貼到 Discord / LINE。');
+            return;
+          } catch (clipboardError) {
+            console.warn('手機圖片剪貼簿失敗，改用備援方式:', clipboardError);
+
+            // 某些手機瀏覽器即使支援 Clipboard API，也可能禁止圖片寫入。
+            // 優先開啟系統分享；若分享不可用，再直接下載 PNG。
+            try {
+              if (await shareCanvasImage(canvas)) {
+                setCartCaptureStatus('✅ 截圖完成！已開啟手機分享選單。');
+                return;
+              }
+            } catch (shareError) {
+              console.warn('手機分享失敗:', shareError);
+            }
+
+            await downloadCanvasImage(canvas);
+            setCartCaptureStatus('✅ 截圖完成！手機瀏覽器限制圖片剪貼簿，已改為下載 PNG。');
+            return;
+          }
+        }
+
+        // 桌面端維持原本的圖片剪貼簿流程。
+        try {
+          await copyCanvasToClipboard(canvas);
+          setCartCaptureStatus('✅ 截圖完成！購物車金額與商品格子圖片已複製到剪貼簿，可直接貼到 Discord / LINE。');
+        } catch (clipboardError) {
+          // 非 HTTPS / 不支援 Clipboard API 時，至少保留可用的圖片下載。
+          console.warn('桌面圖片剪貼簿失敗，改用下載備援:', clipboardError);
+          await downloadCanvasImage(canvas);
+          setCartCaptureStatus('✅ 截圖完成！圖片剪貼簿不可用，已改為下載 PNG。');
+        }
       } catch (error) {
         console.error('購物車截圖失敗:', error);
         const message = error && error.message ? error.message : '截圖或複製失敗，請再試一次。';
