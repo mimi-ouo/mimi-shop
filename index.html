@@ -2746,7 +2746,8 @@
     position: fixed !important;
     left: 8px !important;
     right: 8px !important;
-    bottom: calc(52px + env(safe-area-inset-bottom)) !important;
+    /* 與底部「目前即時在線人數」保留獨立安全區，避免主分頁/子分頁重疊 */
+    bottom: calc(62px + env(safe-area-inset-bottom)) !important;
     top: auto !important;
     width: auto !important;
     max-width: none !important;
@@ -2862,6 +2863,7 @@
 
   #sideTabsPanel .dropdown-menu {
     position: fixed !important;
+    /* JS 會依「即時在線人數」實際高度校正 bottom，這裡只作安全預設 */
     display: none !important;
     z-index: 5100 !important;
     top: auto !important;
@@ -2940,6 +2942,11 @@
     border: 1px solid rgba(226,190,255,.30) !important;
     box-shadow: 0 14px 34px rgba(4,1,14,.70) !important;
     z-index: 5200 !important;
+  }
+
+  /* 即時在線人數固定在最底層；手機導覽列永遠位於它上方 */
+  .online-counter-wrapper {
+    z-index: 900 !important;
   }
 
   #backToTopBtn {
@@ -5026,8 +5033,25 @@
     });
   }
 
+  function syncMobileBottomLayout() {
+    if (window.innerWidth > MOBILE_MAX) return;
+
+    const panel = document.getElementById('sideTabsPanel');
+    const counter = document.querySelector('.online-counter-wrapper');
+    if (!panel || !counter) return;
+
+    // 以即時在線人數實際高度計算分頁列位置，不使用固定 52px 猜測值。
+    // 這樣不同手機、字體大小、safe-area 都不會互相重疊。
+    const counterRect = counter.getBoundingClientRect();
+    const gap = 10;
+    const bottomOffset = Math.max(0, window.innerHeight - counterRect.top) + gap;
+    panel.style.bottom = `${bottomOffset}px`;
+  }
+
   function positionMobileDropdown(dropdown) {
     if (window.innerWidth > MOBILE_MAX || !dropdown || !dropdown.classList.contains('open')) return;
+
+    syncMobileBottomLayout();
 
     const toggle = dropdown.querySelector('.dropdown-toggle');
     const menu = dropdown.querySelector('.dropdown-menu');
@@ -5046,7 +5070,12 @@
     const viewportPadding = 6;
 
     // 固定從主分頁列上方彈出，不允許往下。
-    let bottom = window.innerHeight - panelRect.top + gap;
+    // 同時以即時在線人數區塊的頂端作為硬性下界，避免子分頁進入底部資訊區。
+    const counter = document.querySelector('.online-counter-wrapper');
+    const counterRect = counter ? counter.getBoundingClientRect() : null;
+    const counterTop = counterRect ? counterRect.top : window.innerHeight;
+    const menuBottomY = Math.min(panelRect.top - gap, counterTop - gap);
+    let bottom = window.innerHeight - menuBottomY;
     menu.style.bottom = `${Math.max(0, bottom)}px`;
     menu.style.top = 'auto';
 
@@ -5098,11 +5127,13 @@
     });
 
     window.addEventListener('resize', () => {
+      syncMobileBottomLayout();
       const openDropdown = panel.querySelector('.dropdown.open');
       if (openDropdown) positionMobileDropdown(openDropdown);
     }, { passive: true });
 
     window.addEventListener('scroll', () => {
+      syncMobileBottomLayout();
       const openDropdown = panel.querySelector('.dropdown.open');
       if (openDropdown) positionMobileDropdown(openDropdown);
     }, { passive: true });
@@ -5123,6 +5154,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    syncMobileBottomLayout();
     bindMobileDropdownPositioning();
 
     const observer = new MutationObserver(() => {
