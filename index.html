@@ -2535,6 +2535,34 @@
   .tally-badge::after { content:"💬"; font-size:14px; }
   .title-discord-row { padding-right:82px; }
 }
+
+/* 手機端隱藏分頁列收合按鈕 */
+@media (max-width: 768px) {
+  #collapseToggleBtn,
+  .side-tabs-panel .collapse-toggle-btn {
+    display: none !important;
+  }
+}
+</style>
+
+<style>
+@media (max-width:768px){
+  .side-tabs-panel{overflow:visible!important;position:fixed!important;z-index:3000!important;}
+  .side-tabs-panel .dropdown{position:relative!important;}
+  .side-tabs-panel .dropdown-menu{position:fixed!important;z-index:99999!important;max-width:calc(100vw - 16px)!important;max-height:55vh!important;overflow-y:auto!important;overflow-x:hidden!important;display:none!important;box-sizing:border-box!important;transform:none!important;}
+  .side-tabs-panel .dropdown.open .dropdown-menu,.side-tabs-panel .dropdown-menu.show{display:block!important;}
+  .side-tabs-panel .dropdown-item{min-height:42px!important;padding:10px 13px!important;white-space:nowrap!important;touch-action:manipulation!important;}
+  .title-discord-row{padding-right:112px!important;overflow:visible!important;}
+  .discord-wrapper{right:0!important;width:max-content!important;max-width:none!important;overflow:visible!important;}
+  .discord-container{display:flex!important;flex-direction:column!important;align-items:flex-end!important;gap:5px!important;width:max-content!important;overflow:visible!important;}
+  .discord-badge,.tally-badge{min-width:94px!important;width:max-content!important;max-width:none!important;min-height:30px!important;padding:5px 9px!important;box-sizing:border-box!important;white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;}
+  .discord-badge span,.tally-badge span{max-width:none!important;overflow:visible!important;white-space:nowrap!important;}
+  #collapseToggleBtn{display:none!important;}
+}
+@media (max-width:430px){
+  .title-discord-row{padding-right:108px!important;}
+  .discord-badge,.tally-badge{min-width:96px!important;font-size:10px!important;padding:5px 8px!important;}
+}
 </style>
 </head>
 <body>
