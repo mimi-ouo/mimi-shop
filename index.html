@@ -1886,6 +1886,639 @@
         max-height: 140px !important;
       }
     }
+
+    /* =========================================================
+       ✨ 夢幻粉紫星空主題 / 手機端優化
+       - 僅覆蓋視覺與響應式排版，不修改既有功能邏輯
+       - 電腦端維持原內容區寬度與主要區塊尺寸
+       ========================================================= */
+
+    html {
+      background:
+        radial-gradient(circle at 15% 10%, rgba(176, 111, 255, 0.18), transparent 28%),
+        radial-gradient(circle at 85% 20%, rgba(244, 160, 255, 0.14), transparent 30%),
+        linear-gradient(145deg, #090617 0%, #130a29 42%, #0b0920 100%);
+      min-height: 100%;
+    }
+
+    body {
+      background: transparent;
+      position: relative;
+      isolation: isolate;
+      min-height: 100vh;
+    }
+
+    /* 整頁流動星雲 + 星點 */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: -18%;
+      z-index: -2;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 18% 22%, rgba(255, 205, 255, 0.55) 0 1px, transparent 2px),
+        radial-gradient(circle at 42% 12%, rgba(222, 190, 255, 0.45) 0 1px, transparent 2px),
+        radial-gradient(circle at 72% 28%, rgba(255, 225, 255, 0.5) 0 1px, transparent 2px),
+        radial-gradient(circle at 88% 62%, rgba(213, 181, 255, 0.48) 0 1px, transparent 2px),
+        radial-gradient(circle at 30% 72%, rgba(255, 232, 255, 0.45) 0 1px, transparent 2px),
+        radial-gradient(circle at 65% 84%, rgba(196, 160, 255, 0.4) 0 1px, transparent 2px),
+        radial-gradient(ellipse at 25% 35%, rgba(151, 91, 255, 0.16), transparent 42%),
+        radial-gradient(ellipse at 75% 65%, rgba(238, 123, 255, 0.12), transparent 44%);
+      background-size: 180px 180px, 260px 260px, 220px 220px, 300px 300px, 240px 240px, 280px 280px, 100% 100%, 100% 100%;
+      filter: blur(0.1px);
+      animation: dreamSkyDrift 18s ease-in-out infinite alternate;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% -10%, rgba(238, 190, 255, 0.22), transparent 38%),
+        linear-gradient(180deg, rgba(42, 18, 72, 0.08), rgba(4, 2, 16, 0.22));
+      animation: dreamGlow 7s ease-in-out infinite alternate;
+    }
+
+    @keyframes dreamSkyDrift {
+      0% { transform: translate3d(-1%, -1%, 0) scale(1); opacity: 0.72; }
+      100% { transform: translate3d(1.5%, 1%, 0) scale(1.04); opacity: 1; }
+    }
+
+    @keyframes dreamGlow {
+      0% { opacity: 0.65; }
+      100% { opacity: 1; }
+    }
+
+    /* 凍結區塊：整條 sticky header 使用夢幻粉紫玻璃質感 */
+    .sticky-header-wrapper {
+      position: sticky;
+      top: 0;
+      z-index: 900;
+      background:
+        radial-gradient(circle at 18% 0%, rgba(211, 157, 255, 0.24), transparent 34%),
+        radial-gradient(circle at 82% 15%, rgba(255, 173, 238, 0.16), transparent 36%),
+        linear-gradient(135deg, rgba(22, 10, 45, 0.96), rgba(49, 20, 74, 0.93) 50%, rgba(16, 9, 37, 0.97));
+      border: 1px solid rgba(224, 186, 255, 0.2);
+      border-top-color: rgba(255, 224, 255, 0.3);
+      border-radius: 18px;
+      padding: 14px 16px 16px;
+      margin-top: 2px;
+      box-shadow:
+        0 12px 35px rgba(6, 2, 20, 0.65),
+        0 0 28px rgba(177, 105, 255, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(16px) saturate(130%);
+      -webkit-backdrop-filter: blur(16px) saturate(130%);
+      overflow: visible;
+    }
+
+    .sticky-header-wrapper::before {
+      content: "✦   ·  ˚   ✧   ·    ⋆   ·   ✦    ˚   ·   ✧";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 3px;
+      height: 18px;
+      overflow: hidden;
+      color: rgba(255, 224, 255, 0.55);
+      font-size: 10px;
+      letter-spacing: 10px;
+      white-space: nowrap;
+      pointer-events: none;
+      animation: starRibbon 9s linear infinite;
+    }
+
+    @keyframes starRibbon {
+      from { transform: translateX(-12px); }
+      to { transform: translateX(18px); }
+    }
+
+    .header-layout {
+      position: relative;
+      gap: 10px;
+    }
+
+    .header-top-row {
+      gap: 10px;
+    }
+
+    .left-control-panel {
+      min-width: 0;
+      width: 100%;
+      gap: 0;
+    }
+
+    .title-area-group {
+      gap: 9px;
+      width: 100%;
+    }
+
+    /* 第一行：主標題置中，聯絡標籤固定在右側 */
+    .title-discord-row {
+      position: relative;
+      width: 100%;
+      min-height: 56px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 150px 6px 20px;
+      box-sizing: border-box;
+    }
+
+    .title-area {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-width: 0;
+      overflow: visible;
+    }
+
+    .title-area h2 {
+      margin: 0;
+      padding: 7px 22px;
+      min-height: 50px;
+      box-sizing: border-box;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      white-space: nowrap;
+      overflow: visible;
+      border-radius: 16px;
+      border: 1px solid rgba(240, 209, 255, 0.28);
+      background:
+        linear-gradient(120deg, rgba(255,255,255,0.08), rgba(209,145,255,0.13), rgba(255,182,241,0.08));
+      box-shadow:
+        0 0 22px rgba(181, 105, 255, 0.22),
+        inset 0 0 18px rgba(255,255,255,0.04);
+      color: #fff;
+      background-clip: padding-box;
+      -webkit-text-fill-color: transparent;
+      background-image: linear-gradient(90deg, #ffffff 0%, #f5d8ff 30%, #d9b4ff 55%, #ffcaee 78%, #ffffff 100%);
+      -webkit-background-clip: text;
+      text-shadow: 0 0 14px rgba(238, 196, 255, 0.5);
+      animation: titleDreamPulse 4.5s ease-in-out infinite;
+    }
+
+    /* 外框獨立於文字漸層，避免文字裁切 */
+    .title-area {
+      position: relative;
+    }
+
+    .title-area::before {
+      content: "";
+      position: absolute;
+      width: min(520px, 92%);
+      height: 54px;
+      border-radius: 18px;
+      background: linear-gradient(120deg, rgba(255,255,255,0.055), rgba(184,112,255,0.13), rgba(255,183,237,0.055));
+      border: 1px solid rgba(235, 205, 255, 0.2);
+      box-shadow: 0 0 25px rgba(181, 105, 255, 0.18);
+      pointer-events: none;
+    }
+
+    .title-area h2 {
+      position: relative;
+      z-index: 1;
+      background: linear-gradient(90deg, #ffffff 0%, #f4d8ff 30%, #d8b5ff 55%, #ffc9ee 78%, #ffffff 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    @keyframes titleDreamPulse {
+      0%, 100% { filter: drop-shadow(0 0 4px rgba(226, 177, 255, 0.18)); transform: translateY(0); }
+      50% { filter: drop-shadow(0 0 11px rgba(239, 185, 255, 0.42)); transform: translateY(-1px); }
+    }
+
+    .discord-wrapper {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 3;
+      display: flex;
+      flex-direction: row;
+      gap: 7px;
+    }
+
+    .discord-container {
+      gap: 7px;
+      flex-wrap: nowrap;
+    }
+
+    .discord-badge,
+    .tally-badge {
+      min-height: 36px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      box-sizing: border-box;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22), 0 0 14px rgba(202, 138, 255, 0.14);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .discord-badge {
+      background: linear-gradient(135deg, #6552d9, #8c5de8 55%, #b56bea);
+      border-color: rgba(235, 218, 255, 0.3);
+    }
+
+    .tally-badge {
+      background: linear-gradient(135deg, #a65ee8, #d85ec4 55%, #f18dd8);
+    }
+
+    .discord-badge:hover,
+    .tally-badge:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(177, 105, 255, 0.35);
+    }
+
+    /* 第二行：搜尋欄位保持原本 100% 寬度 */
+    .search-sort-wrapper {
+      width: 100%;
+      gap: 10px;
+      margin-top: 0;
+      position: relative;
+      z-index: 2;
+    }
+
+    .search-input {
+      width: 100%;
+      min-height: 42px;
+      padding: 9px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(230, 203, 255, 0.24);
+      background: rgba(10, 6, 25, 0.64);
+      color: #f7edff;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.05),
+        0 0 18px rgba(170, 93, 255, 0.1);
+    }
+
+    .search-input::placeholder {
+      color: rgba(238, 219, 255, 0.62);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: rgba(228, 190, 255, 0.65);
+      box-shadow: 0 0 0 3px rgba(184, 112, 255, 0.13), 0 0 22px rgba(184, 112, 255, 0.2);
+    }
+
+    /* 星空風格套用到現有導覽浮層，手機再重新定位 */
+    .side-tabs-panel {
+      background:
+        linear-gradient(145deg, rgba(29, 14, 54, 0.97), rgba(54, 24, 77, 0.95));
+      border-color: rgba(226, 190, 255, 0.22);
+      box-shadow: 0 10px 30px rgba(8, 2, 22, 0.58), 0 0 20px rgba(171, 99, 255, 0.12);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .tab-btn,
+    .dropdown-toggle,
+    .collapse-toggle-btn {
+      border-color: rgba(224, 193, 255, 0.2);
+      background: rgba(12, 7, 28, 0.68);
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .tab-btn:hover,
+    .dropdown-toggle:hover,
+    .collapse-toggle-btn:hover {
+      border-color: rgba(224, 184, 255, 0.55);
+      box-shadow: 0 0 12px rgba(181, 105, 255, 0.18);
+      transform: translateY(-1px);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, #9c5be7, #c779eb);
+      border-color: rgba(245, 224, 255, 0.55);
+      color: #fff;
+      box-shadow: 0 0 16px rgba(181, 105, 255, 0.28);
+    }
+
+    .online-counter-wrapper {
+      background: linear-gradient(180deg, rgba(10, 5, 24, 0.78), rgba(9, 4, 19, 0.96));
+      border-top: 1px solid rgba(218, 184, 255, 0.12);
+      box-shadow: 0 -8px 22px rgba(4, 1, 14, 0.5);
+      backdrop-filter: blur(10px);
+    }
+
+    .counter-box {
+      background: rgba(31, 15, 50, 0.84);
+      border-color: rgba(221, 188, 255, 0.18);
+      box-shadow: 0 0 18px rgba(171, 99, 255, 0.12);
+    }
+
+    /* ==================== 手機端 ==================== */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+        padding-bottom: 118px;
+        max-width: none;
+      }
+
+      .sticky-header-wrapper {
+        padding: 13px 10px 12px;
+        border-radius: 15px;
+        margin-left: -1px;
+        margin-right: -1px;
+      }
+
+      .header-layout {
+        gap: 8px;
+      }
+
+      .title-discord-row {
+        min-height: 50px;
+        padding: 4px 92px 4px 4px;
+      }
+
+      .title-area h2 {
+        min-height: 44px;
+        padding: 6px 14px;
+        font-size: clamp(20px, 6vw, 26px);
+        line-height: 1.15;
+        letter-spacing: 0.5px;
+      }
+
+      .title-area::before {
+        width: 96%;
+        height: 48px;
+        border-radius: 14px;
+      }
+
+      .discord-wrapper {
+        right: 2px;
+        gap: 4px;
+      }
+
+      .discord-container {
+        gap: 4px;
+      }
+
+      .discord-badge,
+      .tally-badge {
+        min-height: 32px;
+        padding: 6px 8px;
+        font-size: 11px;
+      }
+
+      .discord-icon {
+        width: 15px;
+        height: 15px;
+      }
+
+      .search-input {
+        min-height: 44px;
+        font-size: 15px;
+        padding: 9px 12px;
+        border-radius: 11px;
+      }
+
+      /* 導覽列改為底部橫向操作列，單手更容易點擊 */
+      .side-tabs-panel {
+        top: auto;
+        right: 8px;
+        bottom: 59px;
+        left: 8px;
+        width: auto;
+        max-width: none;
+        transform: none;
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
+        padding: 7px;
+        border-radius: 14px;
+        overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+
+      .side-tabs-panel::-webkit-scrollbar {
+        display: none;
+      }
+
+      .side-tabs-panel .collapse-toggle-btn,
+      .side-tabs-panel .tab-btn,
+      .side-tabs-panel .dropdown,
+      .side-tabs-panel .auth-section-wrapper {
+        flex: 0 0 auto;
+      }
+
+      .side-tabs-panel .collapse-toggle-btn {
+        width: auto;
+        min-width: 72px;
+        min-height: 40px;
+        margin: 0;
+        padding: 8px 10px;
+        font-size: 12px;
+      }
+
+      .side-tabs-panel .tab-btn,
+      .side-tabs-panel .dropdown-toggle {
+        width: auto;
+        min-width: max-content;
+        min-height: 40px;
+        padding: 8px 11px;
+        font-size: 12px;
+      }
+
+      .side-tabs-panel .collapse-content {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
+        width: max-content;
+        flex: 0 0 auto;
+      }
+
+      .side-tabs-panel.collapsed {
+        padding: 7px;
+      }
+
+      .side-tabs-panel.collapsed .collapse-content {
+        display: none;
+      }
+
+      .side-tabs-panel .auth-section-wrapper {
+        width: auto;
+        min-width: 68px;
+        margin: 0;
+        padding: 0 0 0 6px;
+        border-top: 0;
+        border-left: 1px solid rgba(224, 193, 255, 0.16);
+      }
+
+      .side-tabs-panel .auth-box {
+        width: auto;
+      }
+
+      .side-tabs-panel .auth-btn {
+        min-height: 40px;
+        width: auto;
+        padding: 8px 11px;
+        border-radius: 8px;
+      }
+
+      .side-tabs-panel .dropdown {
+        width: auto;
+      }
+
+      .side-tabs-panel .dropdown-menu {
+        top: auto;
+        bottom: calc(100% + 8px);
+        left: 0;
+        right: auto;
+        min-width: 125px;
+        border-color: rgba(224, 193, 255, 0.22);
+        background: rgba(31, 14, 53, 0.98);
+      }
+
+      .side-tabs-panel .dropdown-item {
+        min-height: 40px;
+        font-size: 12px;
+      }
+
+      #backToTopBtn {
+        right: 12px;
+        bottom: 116px;
+        padding: 9px 12px;
+        font-size: 12px;
+        z-index: 1200;
+        background: rgba(31, 14, 53, 0.9);
+        border-color: rgba(224, 193, 255, 0.24);
+      }
+
+      .online-counter-wrapper {
+        padding-top: 7px;
+        padding-bottom: max(8px, env(safe-area-inset-bottom));
+        min-height: 45px;
+        box-sizing: border-box;
+      }
+
+      .counter-box {
+        max-width: calc(100vw - 30px);
+        padding: 6px 11px;
+        gap: 6px;
+        font-size: 12px;
+        border-radius: 999px;
+      }
+
+      #count {
+        font-size: 14px;
+      }
+
+      /* 手機觸控目標略放大，不改桌機商品格尺寸 */
+      .cart-checkbox {
+        width: 20px;
+        height: 20px;
+      }
+
+      .gallery {
+        padding-bottom: 6px;
+      }
+
+      /* 手機月曆避免操作區過擠 */
+      .schedule-container {
+        padding: 12px;
+        border-radius: 12px;
+      }
+
+      .schedule-header {
+        gap: 9px;
+        margin-bottom: 12px;
+      }
+
+      .schedule-header h3 {
+        font-size: 19px;
+      }
+
+      .schedule-nav-btns {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .schedule-btn {
+        min-height: 40px;
+        flex: 1;
+        padding: 8px 7px;
+        font-size: 12px;
+      }
+
+      .calendar-grid {
+        gap: 4px;
+      }
+
+      .calendar-weekday {
+        font-size: 13px;
+        padding: 4px 0;
+      }
+
+      .calendar-cell {
+        min-height: 76px;
+        padding: 4px;
+      }
+
+      .calendar-date-num {
+        font-size: 12px;
+      }
+
+      .calendar-badge {
+        font-size: 10px;
+        padding: 5px 2px;
+      }
+    }
+
+    @media (max-width: 430px) {
+      .title-discord-row {
+        padding-right: 82px;
+      }
+
+      .discord-badge,
+      .tally-badge {
+        font-size: 0;
+        width: 34px;
+        min-width: 34px;
+        padding: 7px;
+        justify-content: center;
+      }
+
+      .discord-badge::after {
+        content: "DC";
+        font-size: 10px;
+        font-weight: 800;
+      }
+
+      .tally-badge::after {
+        content: "💬";
+        font-size: 14px;
+      }
+
+      .title-area h2 {
+        font-size: 20px;
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      .search-input {
+        font-size: 14px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body::before,
+      body::after,
+      .sticky-header-wrapper::before,
+      .title-area h2 {
+        animation: none !important;
+      }
+    }
+
   </style>
 </head>
 <body>
