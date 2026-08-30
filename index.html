@@ -2639,12 +2639,15 @@
     height: 42px;
   }
 
+  /* 子分頁改由 JS 依主分頁實際位置定位，固定在視窗最上層，避免被主分頁列/橫向捲動區遮住 */
   .side-tabs-panel .dropdown-menu {
+    position: fixed !important;
     top: auto !important;
-    bottom: calc(100% + 9px) !important;
-    left: 0 !important;
+    bottom: auto !important;
+    left: 8px !important;
     right: auto !important;
     min-width: 145px !important;
+    width: max-content !important;
     max-width: min(78vw, 260px) !important;
     max-height: min(46vh, 330px) !important;
     overflow-y: auto !important;
@@ -2653,6 +2656,13 @@
     border-radius: 12px !important;
     box-shadow: 0 10px 30px rgba(0,0,0,.65) !important;
     scrollbar-width: thin;
+    z-index: 99999 !important;
+  }
+
+  /* 固定定位時不再使用 nth-last-child 的相對左右展開規則 */
+  .side-tabs-panel .dropdown:nth-last-child(-n+2) .dropdown-menu {
+    left: 8px !important;
+    right: auto !important;
   }
 
   .side-tabs-panel .dropdown-item {
@@ -3621,6 +3631,55 @@
       });
     }
 
+    function positionMobileDropdown(dropdownEl, toggle) {
+      if (window.innerWidth > 768 || !dropdownEl || !toggle) return;
+
+      const menu = dropdownEl.querySelector('.dropdown-menu');
+      if (!menu) return;
+
+      const gap = 9;
+      const margin = 8;
+      const toggleRect = toggle.getBoundingClientRect();
+
+      // 先顯示才能取得實際高度，再依按鈕位置計算上方座標。
+      menu.style.display = 'block';
+      menu.style.visibility = 'hidden';
+      menu.style.left = '0px';
+      menu.style.top = '0px';
+
+      const menuRect = menu.getBoundingClientRect();
+      let left = toggleRect.left;
+      let top = toggleRect.top - menuRect.height - gap;
+
+      // 不讓子分頁超出左右螢幕。
+      if (left + menuRect.width > window.innerWidth - margin) {
+        left = window.innerWidth - menuRect.width - margin;
+      }
+      left = Math.max(margin, left);
+
+      // 如果上方空間不足，改放到按鈕下方，確保永遠可見。
+      if (top < margin) {
+        top = Math.min(
+          toggleRect.bottom + gap,
+          window.innerHeight - menuRect.height - margin
+        );
+      }
+      top = Math.max(margin, top);
+
+      menu.style.left = `${Math.round(left)}px`;
+      menu.style.top = `${Math.round(top)}px`;
+      menu.style.right = 'auto';
+      menu.style.bottom = 'auto';
+      menu.style.visibility = 'visible';
+    }
+
+    function repositionOpenMobileDropdown() {
+      if (window.innerWidth > 768) return;
+      const openDropdown = document.querySelector('.side-tabs-panel .dropdown.open');
+      if (!openDropdown) return;
+      positionMobileDropdown(openDropdown, openDropdown.querySelector('.dropdown-toggle'));
+    }
+
     function setupTabs() {
       document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
         toggle.addEventListener('click', (e) => {
@@ -3629,17 +3688,33 @@
           const dropdownEl = document.getElementById(dropdownId);
           
           const isOpen = dropdownEl.classList.contains('open');
-          document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
+          document.querySelectorAll('.dropdown').forEach(d => {
+            d.classList.remove('open');
+            const m = d.querySelector('.dropdown-menu');
+            if (m && window.innerWidth <= 768) {
+              m.style.visibility = 'hidden';
+            }
+          });
           
           if (!isOpen) {
             dropdownEl.classList.add('open');
+            if (window.innerWidth <= 768) {
+              positionMobileDropdown(dropdownEl, toggle);
+            }
           }
         });
       });
 
       document.addEventListener('click', () => {
-        document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
+        document.querySelectorAll('.dropdown').forEach(d => {
+          d.classList.remove('open');
+          const m = d.querySelector('.dropdown-menu');
+          if (m && window.innerWidth <= 768) m.style.visibility = 'hidden';
+        });
       });
+
+      window.addEventListener('resize', repositionOpenMobileDropdown);
+      window.addEventListener('scroll', repositionOpenMobileDropdown, { passive: true });
 
       document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
