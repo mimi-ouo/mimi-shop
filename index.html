@@ -440,6 +440,36 @@
       }
     }
 
+    .side-tabs-panel.collapsed {
+      padding: 8px;
+      gap: 4px;
+    }
+    .side-tabs-panel.collapsed .collapse-content {
+      display: none;
+    }
+
+    .collapse-toggle-btn {
+      background: var(--bg-color);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      width: 100px;
+      box-sizing: border-box;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .collapse-toggle-btn:hover {
+      background: #2a2a2a;
+      border-color: var(--accent-color);
+    }
+
     .collapse-content {
       display: flex;
       flex-direction: column;
@@ -2149,6 +2179,7 @@
 
     .tab-btn,
     .dropdown-toggle,
+    .collapse-toggle-btn {
       border-color: rgba(224, 193, 255, 0.2);
       background: rgba(12, 7, 28, 0.68);
       transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
@@ -2156,6 +2187,7 @@
 
     .tab-btn:hover,
     .dropdown-toggle:hover,
+    .collapse-toggle-btn:hover {
       border-color: rgba(224, 184, 255, 0.55);
       box-shadow: 0 0 12px rgba(181, 105, 255, 0.18);
       transform: translateY(-1px);
@@ -2265,29 +2297,35 @@
         overflow-y: visible;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
-        scroll-snap-type: x proximity;
-        overscroll-behavior-x: contain;
       }
 
       .side-tabs-panel::-webkit-scrollbar {
         display: none;
       }
+
+      .side-tabs-panel .collapse-toggle-btn,
       .side-tabs-panel .tab-btn,
       .side-tabs-panel .dropdown,
       .side-tabs-panel .auth-section-wrapper {
         flex: 0 0 auto;
       }
 
+      .side-tabs-panel .collapse-toggle-btn {
+        width: auto;
+        min-width: 72px;
+        min-height: 40px;
+        margin: 0;
+        padding: 8px 10px;
+        font-size: 12px;
+      }
+
       .side-tabs-panel .tab-btn,
       .side-tabs-panel .dropdown-toggle {
         width: auto;
         min-width: max-content;
-        min-height: 42px;
-        padding: 9px 12px;
+        min-height: 40px;
+        padding: 8px 11px;
         font-size: 12px;
-        flex: 0 0 auto;
-        white-space: nowrap;
-        scroll-snap-align: start;
       }
 
       .side-tabs-panel .collapse-content {
@@ -2297,6 +2335,14 @@
         gap: 6px;
         width: max-content;
         flex: 0 0 auto;
+      }
+
+      .side-tabs-panel.collapsed {
+        padding: 7px;
+      }
+
+      .side-tabs-panel.collapsed .collapse-content {
+        display: none;
       }
 
       .side-tabs-panel .auth-section-wrapper {
@@ -2490,13 +2536,20 @@
   .title-discord-row { padding-right:82px; }
 }
 
+/* 手機端隱藏分頁列收合按鈕 */
+@media (max-width: 768px) {
+  #collapseToggleBtn,
+  .side-tabs-panel .collapse-toggle-btn {
+    display: none !important;
+  }
+}
 </style>
 
 <style>
 @media (max-width:768px){
   .side-tabs-panel{overflow:visible!important;position:fixed!important;z-index:3000!important;}
   .side-tabs-panel .dropdown{position:relative!important;}
-  .side-tabs-panel .dropdown-menu{position:absolute!important;z-index:99999!important;top:auto!important;bottom:calc(100% + 8px)!important;left:0!important;right:auto!important;min-width:125px!important;max-width:calc(100vw - 16px)!important;max-height:55vh!important;overflow-y:auto!important;overflow-x:hidden!important;display:none!important;box-sizing:border-box!important;transform:none!important;}
+  .side-tabs-panel .dropdown-menu{position:fixed!important;z-index:99999!important;max-width:calc(100vw - 16px)!important;max-height:55vh!important;overflow-y:auto!important;overflow-x:hidden!important;display:none!important;box-sizing:border-box!important;transform:none!important;}
   .side-tabs-panel .dropdown.open .dropdown-menu,.side-tabs-panel .dropdown-menu.show{display:block!important;}
   .side-tabs-panel .dropdown-item{min-height:42px!important;padding:10px 13px!important;white-space:nowrap!important;touch-action:manipulation!important;}
   .title-discord-row{padding-right:112px!important;overflow:visible!important;}
@@ -2504,11 +2557,178 @@
   .discord-container{display:flex!important;flex-direction:column!important;align-items:flex-end!important;gap:5px!important;width:max-content!important;overflow:visible!important;}
   .discord-badge,.tally-badge{min-width:94px!important;width:max-content!important;max-width:none!important;min-height:30px!important;padding:5px 9px!important;box-sizing:border-box!important;white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;}
   .discord-badge span,.tally-badge span{max-width:none!important;overflow:visible!important;white-space:nowrap!important;}
+  #collapseToggleBtn{display:none!important;}
 }
 @media (max-width:430px){
   .title-discord-row{padding-right:108px!important;}
   .discord-badge,.tally-badge{min-width:96px!important;font-size:10px!important;padding:5px 8px!important;}
 }
+
+/* ===== 手機端智慧分頁列優化（僅 max-width: 768px，不影響桌面） ===== */
+@media (max-width: 768px) {
+  .side-tabs-panel {
+    top: auto !important;
+    bottom: max(10px, env(safe-area-inset-bottom)) !important;
+    left: 8px !important;
+    right: 8px !important;
+    width: auto !important;
+    max-width: none !important;
+    transform: none !important;
+    box-sizing: border-box;
+    padding: 8px !important;
+    gap: 7px !important;
+    border-radius: 14px !important;
+    background: rgba(20, 20, 20, 0.96);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 8px 28px rgba(0,0,0,.55);
+    overflow: visible !important;
+  }
+
+  /* 主分頁改成單列，可左右滑動 */
+  .side-tabs-panel .collapse-content {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
+    gap: 7px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    padding: 1px 2px 3px !important;
+    margin: 0 !important;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  .side-tabs-panel .collapse-content::-webkit-scrollbar {
+    display: none;
+  }
+
+  .side-tabs-panel .tab-btn,
+  .side-tabs-panel .dropdown,
+  .side-tabs-panel .dropdown-toggle {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: max-content !important;
+  }
+
+  .side-tabs-panel .tab-btn,
+  .side-tabs-panel .dropdown-toggle {
+    min-height: 42px !important;
+    padding: 9px 13px !important;
+    border-radius: 10px !important;
+    font-size: 14px !important;
+    justify-content: center !important;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* 當前主分頁更容易辨識 */
+  .side-tabs-panel .tab-btn.active,
+  .side-tabs-panel .dropdown.open > .dropdown-toggle {
+    box-shadow: 0 0 0 2px rgba(255,255,255,.12) inset;
+    transform: translateY(-1px);
+  }
+
+  /* 子分頁從主分頁「上方」彈出 */
+  .side-tabs-panel .dropdown {
+    position: relative !important;
+    height: 42px;
+  }
+
+  .side-tabs-panel .dropdown-menu {
+    top: auto !important;
+    bottom: calc(100% + 9px) !important;
+    left: 0 !important;
+    right: auto !important;
+    min-width: 145px !important;
+    max-width: min(78vw, 260px) !important;
+    max-height: min(46vh, 330px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 6px !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,.65) !important;
+    scrollbar-width: thin;
+  }
+
+  .side-tabs-panel .dropdown-item {
+    min-height: 42px !important;
+    padding: 9px 12px !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    white-space: nowrap !important;
+    touch-action: manipulation;
+  }
+
+  /* 靠右的主分頁，子分頁向左展開，避免超出螢幕 */
+  .side-tabs-panel .dropdown:nth-last-child(-n+2) .dropdown-menu {
+    left: auto !important;
+    right: 0 !important;
+  }
+
+  /* 購物車數字徽章不被擠壓 */
+  .side-tabs-panel .tab-btn[data-category="cart"] {
+    min-width: 92px !important;
+  }
+
+  /* 登入區移到分頁列下方並縮小，不搶主分頁操作空間 */
+  .side-tabs-panel .auth-section-wrapper {
+    width: 100% !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 6px !important;
+    margin: 0 !important;
+    padding-top: 6px !important;
+  }
+
+  .side-tabs-panel .auth-box {
+    width: auto !important;
+  }
+
+  .side-tabs-panel .auth-btn {
+    width: auto !important;
+    min-height: 36px !important;
+    padding: 7px 12px !important;
+  }
+
+  .side-tabs-panel .auth-inputs {
+    position: absolute;
+    right: 8px;
+    bottom: calc(100% + 8px);
+    width: min(280px, calc(100vw - 32px)) !important;
+    padding: 8px;
+    border-radius: 10px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 28px rgba(0,0,0,.55);
+  }
+}
+
+/* 超小螢幕再降低間距，避免分頁列過高 */
+@media (max-width: 390px) {
+  .side-tabs-panel {
+    left: 5px !important;
+    right: 5px !important;
+    padding: 6px !important;
+  }
+
+  .side-tabs-panel .collapse-content {
+    gap: 5px !important;
+  }
+
+  .side-tabs-panel .tab-btn,
+  .side-tabs-panel .dropdown-toggle {
+    min-height: 40px !important;
+    padding: 8px 11px !important;
+    font-size: 13px !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -2521,6 +2741,8 @@
   <button id="backToTopBtn" title="回到頂部">↑ 頂部</button>
 
   <div class="side-tabs-panel" id="sideTabsPanel">
+    <button class="collapse-toggle-btn" id="collapseToggleBtn">📂 收合 ▾</button>
+    
     <button class="tab-btn" id="cartTabBtn" data-category="cart">
       <span>🛒 購物車</span>
     </button>
@@ -2888,7 +3110,8 @@
       });
 
       setupTabs();
-        setupModalEvents();
+      setupCollapseToggle();
+      setupModalEvents();
       setupBackToTop();
       setupClearCartBtn();
       setupCartPreferences();
@@ -3250,6 +3473,32 @@
       });
     }
 
+    function setupCollapseToggle() {
+      const toggleBtn = document.getElementById('collapseToggleBtn');
+      const panel = document.getElementById('sideTabsPanel');
+
+      toggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        panel.classList.toggle('collapsed');
+        if (panel.classList.contains('collapsed')) {
+          toggleBtn.innerText = "📂 展開 ▴";
+        } else {
+          toggleBtn.innerText = "📂 收合 ▾";
+        }
+      });
+    }
+
+    function toggleSidePanel() {
+      const panel = document.getElementById('sideTabsPanel');
+      const toggleBtn = document.getElementById('collapseToggleBtn');
+      if (panel) {
+        panel.classList.remove('collapsed');
+        if (toggleBtn) {
+          toggleBtn.innerText = "📂 收合 ▾";
+        }
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
     function updateCartButtonBadge() {
       const cartBtn = document.getElementById('cartTabBtn');
@@ -3444,6 +3693,12 @@
             renderGallery();
           }
 
+          if (window.innerWidth <= 768) {
+            const sideTabsPanel = document.getElementById('sideTabsPanel');
+            const collapseToggleBtn = document.getElementById('collapseToggleBtn');
+            sideTabsPanel.classList.add('collapsed');
+            collapseToggleBtn.innerText = "📂 展開 ▴";
+          }
         });
       });
     }
