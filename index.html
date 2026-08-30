@@ -5026,119 +5026,205 @@
 <script id="mobile-tabs-redesign-js">
 (function () {
   const MOBILE_MAX = 768;
+  const FLOAT_CLASS = 'mobile-floating-submenu';
 
-  function closeMobileDropdowns(except) {
-    document.querySelectorAll('#sideTabsPanel .dropdown').forEach(dropdown => {
-      if (dropdown !== except) dropdown.classList.remove('open');
-    });
+  function isMobile() {
+    return window.innerWidth <= MOBILE_MAX;
+  }
+
+  function getPanel() {
+    return document.getElementById('sideTabsPanel');
+  }
+
+  function getCounter() {
+    return document.querySelector('.online-counter-wrapper');
   }
 
   function syncMobileBottomLayout() {
-    if (window.innerWidth > MOBILE_MAX) return;
-
-    const panel = document.getElementById('sideTabsPanel');
-    const counter = document.querySelector('.online-counter-wrapper');
+    if (!isMobile()) return;
+    const panel = getPanel();
+    const counter = getCounter();
     if (!panel || !counter) return;
 
-    // 以即時在線人數實際高度計算分頁列位置，不使用固定 52px 猜測值。
-    // 這樣不同手機、字體大小、safe-area 都不會互相重疊。
     const counterRect = counter.getBoundingClientRect();
-    const gap = 10;
+    const gap = 8;
     const bottomOffset = Math.max(0, window.innerHeight - counterRect.top) + gap;
     panel.style.bottom = `${bottomOffset}px`;
   }
 
+  function restoreMenu(dropdown) {
+    if (!dropdown) return;
+    const menu = dropdown.__mobileFloatingMenu;
+    if (!menu) return;
+
+    if (menu.parentElement !== dropdown) {
+      dropdown.appendChild(menu);
+    }
+
+    menu.classList.remove(FLOAT_CLASS);
+    menu.style.display = '';
+    menu.style.visibility = '';
+    menu.style.position = '';
+    menu.style.left = '';
+    menu.style.right = '';
+    menu.style.top = '';
+    menu.style.bottom = '';
+    menu.style.width = '';
+    menu.style.maxWidth = '';
+    menu.style.maxHeight = '';
+    menu.style.zIndex = '';
+    menu.style.overflowY = '';
+    menu.style.overflowX = '';
+  }
+
+  function closeAllMobileMenus(except) {
+    document.querySelectorAll('#sideTabsPanel .dropdown').forEach(dropdown => {
+      if (dropdown !== except) dropdown.classList.remove('open');
+      if (dropdown !== except) restoreMenu(dropdown);
+    });
+
+    document.querySelectorAll(`.${FLOAT_CLASS}`).forEach(menu => {
+      const owner = menu.__mobileOwner;
+      if (owner !== except) {
+        if (owner) owner.classList.remove('open');
+        restoreMenu(owner);
+      }
+    });
+  }
+
   function positionMobileDropdown(dropdown) {
-    if (window.innerWidth > MOBILE_MAX || !dropdown || !dropdown.classList.contains('open')) return;
+    if (!isMobile() || !dropdown || !dropdown.classList.contains('open')) return;
+
+    const panel = getPanel();
+    const toggle = dropdown.querySelector('.dropdown-toggle');
+    let menu = dropdown.__mobileFloatingMenu || dropdown.querySelector('.dropdown-menu');
+    if (!panel || !toggle || !menu) return;
 
     syncMobileBottomLayout();
 
-    const toggle = dropdown.querySelector('.dropdown-toggle');
-    const menu = dropdown.querySelector('.dropdown-menu');
-    const panel = document.getElementById('sideTabsPanel');
-    if (!toggle || !menu || !panel) return;
+    // 關鍵修正：把子分頁真正移到 <body>，完全脫離底部主分頁列的 stacking/overflow context。
+    // 因此它一定位於主分頁列「上方」，並可使用最高層級 z-index。
+    if (menu.parentElement !== document.body) {
+      dropdown.__mobileFloatingMenu = menu;
+      menu.__mobileOwner = dropdown;
+      document.body.appendChild(menu);
+    }
 
-    // 先顯示，取得實際尺寸；Y 座標永遠在主分頁列上方。
+    menu.classList.add(FLOAT_CLASS);
+    menu.style.position = 'fixed';
     menu.style.display = 'block';
     menu.style.visibility = 'hidden';
+    menu.style.top = 'auto';
+    menu.style.right = 'auto';
+    menu.style.transform = 'none';
+    menu.style.zIndex = '2147483647';
+    menu.style.boxSizing = 'border-box';
+    menu.style.maxWidth = 'calc(100vw - 12px)';
+    menu.style.maxHeight = 'min(55vh, 360px)';
+    menu.style.overflowY = 'auto';
+    menu.style.overflowX = 'hidden';
 
     const toggleRect = toggle.getBoundingClientRect();
     const panelRect = panel.getBoundingClientRect();
-    const menuRect = menu.getBoundingClientRect();
-
     const gap = 8;
     const viewportPadding = 6;
 
-    // 固定從主分頁列上方彈出，不允許往下。
-    // 同時以即時在線人數區塊的頂端作為硬性下界，避免子分頁進入底部資訊區。
-    const counter = document.querySelector('.online-counter-wrapper');
-    const counterRect = counter ? counter.getBoundingClientRect() : null;
-    const counterTop = counterRect ? counterRect.top : window.innerHeight;
-    const menuBottomY = Math.min(panelRect.top - gap, counterTop - gap);
-    let bottom = window.innerHeight - menuBottomY;
-    menu.style.bottom = `${Math.max(0, bottom)}px`;
-    menu.style.top = 'auto';
+    // 先用按鈕寬度估算，讓瀏覽器取得正確尺寸。
+    menu.style.left = `${Math.max(viewportPadding, toggleRect.left)}px`;
+    menu.style.bottom = `${Math.max(0, window.innerHeight - panelRect.top + gap)}px`;
 
-    // 水平以主分頁按鈕為基準，超出左右邊界時自動修正。
+    const menuRect = menu.getBoundingClientRect();
+    const menuWidth = Math.min(menuRect.width || 150, window.innerWidth - viewportPadding * 2);
+    const menuHeight = menuRect.height || 0;
+
+    // X：以被點擊的主分頁為基準，超出螢幕就自動向內修正。
     let left = toggleRect.left;
-    const menuWidth = menuRect.width || 150;
-
     if (left + menuWidth > window.innerWidth - viewportPadding) {
       left = window.innerWidth - menuWidth - viewportPadding;
     }
     left = Math.max(viewportPadding, left);
 
+    // Y：底部永遠貼在主分頁列上方，禁止使用 top / 向下彈出。
+    // 即時在線人數位於主分頁列下方，因此子分頁不可能進入該區域。
+    const bottom = window.innerHeight - panelRect.top + gap;
     menu.style.left = `${left}px`;
-    menu.style.right = 'auto';
+    menu.style.bottom = `${Math.max(0, bottom)}px`;
+    menu.style.width = `${menuWidth}px`;
     menu.style.visibility = 'visible';
+
+    // 若內容過高，仍維持「上方彈出」，由 max-height 產生內部滾動。
+    if (menuHeight > panelRect.top - gap - viewportPadding) {
+      menu.style.maxHeight = `${Math.max(120, panelRect.top - gap - viewportPadding)}px`;
+    }
+  }
+
+  function handleMobileToggle(toggle) {
+    if (!isMobile()) return;
+    const dropdown = toggle.closest('.dropdown');
+    if (!dropdown) return;
+
+    requestAnimationFrame(() => {
+      if (dropdown.classList.contains('open')) {
+        closeAllMobileMenus(dropdown);
+        positionMobileDropdown(dropdown);
+      } else {
+        restoreMenu(dropdown);
+      }
+    });
   }
 
   function bindMobileDropdownPositioning() {
-    const panel = document.getElementById('sideTabsPanel');
+    const panel = getPanel();
     if (!panel) return;
 
     panel.querySelectorAll('.dropdown-toggle').forEach(toggle => {
       toggle.addEventListener('click', function () {
-        if (window.innerWidth > MOBILE_MAX) return;
-
-        const dropdown = this.closest('.dropdown');
-        // setupTabs 已先處理 open 狀態，因此下一個 frame 定位最可靠。
-        requestAnimationFrame(() => {
-          closeMobileDropdowns(dropdown);
-          if (dropdown.classList.contains('open')) {
-            positionMobileDropdown(dropdown);
-          }
-        });
+        handleMobileToggle(this);
       });
     });
 
     panel.querySelectorAll('.dropdown-item').forEach(item => {
       item.addEventListener('click', () => {
-        panel.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
+        const dropdown = item.closest('.dropdown');
+        if (dropdown) dropdown.classList.remove('open');
+        requestAnimationFrame(() => restoreMenu(dropdown));
       });
     });
 
     document.addEventListener('click', () => {
-      panel.querySelectorAll('.dropdown-menu').forEach(menu => {
-        menu.style.visibility = '';
-        menu.style.left = '';
-        menu.style.bottom = '';
+      if (!isMobile()) return;
+      requestAnimationFrame(() => {
+        panel.querySelectorAll('.dropdown').forEach(dropdown => {
+          if (!dropdown.classList.contains('open')) restoreMenu(dropdown);
+        });
       });
-    });
+    }, true);
 
     window.addEventListener('resize', () => {
+      if (!isMobile()) {
+        panel.querySelectorAll('.dropdown').forEach(restoreMenu);
+        return;
+      }
       syncMobileBottomLayout();
       const openDropdown = panel.querySelector('.dropdown.open');
       if (openDropdown) positionMobileDropdown(openDropdown);
+    }, { passive: true });
+
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => {
+        syncMobileBottomLayout();
+        const openDropdown = panel.querySelector('.dropdown.open');
+        if (openDropdown) positionMobileDropdown(openDropdown);
+      }, 80);
     }, { passive: true });
 
     window.addEventListener('scroll', () => {
+      if (!isMobile()) return;
       syncMobileBottomLayout();
       const openDropdown = panel.querySelector('.dropdown.open');
       if (openDropdown) positionMobileDropdown(openDropdown);
     }, { passive: true });
 
-    // 初次載入時，若目前分類屬於子分頁，讓主分頁狀態一致。
     panel.querySelectorAll('.dropdown-toggle').forEach(toggle => {
       toggle.setAttribute('aria-haspopup', 'true');
       toggle.setAttribute('aria-expanded', 'false');
@@ -5146,7 +5232,7 @@
   }
 
   function syncMobileAria() {
-    if (window.innerWidth > MOBILE_MAX) return;
+    if (!isMobile()) return;
     document.querySelectorAll('#sideTabsPanel .dropdown').forEach(dropdown => {
       const toggle = dropdown.querySelector('.dropdown-toggle');
       if (toggle) toggle.setAttribute('aria-expanded', dropdown.classList.contains('open') ? 'true' : 'false');
@@ -5158,9 +5244,14 @@
     bindMobileDropdownPositioning();
 
     const observer = new MutationObserver(() => {
-      if (window.innerWidth <= MOBILE_MAX) syncMobileAria();
+      if (isMobile()) {
+        syncMobileAria();
+        const openDropdown = getPanel()?.querySelector('.dropdown.open');
+        if (openDropdown) requestAnimationFrame(() => positionMobileDropdown(openDropdown));
+      }
     });
-    const panel = document.getElementById('sideTabsPanel');
+
+    const panel = getPanel();
     if (panel) observer.observe(panel, { subtree: true, attributes: true, attributeFilter: ['class'] });
   });
 })();
