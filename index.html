@@ -44,6 +44,46 @@
     display: block;
   }
 }
+
+/* === 購物車頁面：依指定圖片調整桌面版功能排列 === */
+@media (min-width:601px){
+  .cart-summary-main-row{
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
+  }
+  .cart-summary-right{
+    flex:0 0 auto;
+    flex-direction:row;
+    align-items:center;
+    justify-content:flex-end;
+    gap:12px;
+  }
+  .cart-preference-row{
+    width:auto;
+    align-items:center;
+    justify-content:flex-end;
+    gap:10px;
+    padding-top:0;
+  }
+  .cart-preference-group{
+    align-items:center;
+    gap:6px;
+  }
+  .cart-preference-label{
+    color:#ffffff;
+  }
+  .cart-summary-actions{
+    width:auto;
+    flex:0 0 auto;
+    align-items:center;
+    justify-content:flex-end;
+    gap:5px;
+  }
+}
+.cart-preference-label{
+  color:#ffffff;
+}
 </style>
 </head>
 <body>
