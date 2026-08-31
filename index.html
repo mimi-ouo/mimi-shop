@@ -1848,7 +1848,7 @@ body
   width:100%;
   margin:0!important;
   gap:6px;
-  grid-template-columns:repeat(7,minmax(0,1fr));
+  grid-template-columns:repeat(6,minmax(0,1fr));
   align-items:start;
   grid-auto-rows:auto
 }
@@ -4188,6 +4188,19 @@ function setupCartPreferences() {
       const summaryClone = summary.cloneNode(true);
       summaryClone.id = 'cartSummaryCapture';
       summaryClone.classList.add('cart-summary-capture');
+
+      // cloneNode() 不一定會保留使用者目前在原生 <select> 上的「即時選擇狀態」，
+      // 有機會把 HTML 原始 selected（預設男號）帶進截圖副本。
+      // 因此截圖前直接把目前畫面上的實際 value 同步到 clone，
+      // 確保選擇「都可」時，剪貼簿圖片也一定顯示「❤️ 都可」。
+      ['#cartPaymentMethod', '#cartCharacterGender'].forEach((selector) => {
+        const sourceSelect = summary.querySelector(selector);
+        const cloneSelect = summaryClone.querySelector(selector);
+        if (sourceSelect && cloneSelect) {
+          cloneSelect.value = sourceSelect.value;
+          cloneSelect.selectedIndex = sourceSelect.selectedIndex;
+        }
+      });
 
       const galleryClone = gallery.cloneNode(true);
       galleryClone.id = 'cartGalleryCapture';
