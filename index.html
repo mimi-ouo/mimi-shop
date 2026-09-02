@@ -2496,17 +2496,6 @@ body::after
     padding:7px;
     justify-content:center
   }
-  .discord-badge::after
-  {
-    content:"DC";
-    font-size:10px;
-    font-weight:800
-  }
-  .tally-badge::after
-  {
-    content:"💬";
-    font-size:14px
-  }
   .search-input
   {
     font-size:14px
@@ -2562,17 +2551,6 @@ body::after
     min-width:34px;
     justify-content:center
   }
-  .discord-badge::after
-  {
-    content:"DC";
-    font-size:10px;
-    font-weight:800
-  }
-  .tally-badge::after
-  {
-    content:"💬";
-    font-size:14px
-  }
   .title-discord-row
   {
     padding-right:82px
@@ -2580,6 +2558,37 @@ body::after
 }
 @media (max-width:768px)
 {
+  /* 手機：管理者登入彈窗固定在主分頁列上方 */
+  .auth-section-wrapper
+  {
+    position:fixed!important;
+    left:8px!important;
+    right:8px!important;
+    bottom:calc(max(10px,env(safe-area-inset-bottom)) + 76px)!important;
+    width:auto!important;
+    max-width:none!important;
+    z-index:2147483646!important;
+    display:none!important;
+    box-sizing:border-box!important;
+    margin:0!important;
+    padding:8px!important;
+    border:1px solid var(--border-color)!important;
+    border-radius:12px!important;
+    background:rgba(30,30,30,0.98)!important;
+    box-shadow:0 8px 25px rgba(0,0,0,0.7)!important;
+  }
+
+  .auth-section-wrapper.mobile-auth-open
+  {
+    display:block!important;
+  }
+
+  .auth-box,
+  .auth-inputs
+  {
+    width:100%!important;
+  }
+
   #collapseToggleBtn,.side-tabs-panel .collapse-toggle-btn
   {
     display:none!important
@@ -5737,6 +5746,28 @@ function setupCartPreferences() {
     return document.getElementById('sideTabsPanel');
   }
 
+  function syncMobileAuthPopup() {
+    const wrapper = document.querySelector('.auth-section-wrapper');
+    const inputs = document.getElementById('authInputs');
+    if (!wrapper || !inputs) return;
+    if (isMobile()) {
+      const visible = getComputedStyle(inputs).display !== 'none';
+      wrapper.classList.toggle('mobile-auth-open', visible);
+      if (visible) {
+        const panel = getPanel();
+        if (panel) {
+          const r = panel.getBoundingClientRect();
+          const h = Math.max(0, window.innerHeight - r.top);
+          wrapper.style.bottom = `${h + 8}px`;
+        }
+      }
+    } else {
+      wrapper.classList.remove('mobile-auth-open');
+      wrapper.style.bottom = '';
+    }
+  }
+
+
   function getCounter() {
     return document.querySelector('.online-counter-wrapper');
   }
@@ -5878,6 +5909,19 @@ function setupCartPreferences() {
     const panel = getPanel();
     if (!panel) return;
 
+    const showLoginBtn = document.getElementById('showLoginBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    if (showLoginBtn) showLoginBtn.addEventListener('click', () => requestAnimationFrame(syncMobileAuthPopup));
+    if (cancelBtn) cancelBtn.addEventListener('click', () => requestAnimationFrame(syncMobileAuthPopup));
+
+    const authInputs = document.getElementById('authInputs');
+    if (authInputs) {
+      new MutationObserver(() => syncMobileAuthPopup()).observe(authInputs, {
+        attributes: true,
+        attributeFilter: ['style', 'class']
+      });
+    }
+
     panel.querySelectorAll('.dropdown-toggle').forEach(toggle => {
       toggle.addEventListener('click', function () {
         handleMobileToggle(this);
@@ -5907,6 +5951,7 @@ function setupCartPreferences() {
         return;
       }
       syncMobileBottomLayout();
+      syncMobileAuthPopup();
       const openDropdown = panel.querySelector('.dropdown.open');
       if (openDropdown) positionMobileDropdown(openDropdown);
     }, { passive: true });
@@ -5914,6 +5959,7 @@ function setupCartPreferences() {
     window.addEventListener('orientationchange', () => {
       setTimeout(() => {
         syncMobileBottomLayout();
+        syncMobileAuthPopup();
         const openDropdown = panel.querySelector('.dropdown.open');
         if (openDropdown) positionMobileDropdown(openDropdown);
       }, 80);
