@@ -3734,6 +3734,71 @@ body::after
   }
 }
 </style>
+
+<style id="mobile-login-final-fix">
+@media (max-width:768px) {
+  /* 登入按鈕留在搜尋列最右側，不因開啟輸入區而消失。 */
+  .search-sort-wrapper {
+    position:relative !important;
+    padding-right:62px !important;
+  }
+
+  .auth-section-wrapper {
+    position:absolute !important;
+    top:50% !important;
+    right:0 !important;
+    left:auto !important;
+    bottom:auto !important;
+    transform:translateY(-50%) !important;
+    width:auto !important;
+    z-index:2147483646 !important;
+    margin:0 !important;
+    padding:0 !important;
+    border:0 !important;
+    background:transparent !important;
+    box-shadow:none !important;
+  }
+
+  .auth-box > #showLoginBtn {
+    display:block !important;
+    width:auto !important;
+    min-width:54px !important;
+    height:36px !important;
+    margin:0 !important;
+  }
+
+  /* 輸入區：凍結區塊正下方、最上層、右側與登入按鈕對齊。 */
+  .auth-section-wrapper .auth-inputs,
+  .auth-section-wrapper.mobile-auth-open .auth-inputs {
+    position:fixed !important;
+    top:auto;
+    right:8px;
+    left:auto;
+    bottom:auto;
+    width:min(220px, calc(100vw - 24px)) !important;
+    max-width:calc(100vw - 24px) !important;
+    box-sizing:border-box !important;
+    margin:0 !important;
+    padding:10px !important;
+    border-radius:14px !important;
+    background:rgba(29,14,54,.99) !important;
+    border:1px solid rgba(226,190,255,.45) !important;
+    box-shadow:0 14px 34px rgba(4,1,14,.75) !important;
+    z-index:2147483647 !important;
+  }
+
+  .auth-section-wrapper:not(.mobile-auth-open) .auth-inputs {
+    display:none !important;
+  }
+
+  .auth-section-wrapper.mobile-auth-open .auth-inputs {
+    display:flex !important;
+    flex-direction:column !important;
+    gap:6px !important;
+  }
+}
+</style>
+
 </head>
 <body>
   <div class="update-banner" id="updateBanner">
@@ -4699,13 +4764,31 @@ function setupCartPreferences() {
       if (!showLoginBtn) return;
 
       showLoginBtn.addEventListener('click', () => {
-        showLoginBtn.style.display = 'none';
+        // 手機版登入按鈕保持顯示；輸入區塊獨立浮在凍結區塊正下方。
         authInputs.style.display = 'flex';
+
+        // 等待 display:flex 套用後，再依凍結區塊與登入按鈕位置校正。
+        requestAnimationFrame(() => {
+          const stickyHeader = document.querySelector('.sticky-header-wrapper');
+          const loginButton = document.getElementById('showLoginBtn');
+          if (stickyHeader && loginButton && window.innerWidth <= 768) {
+            const headerRect = stickyHeader.getBoundingClientRect();
+            const buttonRect = loginButton.getBoundingClientRect();
+            authInputs.style.position = 'fixed';
+            authInputs.style.top = `${Math.max(0, headerRect.bottom + 8)}px`;
+            authInputs.style.bottom = 'auto';
+            authInputs.style.left = 'auto';
+            authInputs.style.right = `${Math.max(8, window.innerWidth - buttonRect.right)}px`;
+          }
+        });
       });
 
       cancelBtn.addEventListener('click', () => {
         authInputs.style.display = 'none';
         showLoginBtn.style.display = 'block';
+        if (typeof window.__syncMobileAuthPopup === 'function') {
+          window.__syncMobileAuthPopup();
+        }
       });
 
       loginBtn.addEventListener('click', () => {
@@ -5909,6 +5992,7 @@ function setupCartPreferences() {
   function syncMobileAuthPopup() {
     const wrapper = document.querySelector('.auth-section-wrapper');
     const inputs = document.getElementById('authInputs');
+    const loginBtn = document.getElementById('showLoginBtn');
     if (!wrapper || !inputs) return;
 
     if (isMobile()) {
@@ -5916,22 +6000,38 @@ function setupCartPreferences() {
       wrapper.classList.toggle('mobile-auth-open', visible);
 
       if (visible) {
-        const panel = getPanel();
-        if (panel) {
-          const r = panel.getBoundingClientRect();
+        const stickyHeader = document.querySelector('.sticky-header-wrapper');
+        const target = loginBtn || wrapper;
+        const targetRect = target.getBoundingClientRect();
+
+        // 登入表單固定在整個凍結區塊正下方，並與「登入」按鈕右側精準對齊。
+        if (stickyHeader) {
+          const headerRect = stickyHeader.getBoundingClientRect();
           const gap = 8;
-          const bottom = Math.max(10, window.innerHeight - r.top + gap);
-          inputs.style.bottom = `${bottom}px`;
+          inputs.style.top = `${Math.max(0, headerRect.bottom + gap)}px`;
         }
+
+        const rightGap = Math.max(8, window.innerWidth - targetRect.right);
+        inputs.style.right = `${rightGap}px`;
+        inputs.style.left = 'auto';
+        inputs.style.bottom = 'auto';
       } else {
+        inputs.style.top = '';
+        inputs.style.right = '';
+        inputs.style.left = '';
         inputs.style.bottom = '';
       }
     } else {
       wrapper.classList.remove('mobile-auth-open');
+      inputs.style.top = '';
+      inputs.style.right = '';
+      inputs.style.left = '';
       inputs.style.bottom = '';
     }
   }
 
+
+  window.__syncMobileAuthPopup = syncMobileAuthPopup;
 
   function getCounter() {
     return document.querySelector('.online-counter-wrapper');
