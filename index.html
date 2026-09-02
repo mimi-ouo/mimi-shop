@@ -3646,6 +3646,93 @@ body::after
 {
   color:#ffffff;
 }
+
+/* === Mobile header layout requested === */
+@media (max-width:768px) {
+  .sticky-header-wrapper {
+    position: sticky;
+    overflow: visible;
+  }
+
+  .title-discord-row {
+    width: 100%;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .discord-wrapper {
+    width: 100%;
+    align-items: flex-end;
+    gap: 6px;
+  }
+
+  .discord-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+  }
+
+  .discord-badge,
+  .tally-badge {
+    align-self: flex-end;
+  }
+
+  .search-sort-wrapper {
+    width: 100%;
+    gap: 8px;
+    align-items: center;
+    position: relative;
+  }
+
+  .search-sort-wrapper .search-input {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  /* Login button sits directly to the right of the search field. */
+  .search-sort-wrapper > .auth-section-wrapper {
+    flex: 0 0 auto;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: flex;
+  }
+
+  .search-sort-wrapper > .auth-section-wrapper .auth-box {
+    width: auto;
+  }
+
+  .search-sort-wrapper > .auth-section-wrapper .auth-btn {
+    width: auto;
+    min-width: 58px;
+    min-height: 38px;
+    padding: 8px 11px;
+    border-radius: 8px;
+  }
+
+  /* Login form: bottom-right, immediately below the entire frozen header. */
+  .sticky-header-wrapper .auth-inputs {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 15px;
+    bottom: auto !important;
+    width: min(220px, calc(100vw - 30px));
+    padding: 10px;
+    box-sizing: border-box;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.45);
+    z-index: 2147483647;
+  }
+
+  .sticky-header-wrapper .auth-inputs input {
+    min-height: 34px;
+  }
+}
 </style>
 </head>
 <body>
@@ -6083,3 +6170,45 @@ function setupCartPreferences() {
 </script>
 </body>
 </html>
+
+<script>
+(function setupRequestedMobileHeaderLayout() {
+  const mq = window.matchMedia('(max-width: 768px)');
+  let authWrapper = null;
+  let authOriginalParent = null;
+  let authOriginalNextSibling = null;
+
+  function applyLayout() {
+    const searchRow = document.querySelector('.sticky-header-wrapper .search-sort-wrapper');
+    const wrapper = document.querySelector('.auth-section-wrapper');
+    if (!searchRow || !wrapper) return;
+
+    if (mq.matches) {
+      if (!authOriginalParent) {
+        authWrapper = wrapper;
+        authOriginalParent = wrapper.parentNode;
+        authOriginalNextSibling = wrapper.nextSibling;
+      }
+      if (wrapper.parentNode !== searchRow) {
+        searchRow.appendChild(wrapper);
+      }
+      wrapper.classList.add('mobile-header-auth');
+    } else if (authOriginalParent && wrapper.parentNode !== authOriginalParent) {
+      authOriginalParent.insertBefore(wrapper, authOriginalNextSibling);
+      wrapper.classList.remove('mobile-header-auth');
+    }
+  }
+
+  function init() {
+    applyLayout();
+    mq.addEventListener?.('change', applyLayout);
+    window.addEventListener('resize', applyLayout, { passive: true });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  } else {
+    init();
+  }
+})();
+</script>
