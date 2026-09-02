@@ -2558,8 +2558,55 @@ body::after
 }
 @media (max-width:768px)
 {
-  /* 手機：管理者登入彈窗固定在主分頁列上方 */
+  /* 手機：登入按鈕放到凍結搜尋欄同一行最右側 */
+  .search-sort-wrapper
+  {
+    position:relative!important;
+    padding-right:62px!important;
+    box-sizing:border-box!important;
+  }
+
   .auth-section-wrapper
+  {
+    position:absolute!important;
+    top:50%!important;
+    right:0!important;
+    left:auto!important;
+    bottom:auto!important;
+    transform:translateY(-50%)!important;
+    width:auto!important;
+    max-width:none!important;
+    z-index:2147483646!important;
+    display:block!important;
+    box-sizing:border-box!important;
+    margin:0!important;
+    padding:0!important;
+    border:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+
+  .auth-box
+  {
+    width:auto!important;
+    display:block!important;
+  }
+
+  .auth-box > #showLoginBtn
+  {
+    width:auto!important;
+    min-width:54px!important;
+    height:36px!important;
+    padding:6px 10px!important;
+    border-radius:7px!important;
+    font-size:13px!important;
+    white-space:nowrap!important;
+    box-shadow:0 2px 8px rgba(0,0,0,0.35)!important;
+  }
+
+  /* 登入表單改成真正的手機浮動彈窗，不跟搜尋欄或分頁列重疊 */
+  .auth-inputs
   {
     position:fixed!important;
     left:8px!important;
@@ -2567,26 +2614,52 @@ body::after
     bottom:calc(max(10px,env(safe-area-inset-bottom)) + 76px)!important;
     width:auto!important;
     max-width:none!important;
-    z-index:2147483646!important;
+    z-index:2147483647!important;
     display:none!important;
     box-sizing:border-box!important;
     margin:0!important;
-    padding:8px!important;
+    padding:12px!important;
+    padding-top:30px!important;
     border:1px solid var(--border-color)!important;
     border-radius:12px!important;
     background:rgba(30,30,30,0.98)!important;
     box-shadow:0 8px 25px rgba(0,0,0,0.7)!important;
   }
 
-  .auth-section-wrapper.mobile-auth-open
-  {
-    display:block!important;
-  }
-
-  .auth-box,
-  .auth-inputs
+  .auth-inputs input
   {
     width:100%!important;
+    min-height:38px!important;
+    box-sizing:border-box!important;
+    font-size:14px!important;
+  }
+
+  .auth-inputs .auth-btn
+  {
+    min-height:38px!important;
+  }
+
+  /* 誤觸登入時可用小叉叉關閉 */
+  .auth-inputs .cancel-btn
+  {
+    position:absolute!important;
+    top:6px!important;
+    right:7px!important;
+    width:26px!important;
+    height:26px!important;
+    min-width:26px!important;
+    padding:0!important;
+    border-radius:50%!important;
+    font-size:15px!important;
+    line-height:26px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+  }
+
+  .auth-section-wrapper.mobile-auth-open .auth-inputs
+  {
+    display:flex!important;
   }
 
   #collapseToggleBtn,.side-tabs-panel .collapse-toggle-btn
@@ -5750,20 +5823,25 @@ function setupCartPreferences() {
     const wrapper = document.querySelector('.auth-section-wrapper');
     const inputs = document.getElementById('authInputs');
     if (!wrapper || !inputs) return;
+
     if (isMobile()) {
       const visible = getComputedStyle(inputs).display !== 'none';
       wrapper.classList.toggle('mobile-auth-open', visible);
+
       if (visible) {
         const panel = getPanel();
         if (panel) {
           const r = panel.getBoundingClientRect();
-          const h = Math.max(0, window.innerHeight - r.top);
-          wrapper.style.bottom = `${h + 8}px`;
+          const gap = 8;
+          const bottom = Math.max(10, window.innerHeight - r.top + gap);
+          inputs.style.bottom = `${bottom}px`;
         }
+      } else {
+        inputs.style.bottom = '';
       }
     } else {
       wrapper.classList.remove('mobile-auth-open');
-      wrapper.style.bottom = '';
+      inputs.style.bottom = '';
     }
   }
 
