@@ -3584,6 +3584,95 @@ body::after
 }
 </style>
 
+
+<style id="mobile-login-button-optimization">
+/* ===== 手機版登入按鈕優化：不改桌面版 ===== */
+@media (max-width:768px) {
+  /* 移除登入按鈕左側多餘長條空白 */
+  #sideTabsPanel .auth-section-wrapper {
+    width:auto !important;
+    min-width:0 !important;
+    padding:0 !important;
+    margin:0 !important;
+    border-top:0 !important;
+    background:transparent !important;
+    box-shadow:none !important;
+  }
+
+  /* 關閉狀態：登入按鈕本身決定寬度 */
+  #sideTabsPanel .auth-section-wrapper:not(.mobile-auth-open) #showLoginBtn {
+    width:auto !important;
+    min-width:72px !important;
+  }
+
+  /* 開啟狀態：登入表單保持適合手機的寬度 */
+  #sideTabsPanel .auth-section-wrapper.mobile-auth-open {
+    width:min(320px, calc(100vw - 24px)) !important;
+    padding:10px !important;
+    margin:0 !important;
+  }
+
+  /* 尚未開啟登入表單時：讓登入按鈕更容易按 */
+  .auth-section-wrapper:not(.mobile-auth-open) #showLoginBtn {
+    min-height:42px !important;
+    padding:9px 12px !important;
+    border-radius:10px !important;
+    font-size:13px !important;
+    font-weight:800 !important;
+    letter-spacing:.3px !important;
+    box-shadow:0 3px 10px rgba(255,255,255,.12) !important;
+    -webkit-tap-highlight-color:transparent;
+    touch-action:manipulation;
+    transition:transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+  }
+
+  .auth-section-wrapper:not(.mobile-auth-open) #showLoginBtn::before {
+    content:"🔐 ";
+  }
+
+  .auth-section-wrapper:not(.mobile-auth-open) #showLoginBtn:active {
+    transform:scale(.96) !important;
+    box-shadow:0 1px 5px rgba(255,255,255,.08) !important;
+  }
+
+  /* 登入浮窗內的欄位與按鈕，提高觸控舒適度 */
+  .auth-section-wrapper.mobile-auth-open {
+    padding:10px !important;
+    border-radius:12px !important;
+  }
+
+  .auth-section-wrapper.mobile-auth-open .auth-inputs {
+    gap:7px !important;
+  }
+
+  .auth-section-wrapper.mobile-auth-open .auth-inputs input {
+    min-height:38px !important;
+    padding:8px 9px !important;
+    border-radius:7px !important;
+    font-size:13px !important;
+  }
+
+  .auth-section-wrapper.mobile-auth-open #loginBtn {
+    min-height:40px !important;
+    padding:8px 10px !important;
+    border-radius:8px !important;
+    font-size:13px !important;
+    font-weight:800 !important;
+    touch-action:manipulation;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  .auth-section-wrapper.mobile-auth-open #loginBtn:active {
+    transform:scale(.98);
+  }
+
+  /* 隱藏舊取消按鈕，維持點空白關閉 */
+  .auth-section-wrapper.mobile-auth-open #cancelBtn {
+    display:none !important;
+  }
+}
+</style>
+
 </head>
 <body>
   <div class="update-banner" id="updateBanner">
@@ -6050,6 +6139,38 @@ function setupCartPreferences() {
   } else {
     setupLoginOutsideClose();
   }
+})();
+</script>
+
+
+<script id="mobile-login-button-optimization-js">
+(function () {
+  function optimizeMobileLoginButton() {
+    const btn = document.getElementById('showLoginBtn');
+    if (!btn) return;
+
+    btn.setAttribute('aria-label', '管理員登入');
+    btn.setAttribute('type', 'button');
+
+    const loginBtn = document.getElementById('loginBtn');
+    if (loginBtn) {
+      loginBtn.setAttribute('type', 'button');
+      loginBtn.setAttribute('aria-label', '確認登入');
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', optimizeMobileLoginButton);
+  } else {
+    optimizeMobileLoginButton();
+  }
+
+  /* 原程式登入後可能重建 authBox，重新套用屬性 */
+  const observer = new MutationObserver(optimizeMobileLoginButton);
+  document.addEventListener('DOMContentLoaded', function () {
+    const authBox = document.getElementById('authBox');
+    if (authBox) observer.observe(authBox, { childList:true, subtree:true });
+  });
 })();
 </script>
 
