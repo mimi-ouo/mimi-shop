@@ -5327,7 +5327,7 @@ function setupCartPreferences() {
       if(googleOwnerLoginBtn){
         googleOwnerLoginBtn.addEventListener('click', async () => {
           googleOwnerLoginBtn.disabled=true;
-          try{ await signInBranchOwnerWithGoogle(); location.reload(); }
+          try{ await window.signInBranchOwnerWithGoogle(); location.reload(); }
           catch(error){ alert('Google 登入失敗：'+(error.message||error)); googleOwnerLoginBtn.disabled=false; }
         });
       }
@@ -7231,6 +7231,10 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
     googleAccessTokenExpiresAt = 0;
     return {user,accessToken:null};
   }
+
+  // 提供給主站登入區所在的其他 script 使用。
+  // branch-system-js 本身是獨立 script scope，因此必須明確掛到 window。
+  window.signInBranchOwnerWithGoogle = signInBranchOwnerWithGoogle;
 
   async function ensureFreshGoogleToken(){
     ensureFirebaseWebEnvironment();
