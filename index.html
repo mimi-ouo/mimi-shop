@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>⭐ 米米小舖-Club MStar ⭐</title>
+  <title>⭐ 米米小舖-Club MStar ⭐ v16.9</title>
   <!-- 引入 Firebase Compat 版本 SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
@@ -4466,53 +4466,82 @@ body.is-admin .main-admin-tab{display:flex !important;}
     const db = firebase.database();
     const auth = firebase.auth();
 
+    // 明確指定 Firebase Auth 使用 LOCAL persistence：重新整理、關閉再開啟網站時，
+    // 不會因為頁面重載而自動登出目前的版主／分店主帳號。
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(err){
+      console.warn('Firebase 登入狀態保存設定失敗：', err);
+    });
+
+    // ==================== 即時在線人數 v17.0（每個分頁獨立計數） ====================
+    // 訪客、分店主、版主全部計入；每一個瀏覽分頁使用獨立且隨機的 presence key。
     const userStatusDatabaseRef = db.ref('status');
-    // 每個瀏覽分頁只使用一個固定的 presence 節點；重新連線時重用它，避免重連造成重複計數。
-    const myPresenceRef = userStatusDatabaseRef.push();
-    let presenceConnected = false;
+    const tabPresenceKey = 'tab_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2) + '_' + Math.random().toString(36).slice(2);
+    const myPresenceRef = userStatusDatabaseRef.child(tabPresenceKey);
+    let myPresenceActive = false;
 
     function setOnlineCounterText(value) {
       const countElem = document.getElementById('count');
-      if (countElem) countElem.innerText = String(value);
+      if (countElem) countElem.innerText = String(Math.max(1, Number(value) || 1));
     }
 
-    // 先顯示 0，不因 Firebase 短暫斷線而顯示「—」。
-    setOnlineCounterText(0);
+    // 頁面剛開啟時先顯示自己 1 人，避免 Firebase 尚未完成同步時顯示 0。
+    setOnlineCounterText(1);
 
-    db.ref('.info/connected').on('value', function(snapshot) {
-      const connected = snapshot.val() === true;
-      presenceConnected = connected;
-
-      if (!connected) {
-        // Firebase 重新連線後會再次執行下面的 set；這裡不清空目前的計數。
-        return;
-      }
-
-      // Firebase 官方 presence 模式：先註冊斷線清除，再寫入在線狀態。
-      myPresenceRef.onDisconnect().remove().then(function() {
-        return myPresenceRef.set({
-          online: true,
-          timestamp: firebase.database.ServerValue.TIMESTAMP
-        });
-      }).catch(function(err) {
-        console.error('在線人數寫入失敗：', err);
-        // 保持數字顯示，不再改成「—」。
-      });
-    }, function(err) {
-      console.error('Firebase 連線狀態讀取失敗：', err);
-      // 保持目前數字，避免 UI 出現「—」。
-    });
-
-    userStatusDatabaseRef.on('value', function(snapshot) {
+    function countOnline(snapshot) {
       let onlineCount = 0;
       snapshot.forEach(function(child) {
         const value = child.val();
         if (value && value.online === true) onlineCount++;
       });
+      // 只要這個分頁已成功發佈 presence，就至少把自己算進去。
+      if (myPresenceActive) onlineCount = Math.max(1, onlineCount);
+      return Math.max(1, onlineCount);
+    }
+
+    function publishMyPresence() {
+      return myPresenceRef.onDisconnect().remove().then(function() {
+        return myPresenceRef.set({
+          online: true,
+          timestamp: firebase.database.ServerValue.TIMESTAMP,
+          tabId: tabPresenceKey
+        });
+      }).then(function() {
+        myPresenceActive = true;
+        return userStatusDatabaseRef.once('value');
+      }).then(function(snapshot) {
+        setOnlineCounterText(countOnline(snapshot));
+      }).catch(function(err) {
+        console.error('在線人數寫入失敗：', err);
+        // 即使 Firebase 暫時失敗，也不讓自己的頁面顯示 0。
+        setOnlineCounterText(1);
+      });
+    }
+
+    // Firebase 連線成功後註冊 onDisconnect，再寫入自己的 presence。
+    db.ref('.info/connected').on('value', function(snapshot) {
+      if (snapshot.val() === true) {
+        publishMyPresence();
+      }
+    }, function(err) {
+      console.error('Firebase 連線狀態讀取失敗：', err);
+      setOnlineCounterText(1);
+    });
+
+    // status 有任何分頁新增、移除或更新時，即時計算所有在線分頁。
+    userStatusDatabaseRef.on('value', function(snapshot) {
+      const onlineCount = countOnline(snapshot);
       setOnlineCounterText(onlineCount);
     }, function(err) {
       console.error('在線人數讀取失敗：', err);
-      // 讀取失敗時保留目前數字，不顯示「—」。
+      setOnlineCounterText(1);
+    });
+
+    // 頁面離開時主動移除；onDisconnect() 也會處理瀏覽器突然關閉或斷線。
+    window.addEventListener('pagehide', function() {
+      if (myPresenceActive) {
+        myPresenceRef.remove().catch(function() {});
+        myPresenceActive = false;
+      }
     });
 
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxVrP__g-bnoVRQQrJkKLlMZDhSbFeUuTMyw6-zVRhtYkkSedoVbJXKUwN0bUyc4vs3rQ/exec";
