@@ -4439,13 +4439,14 @@ body.is-admin .main-admin-tab{display:flex !important;}
   </div>
   <script>
     const firebaseConfig = {
-      apiKey: "AIzaSyDPapDe0cUgAhVfixTC50x9VWGtxteo4wQ",
-      authDomain: "mimi-ouo-mimishop.firebaseapp.com",
-      databaseURL: "https://mimi-ouo-mimishop-default-rtdb.firebaseio.com",
-      projectId: "mimi-ouo-mimishop",
-      storageBucket: "mimi-ouo-mimishop.firebasestorage.app",
-      messagingSenderId: "909483575893",
-      appId: "1:909483575893:web:1526adce01aa2b70f3e2dc"
+      apiKey: "AIzaSyCVUSw-B1it_bQ2sF3pAsTI0pXcyF-Tdfg",
+      authDomain: "mimishop-93214.firebaseapp.com",
+      databaseURL: "https://mimishop-93214-default-rtdb.firebaseio.com",
+      projectId: "mimishop-93214",
+      storageBucket: "mimishop-93214.firebasestorage.app",
+      messagingSenderId: "953118400447",
+      appId: "1:953118400447:web:3a0e2fc6c4d2b65425cb0a",
+      measurementId: "G-0EDJDFNFWF"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -7229,8 +7230,8 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
     if(!user || user.email?.toLowerCase()===BRANCH_ADMIN_EMAIL.toLowerCase()) return dir;
     if(dir.ownerUid!==user.uid) return dir;
     const created=await createPersonalShopStorage(code,dir.name||code);
-    await firebase.database().ref('storeDirectory/'+code).update(Object.assign({},created,{dataBackend:'google-owner-drive',backendVersion:'16.1',storageOwnerUid:user.uid,storageOwnerEmail:user.email||''}));
-    return Object.assign({},dir,created,{dataBackend:'google-owner-drive',backendVersion:'16.1'});
+    await firebase.database().ref('storeDirectory/'+code).update(Object.assign({},created,{dataBackend:'google-owner-drive',backendVersion:'16.3',storageOwnerUid:user.uid,storageOwnerEmail:user.email||''}));
+    return Object.assign({},dir,created,{dataBackend:'google-owner-drive',backendVersion:'16.3'});
   }
   const isBranchRoute = /\/store\/[^/]+/.test(location.pathname);
   const branchCode = isBranchRoute ? decodeURIComponent(location.pathname.split('/store/')[1].split('/')[0]) : '';
@@ -7244,7 +7245,7 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
     const s=slug(name).replace(/-/g,'') || 'branch';
     return s.slice(0,18)+'-'+Math.random().toString(36).slice(2,7);
   }
-  // v16.0：Firebase 只負責登入/分店權限與目錄；分店內容改由 Google Apps Script 存取 Google Sheets/Drive。
+  // v16.3：Firebase 只負責登入/分店權限與目錄；分店內容改由 Google Apps Script 存取 Google Sheets/Drive。
   const V16_CONFIG = {
     // 請在部署 Apps Script 網頁應用程式後，把 /exec 網址貼到這裡。
     appsScriptUrl: 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE'
@@ -7254,7 +7255,7 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
   }
   function randomKey(){ return 'p_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,9); }
   async function v16Api(payload, opts={}){
-    if(!hasSheetsBackend()) throw new Error('尚未設定 Google Apps Script 網址。請在 v16.0 HTML 的 V16_CONFIG.appsScriptUrl 貼上 /exec 網址。');
+    if(!hasSheetsBackend()) throw new Error('尚未設定 Google Apps Script 網址。請在 v16.3 HTML 的 V16_CONFIG.appsScriptUrl 貼上 /exec 網址。');
     const body=Object.assign({},payload);
     const user=firebase.auth().currentUser;
     if(user) body.idToken=await user.getIdToken(false);
@@ -7341,7 +7342,7 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
     const snap=await dbRoot().ref('storeDirectory').once('value');
     const raw=snap.val()||{};
     return Object.keys(raw).map(code=>({code,...raw[code]}))
-      .filter(x=>x.active!==false && x.approved===true && x.approvalStatus!=='rejected')
+      .filter(x=>x.active!==false && x.adminLockedClosed!==true && x.approved===true && x.approvalStatus!=='rejected')
       .sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0)||String(a.name||'').localeCompare(String(b.name||''),'zh-TW'));
   }
   const BRANCH_HEARTS = ['❤️','🩷','🧡','💛','💚','💙','🩵','💜'];
@@ -7543,15 +7544,27 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
     const toggleBtn=root.querySelector('#toggleOwnerBranchBtn');
     if(toggleBtn){
       const snap=await dbRoot().ref('storeDirectory/'+branchCode).once('value');
-      const d=snap.val()||{}, isOpen=d.active!==false;
-      toggleBtn.textContent=isOpen?'⏸ 關閉分店':'▶️ 開啟分店';
-      toggleBtn.onclick=async()=>{
-        try{
-          await dbRoot().ref('storeDirectory/'+branchCode).update({active:!isOpen,updatedAt:firebase.database.ServerValue.TIMESTAMP});
-          alert(!isOpen?'分店已開啟。':'分店已關閉。');
-          await openOwnerPanel();
-        }catch(e){alert('更新分店狀態失敗：'+(e.message||e));}
-      };
+      const d=snap.val()||{}, isOpen=d.active!==false, adminLocked=d.adminLockedClosed===true;
+      if(adminLocked){
+        toggleBtn.textContent='🔒 版主鎖定關店';
+        toggleBtn.disabled=true;
+        toggleBtn.title='此分店已由版主強制關閉，必須由版主重新核准開店。';
+      }else{
+        toggleBtn.textContent=isOpen?'⏸ 關閉分店':'▶️ 開啟分店';
+        toggleBtn.onclick=async()=>{
+          try{
+            const latest=(await dbRoot().ref('storeDirectory/'+branchCode).once('value')).val()||{};
+            if(latest.adminLockedClosed===true){
+              alert('此分店已由版主關閉並鎖定。\n\n你無法自行重新開啟，請聯絡版主重新核准開店。');
+              return;
+            }
+            const nextOpen=latest.active===false;
+            await dbRoot().ref('storeDirectory/'+branchCode).update({active:nextOpen,closedBy:nextOpen?null:'owner',adminLockedClosed:false,closureMode:nextOpen?'open':'owner_closed',closedAt:nextOpen?null:firebase.database.ServerValue.TIMESTAMP,updatedAt:firebase.database.ServerValue.TIMESTAMP});
+            alert(nextOpen?'分店已開啟。':'分店已關閉。');
+            await openOwnerPanel();
+          }catch(e){alert('更新分店狀態失敗：'+(e.message||e));}
+        };
+      }
     }
     await renderOwnerSettings();
   }
@@ -7764,7 +7777,7 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
     }
     const next=d.active===false;
     if(!confirm(next?'確定要重新開啟你的分店？':'確定要關閉你的分店？'))return;
-    await dbRoot().ref('storeDirectory/'+code).update({active:next,closedBy:next?null:'owner',updatedAt:firebase.database.ServerValue.TIMESTAMP});
+    await dbRoot().ref('storeDirectory/'+code).update({active:next,closedBy:next?null:'owner',adminLockedClosed:false,closureMode:next?'open':'owner_closed',closedAt:next?null:firebase.database.ServerValue.TIMESTAMP,updatedAt:firebase.database.ServerValue.TIMESTAMP});
     await bootBranch();
   }
 
@@ -7804,7 +7817,7 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
               <div class="admin-branch-main">
                 <strong>${esc(b.icon||'🏪')} ${esc(b.name||b.code)}</strong>
                 <small>代碼：${esc(b.code)} · ${esc(b.ownerEmail||'未設定主理人')}</small>${b.sheetUrl?`<small>📊 <a href="${esc(b.sheetUrl)}" target="_blank" rel="noopener">Google 試算表</a>${b.driveFolderUrl?` · <a href="${esc(b.driveFolderUrl)}" target="_blank" rel="noopener">圖片資料夾</a>`:''}</small>`:''}
-                <span class="admin-status ${b.active===false?'closed':'open'}">${b.active===false?'⏸ 已關閉':'● 開啟中'}</span>
+                <span class="admin-status ${b.active===false?'closed':'open'}">${b.active===false?(b.adminLockedClosed?'🔒 版主鎖定':'⏸ 已關閉'):'● 開啟中'}</span>
               </div>
               <div class="branch-row admin-branch-actions">
                 <button class="branch-btn" data-edit-branch="${esc(b.code)}">✏️ 編輯</button>
@@ -7877,7 +7890,7 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
       const old=(await firebase.database().ref('branches/'+code).once('value')).val()||{};
       const created=await v16Api({action:'createShop',code,name:data?.name||code,ownerUid:data?.ownerUid||'',initialData:{settings:old.settings||{title:data?.name||code,intro:'歡迎來到本分店',notice:''},tabs:old.tabs||{cart:{name:'購物車',icon:'🛒',order:0,description:'購物車'},products:{name:'商品',icon:'🛍️',order:1,description:'商品分頁'}},products:old.products||{}}});
       await firebase.database().ref('storeDirectory/'+code).update({sheetId:created.sheetId,driveFolderId:created.driveFolderId,sheetUrl:created.sheetUrl,driveFolderUrl:created.driveFolderUrl,dataBackend:'google-sheets-drive',backendVersion:'16.0'});
-      alert('分店「'+(data?.name||code)+'」已完成 v16.0 資料庫建立。');
+      alert('分店「'+(data?.name||code)+'」已完成 v16.3 資料庫建立。');
       el.remove();openAdminPanel();
     }catch(e){
       if(btn){btn.disabled=false;btn.textContent='📊 建立試算表';}
@@ -7889,11 +7902,11 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
     const dir=(await dbRoot().ref('storeDirectory/'+code).once('value')).val()||{};
     if(current){
       if(!confirm('確定要暫停這間分店？\n\n版主關閉後，分店主將無法自行重新開啟，必須聯絡版主重新核准。'))return;
-      await dbRoot().ref('storeDirectory/'+code).update({active:false,closedBy:'admin',adminLockedClosed:true,closedAt:firebase.database.ServerValue.TIMESTAMP,updatedAt:firebase.database.ServerValue.TIMESTAMP});
+      await dbRoot().ref('storeDirectory/'+code).update({active:false,closedBy:'admin',adminLockedClosed:true,closureMode:'admin_closed',closedAt:firebase.database.ServerValue.TIMESTAMP,updatedAt:firebase.database.ServerValue.TIMESTAMP});
     }else{
       if(dir.adminLockedClosed){
         if(!confirm('這間分店目前是「版主鎖定關店」。\n\n重新開店必須由版主核准，確定要解除鎖定並重新開放嗎？'))return;
-        await dbRoot().ref('storeDirectory/'+code).update({active:true,closedBy:null,adminLockedClosed:false,reopenedBy:'admin',reopenedAt:firebase.database.ServerValue.TIMESTAMP,updatedAt:firebase.database.ServerValue.TIMESTAMP});
+        await dbRoot().ref('storeDirectory/'+code).update({active:true,closedBy:null,adminLockedClosed:false,closureMode:'open',reopenedBy:'admin',reopenedAt:firebase.database.ServerValue.TIMESTAMP,updatedAt:firebase.database.ServerValue.TIMESTAMP});
       }else{
         if(!confirm('確定要重新開放這間分店？'))return;
         await dbRoot().ref('storeDirectory/'+code).update({active:true,closedBy:null,updatedAt:firebase.database.ServerValue.TIMESTAMP});
@@ -7908,7 +7921,7 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
     const order=Date.now();
     try{
       const updates={};
-      updates['storeDirectory/'+a.code]={name:a.name,active:true,approved:true,approvalStatus:'approved',order,ownerEmail:a.email||'',ownerUid:a.uid,adminLockedClosed:false,dataBackend:'google-owner-drive',backendVersion:'16.1',storageStatus:'waiting-owner-google-consent'};
+      updates['storeDirectory/'+a.code]={name:a.name,active:true,approved:true,approvalStatus:'approved',order,ownerEmail:a.email||'',ownerUid:a.uid,adminLockedClosed:false,closureMode:'open',dataBackend:'google-owner-drive',backendVersion:'16.3',storageStatus:'waiting-owner-google-consent'};
       updates['branchOwners/'+a.uid+'/'+a.code]=true;
       updates['branchApplications/'+id+'/status']='approved';
       updates['branchApplications/'+id+'/approvedAt']=firebase.database.ServerValue.TIMESTAMP;
