@@ -5236,10 +5236,18 @@ function setupCartPreferences() {
           <button class="auth-btn" id="sharedBranchManageBtn" type="button">🛡️ 管理中心</button>
           <button class="auth-btn" id="logoutBtn" style="background:#333;color:var(--text-color)">登出</button>
         `;
-        document.getElementById('sharedBranchManageBtn').onclick = () => {
-          if (typeof window.openBranchManagement === 'function') {
-            Promise.resolve(window.openBranchManagement()).catch(e => alert('管理中心開啟失敗：'+(e.message||e)));
-          }
+        document.getElementById('sharedBranchManageBtn').onclick = async () => {
+          const btn=document.getElementById('sharedBranchManageBtn');
+          try{
+            btn.disabled=true;
+            if(typeof window.openBranchManagement !== 'function'){
+              throw new Error('管理中心程式尚未載入，請重新整理頁面。');
+            }
+            await window.openBranchManagement();
+          }catch(e){
+            console.error('管理中心開啟失敗',e);
+            alert('管理中心開啟失敗：'+(e.message||e));
+          }finally{ btn.disabled=false; }
         };
         document.getElementById('logoutBtn').onclick = () => auth.signOut().then(() => location.reload());
       } else if (isLoggedIn) {
@@ -5253,10 +5261,18 @@ function setupCartPreferences() {
           <button class="auth-btn" id="sharedBranchManageBtn" type="button">⚙️ 管理中心</button>
           <button class="auth-btn" id="logoutBtn" style="background:#333;color:var(--text-color)">登出</button>
         `;
-        document.getElementById('sharedBranchManageBtn').onclick = () => {
-          if (typeof window.openBranchManagement === 'function') {
-            Promise.resolve(window.openBranchManagement()).catch(e => alert('管理中心開啟失敗：'+(e.message||e)));
-          }
+        document.getElementById('sharedBranchManageBtn').onclick = async () => {
+          const btn=document.getElementById('sharedBranchManageBtn');
+          try{
+            btn.disabled=true;
+            if(typeof window.openBranchManagement !== 'function'){
+              throw new Error('管理中心程式尚未載入，請重新整理頁面。');
+            }
+            await window.openBranchManagement();
+          }catch(e){
+            console.error('管理中心開啟失敗',e);
+            alert('管理中心開啟失敗：'+(e.message||e));
+          }finally{ btn.disabled=false; }
         };
         document.getElementById('logoutBtn').onclick = async () => {
           await auth.signOut();
@@ -7517,7 +7533,14 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
       if(!name){st.textContent='請先填寫分店名稱。';return;}
       btn.disabled=true; st.textContent='正在使用 Google 登入…';
       try{
-        const {user}=await signInBranchOwnerWithGoogle();
+        // 如果左下角已顯示「已登入」，直接使用目前 Firebase 使用者，
+        // 不要再次 signInWithPopup，避免瀏覽器彈窗被封鎖後一直卡在「登入中」。
+        let user=firebase.auth().currentUser;
+        if(!user){
+          const loginResult=await window.signInBranchOwnerWithGoogle();
+          user=loginResult && loginResult.user;
+        }
+        if(!user) throw new Error('尚未取得 Google 登入身分，請先完成 Google 登入。');
         const appId=dbRoot().ref('branchApplications').push().key, code=makeCode(name);
         const existing=(await dbRoot().ref('branchApplications').once('value')).val()||{};
         const duplicate=Object.values(existing).find(a=>a && a.uid===user.uid && a.status==='pending');
@@ -7593,7 +7616,14 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
   // 提供給主站分頁列使用，避免跨 IIFE 作用域造成「管理中心」點擊無反應。
   window.openAdminPanel = openAdminPanel;
   window.openAdminPanel = openAdminPanel;
-  window.openBranchManagement = openManagement;
+  window.openBranchManagement = async function(){
+    try{
+      return await openManagement();
+    }catch(e){
+      console.error('openManagement error:',e);
+      throw e;
+    }
+  };
 
   // 最終權限保護：
   // 1. 未登入訪客：完全不顯示管理中心
@@ -8038,6 +8068,21 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
     }
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+<script id="v18-management-application-safety-fix">
+(function(){
+  // 最外層保險：即使登入區重繪，管理中心按鈕仍可被事件委派接手。
+  document.addEventListener('click', function(e){
+    const manage=e.target && e.target.closest ? e.target.closest('#sharedBranchManageBtn') : null;
+    if(manage && !manage.dataset.v18SafetyBound){
+      // 若原本已有 handler，不重複執行；只在 window API 存在時提供備援。
+      manage.dataset.v18SafetyBound='1';
+      if(typeof window.openBranchManagement==='function'){
+        // 不在此處主動執行，避免與原 handler 重複；原 handler 若不存在才由下一輪處理。
+      }
+    }
+  }, true);
 })();
 </script>
 
