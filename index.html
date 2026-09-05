@@ -7180,6 +7180,21 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
 
 <div id="branchAppRoot"></div>
 
+<script id="google-login-global-fix-v18">
+(function(){
+  window.signInBranchOwnerWithGoogle = async function(){
+    if(!window.firebase || !firebase.auth) throw new Error('Firebase 尚未載入，請重新整理頁面。');
+    const protocol=String(window.location.protocol||'').toLowerCase();
+    if(protocol!=='http:' && protocol!=='https:' && protocol!=='chrome-extension:') throw new Error('請使用 GitHub Pages 或 http://localhost 開啟，不能直接用 file:// 開啟。');
+    const provider=new firebase.auth.GoogleAuthProvider();
+    const result=await firebase.auth().signInWithPopup(provider);
+    const user=result && result.user;
+    if(!user) throw new Error('Google 登入後沒有取得使用者身分。');
+    if(String(user.email||'').toLowerCase()==='comtw919@gmail.com'){ await firebase.auth().signOut(); throw new Error('版主請使用原本的版主 Firebase 登入方式。'); }
+    return {user,accessToken:null};
+  };
+})();
+</script>
 <script id="branch-system-js">
 (function(){
   const BRANCH_ADMIN_EMAIL = "comtw919@gmail.com";
@@ -7914,6 +7929,10 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
     el.querySelectorAll('[data-toggle-branch]').forEach(b=>b.onclick=async()=>toggleDirectoryBranch(b.dataset.toggleBranch,b.dataset.active==='true',el));
     el.querySelectorAll('[data-view-branch]').forEach(b=>b.onclick=()=>{el.remove();goToBranch(b.dataset.viewBranch);});
     el.querySelectorAll('[data-delete-branch]').forEach(b=>b.onclick=async()=>deleteApprovedBranch(b.dataset.deleteBranch,dir[b.dataset.deleteBranch],el));
+    } catch(e) {
+      console.error('openAdminPanel failed:', e);
+      alert('管理中心讀取失敗：'+(e.message||e));
+    }
   }
 
   async function deleteApprovedBranch(code,data,el){
@@ -8289,42 +8308,12 @@ body:not(.is-admin) .main-admin-tab{display:none !important;}
 <style id="v15-12-fixes">
 /* v15.12：分店主導向、自己的分店辨識、商品圖片不依賴 Storage */
 </style>
-<script id="google-login-global-fix-v18">
+<script id="v18-final-management-single-entry">
 (function(){
-  // 最外層 Google 登入橋接：不依賴 branch-system-js 的 IIFE scope。
-  // 即使分店系統腳本部分初始化失敗，登入按鈕仍可正常呼叫。
-  window.signInBranchOwnerWithGoogle = async function(){
-    if(!window.firebase || !firebase.auth){
-      throw new Error('Firebase 尚未載入，請重新整理頁面。');
-    }
-    const protocol=String(window.location.protocol||'').toLowerCase();
-    if(protocol!=='http:' && protocol!=='https:' && protocol!=='chrome-extension:'){
-      throw new Error('目前是直接開啟 HTML 檔案（file://）。Firebase 登入不支援 file://，請改用 GitHub Pages 或 http://localhost 開啟。');
-    }
-    const provider=new firebase.auth.GoogleAuthProvider();
-    const result=await firebase.auth().signInWithPopup(provider);
-    const user=result && result.user;
-    if(!user) throw new Error('Google 登入後沒有取得使用者身分。');
-    if(String(user.email||'').toLowerCase()==='comtw919@gmail.com'){
-      await firebase.auth().signOut();
-      throw new Error('版主請使用原本的版主 Firebase 登入方式。');
-    }
-    return {user,accessToken:null};
-  };
+  function hideDuplicate(){ const el=document.getElementById('mainAdminManageTab'); if(el) el.remove(); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',hideDuplicate,{once:true}); else hideDuplicate();
+  setTimeout(hideDuplicate,100); setTimeout(hideDuplicate,500);
 })();
 </script>
 </body>
 </html>
-
-<script id="v18-final-management-single-entry">
-(function(){
-  function hideDuplicate(){
-    const el=document.getElementById('mainAdminManageTab');
-    if(el) el.remove();
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',hideDuplicate,{once:true});
-  else hideDuplicate();
-  setTimeout(hideDuplicate,100);
-  setTimeout(hideDuplicate,500);
-})();
-</script>
