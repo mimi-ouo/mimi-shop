@@ -1848,7 +1848,7 @@ body
   width:100%;
   margin:0!important;
   gap:6px;
-  grid-template-columns:repeat(7,minmax(0,1fr));
+  grid-template-columns:repeat(6,minmax(0,1fr));
   align-items:start;
   grid-auto-rows:auto
 }
@@ -4317,6 +4317,44 @@ function setupCartPreferences() {
       const galleryClone = gallery.cloneNode(true);
       galleryClone.id = 'cartGalleryCapture';
 
+      // 截圖專用：把購物車中「每一項商品目前選擇的購買數量」直接顯示在商品格內。
+      // 原本截圖會隱藏 .cart-qty-select，因此商品排列容器裡看不到數量。
+      galleryClone.querySelectorAll('.img-card[data-id]').forEach((card) => {
+        const itemId = String(card.getAttribute('data-id') || '');
+        const selectedQty = cartItems.get(itemId) || '數量: 1';
+
+        const qtyBadge = document.createElement('div');
+        qtyBadge.className = 'cart-capture-quantity';
+        qtyBadge.textContent = selectedQty;
+
+        Object.assign(qtyBadge.style, {
+          display: 'block',
+          width: '100%',
+          boxSizing: 'border-box',
+          marginTop: '4px',
+          padding: '3px 6px',
+          minHeight: '24px',
+          lineHeight: '18px',
+          textAlign: 'center',
+          fontSize: '13px',
+          fontWeight: 'bold',
+          color: '#000000',
+          backgroundColor: '#fff3a6',
+          border: '1px solid #d8bd35',
+          borderRadius: '4px',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis'
+        });
+
+        const info = card.querySelector('.img-info');
+        if (info) {
+          info.appendChild(qtyBadge);
+        } else {
+          card.appendChild(qtyBadge);
+        }
+      });
+
       // 截圖專用：兩個原生 <select> 都改成固定 HTML 文字方塊。
       // html2canvas 對原生 select/option 的選定背景色，在不同桌面/手機
       // 瀏覽器可能不會照 CSS 繪製；因此截圖時直接繪製成 HTML 元素，
@@ -4812,7 +4850,7 @@ function setupCartPreferences() {
         const work = isWorkDay(d);
         cell.innerHTML = `
           <div class="calendar-date-num">${dayNum}</div>
-          <div class="calendar-badge ${work ? 'badge-work' : 'badge-off'}">${work ? '🫠<br>上班' : '😍<br>休假'}</div>
+          <div class="calendar-badge ${work ? 'badge-work' : 'badge-off'}">${work ? '🫠 上班' : '😍 休假'}</div>
         `;
         gridElem.appendChild(cell);
       }
@@ -4831,7 +4869,7 @@ function setupCartPreferences() {
 
         cell.innerHTML = `
           <div class="calendar-date-num" ${isToday ? 'style="color:var(--warning-color);"' : ''}>${i}${isToday ? ' <span class="rotating-star">⭐</span> 今天' : ''}</div>
-          <div class="calendar-badge ${work ? 'badge-work' : 'badge-off'}">${work ? '🫠<br>上班' : '😍<br>休假'}</div>
+          <div class="calendar-badge ${work ? 'badge-work' : 'badge-off'}">${work ? '🫠 上班' : '😍 休假'}</div>
         `;
         gridElem.appendChild(cell);
       }
@@ -6407,5 +6445,22 @@ function setupCartPreferences() {
 }
 </style>
 
+
+<style id="cart-capture-quantity-style">
+.cart-capture-stage .cart-capture-quantity{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+</style>
+<style id="mobile-back-to-top-adjusted">
+@media (max-width:768px){
+  /* 手機版：頂部按鈕往上移，避免被分頁列蓋住；水平位置維持不變 */
+  #backToTopBtn{
+    right:12px !important;
+    bottom:105px !important;
+  }
+}
+</style>
 </body>
 </html>
