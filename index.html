@@ -5208,6 +5208,7 @@ function setupCartPreferences() {
         cropDescElem.contentEditable = "false";
         authBox.innerHTML = `
           <button class="auth-btn" id="showLoginBtn">登入</button>
+          <button class="auth-btn" id="googleOwnerLoginBtn" type="button" style="margin-top:2px">🔵 Google 登入（分店主）</button>
           <div class="auth-inputs" id="authInputs">
             <input type="email" id="emailInput" placeholder="Email">
             <input type="password" id="passwordInput" placeholder="Firebase 密碼">
@@ -5263,8 +5264,22 @@ function setupCartPreferences() {
       if(googleOwnerLoginBtn){
         googleOwnerLoginBtn.addEventListener('click', async () => {
           googleOwnerLoginBtn.disabled=true;
-          try{ await signInBranchOwnerWithGoogle(); location.reload(); }
-          catch(error){ alert('Google 登入失敗：'+(error.message||error)); googleOwnerLoginBtn.disabled=false; }
+          try{
+            if(typeof window.signInBranchOwnerWithGoogle !== 'function'){
+              throw new Error('Google 分店主登入程式尚未載入，請重新整理頁面。');
+            }
+            await window.signInBranchOwnerWithGoogle();
+            location.reload();
+          }catch(error){
+            console.error('Google branch-owner login failed:', error);
+            const msg=String(error && (error.message||error) || '未知錯誤');
+            if(msg.includes('auth/unauthorized-domain') || msg.includes('domain is not authorized')){
+              alert('Google 登入失敗：此網站網域尚未加入 Firebase Authorized domains。\n\n請到 Firebase Console → Authentication → Settings → Authorized domains，加入：\n'+location.hostname+'\n\n加入後重新整理網頁即可。');
+            }else{
+              alert('Google 登入失敗：'+msg);
+            }
+            googleOwnerLoginBtn.disabled=false;
+          }
         });
       }
 
@@ -7137,6 +7152,13 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
     if(protocol !== 'http:' && protocol !== 'https:' && protocol !== 'chrome-extension:'){
       throw new Error('目前是直接開啟 HTML 檔案（file://）。Firebase 登入不支援 file://，請改用 http://localhost 開啟本系統。');
     }
+    // Firebase Authentication 的 OAuth 必須先把目前網站網域加入 Firebase Authorized domains。
+    // 這裡只做友善提示，不偽造或繞過 Firebase 的安全檢查。
+    const host=String(window.location.hostname||'').toLowerCase();
+    if(host && !host.endsWith('.localhost') && host!=='localhost' && !host.startsWith('127.0.0.1')){
+      // GitHub Pages 常見網域會由 Firebase 在 signInWithPopup 時檢查；真正授權仍需在 Firebase Console 設定。
+      console.info('Firebase OAuth current host:', host);
+    }
     try{
       const testKey='__mimi_storage_test__';
       window.localStorage.setItem(testKey,'1');
@@ -7163,6 +7185,9 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
     }
     return {user,accessToken:googleAccessToken};
   }
+
+  // 提供給主站登入區使用：分店主 Google 登入必須是全域函式。
+  window.signInBranchOwnerWithGoogle = signInBranchOwnerWithGoogle;
 
   async function ensureFreshGoogleToken(){
     ensureFirebaseWebEnvironment();
@@ -7461,6 +7486,7 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
       <textarea id="appDesc" class="full" placeholder="分店介紹 / 申請原因"></textarea>
     </div>
     <p style="font-size:11px;color:#aaa;line-height:1.7">申請只需要 Firebase 登入身分，不會在這一步要求 Google Drive / Sheets 權限。版主核准後，分店主進入自己的分店時才會進行個人資料庫授權。</p>
+    <div style="font-size:11px;color:#f3c96b;line-height:1.7;margin-top:4px">若 Google 登入顯示「auth/unauthorized-domain」，請將目前網站網域 <b>${esc(location.hostname)}</b> 加入 Firebase → Authentication → Settings → Authorized domains。</div>
     <div class="branch-row"><button class="branch-btn primary" id="googleApplyBtn">🔵 使用 Google 帳號申請</button><span id="appStatus" style="font-size:11px"></span></div>`;
     const el=modal('📝 分店主申請',body,'branchApplicationModal');
     el.querySelector('#googleApplyBtn').onclick=async()=>{
@@ -7482,7 +7508,12 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
         setTimeout(()=>{el.remove();},900);
       }catch(e){
         btn.disabled=false;
-        st.textContent='申請失敗：'+(e.message||e);
+        const msg=String(e && (e.message||e) || '未知錯誤');
+        if(msg.includes('auth/unauthorized-domain') || msg.includes('domain is not authorized')){
+          st.innerHTML='申請失敗：目前網站網域尚未加入 Firebase「Authorized domains」。請先在 Firebase Console → Authentication → Settings → Authorized domains 加入 <b>'+String(location.hostname)+'</b>，再重新整理頁面。';
+        }else{
+          st.textContent='申請失敗：'+msg;
+        }
       }
     };
   }
