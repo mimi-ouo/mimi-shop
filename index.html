@@ -3786,7 +3786,6 @@ body::after
   #sideTabsPanel .dropdown-menu{min-width:124px !important;width:124px !important;box-sizing:border-box !important;}
 }
 .main-admin-tab{display:none !important;}
-body.is-admin .main-admin-tab{display:flex !important;}
 #sideTabsPanel .auth-section-wrapper,#sideTabsPanel .auth-box{justify-content:center !important;text-align:center !important;}
 #sideTabsPanel .auth-section-wrapper{align-items:center !important;}
 #sideTabsPanel .auth-box{display:flex;flex-direction:column;align-items:center;}
@@ -4226,6 +4225,7 @@ body.is-admin .main-admin-tab{display:flex !important;}
         <div class="branch-menu-loading">載入分店中...</div>
       </div>
     </div>
+    <button class="tab-btn main-admin-tab" id="mainAdminManageTab" type="button">🛡️ 管理中心</button>
     <div class="collapse-content" id="collapseContent">
       <div class="dropdown" id="dropdown-furniture">
         <button class="dropdown-toggle" data-dropdown="dropdown-furniture" id="furnitureToggleBtn">🏠 家具 ▾</button>
@@ -4261,24 +4261,10 @@ body.is-admin .main-admin-tab{display:flex !important;}
       <button class="tab-btn" data-category="schedule">📅 米米班表</button>
     </div>
 
-    <style>
-      .firebase-login-label {
-        width: 100%;
-        font-size: 11px;
-        font-weight: 700;
-        opacity: .72;
-        text-align: center;
-        margin: 2px 0 -2px;
-      }
-      #googleOwnerLoginBtn { order: -10; }
-    </style>
-
     <div class="auth-section-wrapper">
       <div class="auth-box" id="authBox">
         <button class="auth-btn" id="showLoginBtn">登入</button>
         <div class="auth-inputs" id="authInputs">
-          <button class="auth-btn" id="googleOwnerLoginBtn" type="button">🔵 Google 登入（分店主）</button>
-          <div class="firebase-login-label">版主 Firebase 登入</div>
           <input type="email" id="emailInput" placeholder="管理員 Email">
           <input type="password" id="passwordInput" placeholder="Firebase 密碼">
           <button class="auth-btn" id="loginBtn">確認</button>
@@ -4452,92 +4438,39 @@ body.is-admin .main-admin-tab{display:flex !important;}
   </div>
   <script>
     const firebaseConfig = {
-      apiKey: "AIzaSyCVUSw-B1it_bQ2sF3pAsTI0pXcyF-Tdfg",
-      authDomain: "mimishop-93214.firebaseapp.com",
-      databaseURL: "https://mimishop-93214-default-rtdb.firebaseio.com",
-      projectId: "mimishop-93214",
-      storageBucket: "mimishop-93214.firebasestorage.app",
-      messagingSenderId: "953118400447",
-      appId: "1:953118400447:web:3a0e2fc6c4d2b65425cb0a",
-      measurementId: "G-0EDJDFNFWF"
+      apiKey: "AIzaSyDPapDe0cUgAhVfixTC50x9VWGtxteo4wQ",
+      authDomain: "mimi-ouo-mimishop.firebaseapp.com",
+      databaseURL: "https://mimi-ouo-mimishop-default-rtdb.firebaseio.com",
+      projectId: "mimi-ouo-mimishop",
+      storageBucket: "mimi-ouo-mimishop.firebasestorage.app",
+      messagingSenderId: "909483575893",
+      appId: "1:909483575893:web:1526adce01aa2b70f3e2dc"
     };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const auth = firebase.auth();
 
-    /* === 在線人數修正版：沿用 V13 正常運作的 status Firebase，V18 其他功能維持原 Firebase === */
-    (function OnlineCountPluginFixed(){
-      // V13 正常版本使用的 Firebase 專案，只拿來做「在線人數」。
-      // V18 原本的 auth / 商品 / 分店資料仍然使用上方既有 db，不受影響。
-      const presenceConfig = {
-        apiKey: "AIzaSyDPapDe0cUgAhVfixTC50x9VWGtxteo4wQ",
-        authDomain: "mimi-ouo-mimishop.firebaseapp.com",
-        databaseURL: "https://mimi-ouo-mimishop-default-rtdb.firebaseio.com",
-        projectId: "mimi-ouo-mimishop",
-        storageBucket: "mimi-ouo-mimishop.firebasestorage.app",
-        messagingSenderId: "909483575893",
-        appId: "1:909483575893:web:1526adce01aa2b70f3e2dc"
-      };
+    const userStatusDatabaseRef = db.ref('status');
 
-      let presenceApp;
-      try {
-        presenceApp = firebase.app('onlinePresenceV13');
-      } catch(e) {
-        presenceApp = firebase.initializeApp(presenceConfig, 'onlinePresenceV13');
+    db.ref('.info/connected').on('value', function(snapshot) {
+      if (snapshot.val() === false) {
+        return;
       }
+      const myConnectionRef = userStatusDatabaseRef.push();
+      myConnectionRef.onDisconnect().remove();
+      myConnectionRef.set({
+        online: true,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+      });
+    });
 
-      const presenceDb = presenceApp.database();
-      const userStatusDatabaseRef = presenceDb.ref('status');
-      let myConnectionRef = null;
-
-      function showOnlineCount(n) {
-        const el = document.getElementById('count');
-        if (el) el.innerText = String(Math.max(0, Number(n) || 0));
+    userStatusDatabaseRef.on('value', function(snapshot) {
+      const onlineCount = snapshot.numChildren();
+      const countElem = document.getElementById('count');
+      if (countElem) {
+        countElem.innerText = onlineCount;
       }
-
-      function updateOnlineCount(snapshot) {
-        // 完全採用 V13 的計算方式：status 底下每一個連線節點 = 1 人。
-        showOnlineCount(snapshot.numChildren());
-      }
-
-      presenceDb.ref('.info/connected').on('value', function(snapshot) {
-        if (snapshot.val() !== true) return;
-
-        // 每次 Firebase 重新連線，都建立新的連線節點。
-        // 先註冊 onDisconnect，再寫入 online，避免斷線時留下幽靈人數。
-        myConnectionRef = userStatusDatabaseRef.push();
-
-        myConnectionRef.onDisconnect().remove()
-          .then(function() {
-            return myConnectionRef.set({
-              online: true,
-              timestamp: firebase.database.ServerValue.TIMESTAMP
-            });
-          })
-          .catch(function(err) {
-            console.error('在線人數寫入失敗：', err);
-          });
-      });
-
-      userStatusDatabaseRef.on('value', updateOnlineCount, function(err) {
-        console.error('在線人數讀取失敗：', err);
-        // 讀取失敗時不要把錯誤值當成 0。
-        // 保留目前畫面數字，等 Firebase 恢復後由 listener 自動更新。
-      });
-
-      // 正常離開時立即清除自己的節點；異常關閉則由 onDisconnect 處理。
-      window.addEventListener('pagehide', function() {
-        if (myConnectionRef) {
-          myConnectionRef.remove().catch(function(){});
-          myConnectionRef = null;
-        }
-      });
-    })();
-
-    // 明確使用 Firebase 本機登入狀態，重新整理不會自動登出。
-    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(err){
-      console.error('登入狀態保存設定失敗：', err);
     });
 
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxVrP__g-bnoVRQQrJkKLlMZDhSbFeUuTMyw6-zVRhtYkkSedoVbJXKUwN0bUyc4vs3rQ/exec";
@@ -4669,15 +4602,18 @@ function setupCartPreferences() {
 
     document.addEventListener('DOMContentLoaded', () => {
       auth.onAuthStateChanged((user) => {
-        // 版主使用指定帳號；分店主也必須保持 Firebase 登入狀態，
-        // 由分店系統依 branchOwners/{uid}/{branchCode} 判斷可管理的商店。
-        // 不再把非版主帳號強制登出，否則分店主永遠無法登入。
-        isAdmin = !!(user && user.email === "comtw919@gmail.com");
+        if (user && user.email === "comtw919@gmail.com") {
+          isAdmin = true;
+        } else {
+          isAdmin = false;
+          if (user) {
+            // 如果不是指定帳號，強制登出
+            auth.signOut();
+          }
+        }
         initAuthUI();
-        // 登入狀態改變後重新判斷管理中心顯示與權限。
+        // 主站登入 UI 重建完成後，再確保管理中心按鈕存在
         setTimeout(() => {
-          if (typeof refreshSharedAuthUI === 'function') refreshSharedAuthUI();
-          if (typeof enforceMainAdminTabVisibility === 'function') enforceMainAdminTabVisibility();
           if (typeof refreshSharedAuthUI === 'function') refreshSharedAuthUI();
         }, 0);
       });
@@ -5218,9 +5154,11 @@ function setupCartPreferences() {
       const ringDescElem = document.getElementById('ringDescription');
       const cropDescElem = document.getElementById('cropDescription');
 
-      const currentUser = auth.currentUser;
-      const isLoggedIn = !!currentUser;
-      // 管理中心統一放在登入區，主分頁列不再建立第二個入口。
+      const mainAdminTab = document.getElementById('mainAdminManageTab');
+      if (mainAdminTab) {
+        mainAdminTab.style.display = isAdmin ? 'flex' : 'none';
+        mainAdminTab.onclick = () => { if (window.openBranchManagement) window.openBranchManagement(); };
+      }
       if (isAdmin) {
         document.body.classList.add('is-admin');
         dropZone.style.display = currentCategory ? 'block' : 'none';
@@ -5241,31 +5179,6 @@ function setupCartPreferences() {
             location.reload();
           });
         });
-      } else if (isLoggedIn) {
-        // 分店主也是真正的 Firebase 登入使用者；不可再落回「登入」表單，更不能被當成訪客。
-        document.body.classList.remove('is-admin');
-        dropZone.style.display = 'none';
-        giftDescElem.contentEditable = "false";
-        ringDescElem.contentEditable = "false";
-        cropDescElem.contentEditable = "false";
-        authBox.innerHTML = `
-          <div style="font-size:11px; font-weight:bold; color:var(--success-color); text-align:center; margin-bottom:4px;">已登入</div>
-          <button class="auth-btn" id="sharedBranchManageBtn" type="button">⚙️ 管理中心</button>
-          <button class="auth-btn" id="logoutBtn" style="background:#333; color:var(--text-color);">登出</button>
-        `;
-        const managementBtn = document.getElementById('sharedBranchManageBtn');
-        if (managementBtn) managementBtn.addEventListener('click', () => {
-          if (window.openBranchManagement) window.openBranchManagement();
-        });
-        document.getElementById('logoutBtn').addEventListener('click', async () => {
-          await auth.signOut();
-          if (location.pathname.includes('/store/')) {
-            await new Promise(r => setTimeout(r, 50));
-            location.reload();
-          } else {
-            initAuthUI();
-          }
-        });
       } else {
         document.body.classList.remove('is-admin');
         dropZone.style.display = 'none';
@@ -5275,9 +5188,7 @@ function setupCartPreferences() {
         authBox.innerHTML = `
           <button class="auth-btn" id="showLoginBtn">登入</button>
           <div class="auth-inputs" id="authInputs">
-            <button class="auth-btn" id="googleOwnerLoginBtn" type="button">🔵 Google 登入（分店主）</button>
-            <div class="firebase-login-label">版主 Firebase 登入</div>
-            <input type="email" id="emailInput" placeholder="Email">
+            <input type="email" id="emailInput" placeholder="管理員 Email">
             <input type="password" id="passwordInput" placeholder="Firebase 密碼">
             <button class="auth-btn" id="loginBtn">確認</button>
             <button class="cancel-btn" id="cancelBtn">✕</button>
@@ -5325,16 +5236,8 @@ function setupCartPreferences() {
       const authInputs = document.getElementById('authInputs');
       const cancelBtn = document.getElementById('cancelBtn');
       const loginBtn = document.getElementById('loginBtn');
-      const googleOwnerLoginBtn = document.getElementById('googleOwnerLoginBtn');
 
       if (!showLoginBtn) return;
-      if(googleOwnerLoginBtn){
-        googleOwnerLoginBtn.addEventListener('click', async () => {
-          googleOwnerLoginBtn.disabled=true;
-          try{ await signInBranchOwnerWithGoogle(); location.reload(); }
-          catch(error){ alert('Google 登入失敗：'+(error.message||error)); googleOwnerLoginBtn.disabled=false; }
-        });
-      }
 
       showLoginBtn.addEventListener('click', () => {
         showLoginBtn.style.display = 'none';
@@ -7173,7 +7076,6 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
 .branch-owner .branch-card-edit{background:#171717}
 .branch-inline-input{background:#111;color:#fff;border:1px solid #444;border-radius:6px;padding:6px;font-size:11px;box-sizing:border-box}
 .branch-modal-box.wide{width:min(980px,100%)}
-.branch-admin-dashboard{display:flex;flex-direction:column;gap:14px}.branch-admin-toolbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;gap:8px;align-items:stretch}.branch-admin-stat{background:#171717;border:1px solid #333;border-radius:10px;padding:9px 10px;display:flex;flex-direction:column;gap:2px}.branch-admin-stat b{font-size:18px;color:#fff}.branch-admin-stat span{font-size:10px;color:#999}.branch-admin-section-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}.branch-admin-section-head h4{margin:0}.branch-admin-section-head span{font-size:10px;color:#888}.admin-branch-item{display:flex;align-items:center;justify-content:space-between;gap:10px}.admin-branch-main{min-width:0;display:flex;flex-direction:column;gap:3px}.admin-branch-main small{color:#999;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.admin-status{font-size:10px;font-weight:bold}.admin-status.open{color:#70d6a1}.admin-status.closed{color:#ff9b9b}.admin-branch-actions{margin-left:auto;flex-wrap:wrap;justify-content:flex-end}@media(max-width:600px){.branch-admin-toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}.branch-admin-toolbar>#refreshBranchAdmin{grid-column:1/-1}.admin-branch-item{align-items:flex-start;flex-direction:column}.admin-branch-actions{width:100%;margin-left:0}.branch-admin-section-head{align-items:flex-start;flex-direction:column}}
 .branch-admin-section{margin-top:12px;padding-top:12px;border-top:1px solid #333}
 .branch-admin-section h4{margin:0 0 8px;font-size:13px}
 
@@ -7187,123 +7089,6 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
 <script id="branch-system-js">
 (function(){
   const BRANCH_ADMIN_EMAIL = "comtw919@gmail.com";
-  const GOOGLE_DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.file";
-  const GOOGLE_SHEETS_SCOPE = "https://www.googleapis.com/auth/spreadsheets";
-  // Google OAuth access token 只存記憶體，不寫入 Firebase/LocalStorage。
-  let googleAccessToken = null;
-  let googleAccessTokenExpiresAt = 0;
-
-  // 一般 Google 登入只用於 Firebase 身分辨識，不要求 Drive / Sheets 權限。
-  function makeGoogleLoginProvider(){
-    return new firebase.auth.GoogleAuthProvider();
-  }
-
-  // 只有分店已核准、分店主按下「建立我的 Google 資料庫」時，才要求額外權限。
-  function makeGoogleStorageProvider(){
-    const provider = new firebase.auth.GoogleAuthProvider();
-    provider.addScope(GOOGLE_DRIVE_SCOPE);
-    provider.addScope(GOOGLE_SHEETS_SCOPE);
-    return provider;
-  }
-
-  function ensureFirebaseWebEnvironment(){
-    const protocol = String(window.location.protocol || '').toLowerCase();
-    if(protocol !== 'http:' && protocol !== 'https:' && protocol !== 'chrome-extension:'){
-      throw new Error('目前是直接開啟 HTML 檔案（file://）。Firebase 登入不支援 file://，請改用 http://localhost 開啟本系統。');
-    }
-    try{
-      const testKey='__mimi_storage_test__';
-      window.localStorage.setItem(testKey,'1');
-      window.localStorage.removeItem(testKey);
-    }catch(e){
-      throw new Error('瀏覽器的 Web Storage 被停用或封鎖。請允許此網站使用 Cookie／網站資料後再登入。');
-    }
-  }
-
-  async function signInBranchOwnerWithGoogle(){
-    ensureFirebaseWebEnvironment();
-    const provider = makeGoogleLoginProvider();
-    const result = await firebase.auth().signInWithPopup(provider);
-    const user = result.user;
-    if(!user) throw new Error('Google 登入後沒有取得使用者身分。');
-    if(user.email && user.email.toLowerCase()===BRANCH_ADMIN_EMAIL.toLowerCase()){
-      await firebase.auth().signOut();
-      throw new Error('版主請使用原本的版主登入方式；Google 分店主登入不會取代版主權限。');
-    }
-    // 申請階段不保留 Google Drive / Sheets token。
-    googleAccessToken = null;
-    googleAccessTokenExpiresAt = 0;
-    return {user,accessToken:null};
-  }
-
-  async function ensureFreshGoogleToken(){
-    ensureFirebaseWebEnvironment();
-    if(googleAccessToken && Date.now() < googleAccessTokenExpiresAt) return googleAccessToken;
-    const provider = makeGoogleStorageProvider();
-    const result = await firebase.auth().signInWithPopup(provider);
-    const user = result.user;
-    if(user && user.email && user.email.toLowerCase()===BRANCH_ADMIN_EMAIL.toLowerCase()){
-      await firebase.auth().signOut();
-      throw new Error('版主請使用原本的版主登入方式。');
-    }
-    googleAccessToken = result.credential && result.credential.accessToken || null;
-    googleAccessTokenExpiresAt = googleAccessToken ? Date.now()+55*60*1000 : 0;
-    if(!googleAccessToken) throw new Error('未取得 Google Drive/Sheets 授權。請重新按「建立我的 Google 資料庫」並允許資料庫授權。');
-    return googleAccessToken;
-  }
-
-  async function googleApi(url, options={}){
-    const token = await ensureFreshGoogleToken();
-    const headers = Object.assign({}, options.headers||{}, {Authorization:'Bearer '+token});
-    const res=await fetch(url,Object.assign({},options,{headers}));
-    const text=await res.text();
-    let data={}; try{data=text?JSON.parse(text):{};}catch(_){data={raw:text};}
-    if(!res.ok) throw new Error(data.error?.message || data.raw || ('Google API '+res.status));
-    return data;
-  }
-
-  async function createPersonalShopStorage(code,name,initialData){
-    const safeCode=String(code||'').trim();
-    if(!safeCode) throw new Error('缺少分店代碼。');
-    const rootFolder = await googleApi('https://www.googleapis.com/drive/v3/files?fields=id,name,webViewLink',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({name:'米米小舖｜'+name+'｜資料庫',mimeType:'application/vnd.google-apps.folder'})
-    });
-    const folderId=rootFolder.id;
-    const sheet=await googleApi('https://www.googleapis.com/drive/v3/files?fields=id,name,webViewLink',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({name:'米米小舖｜'+name+'｜分店資料庫',mimeType:'application/vnd.google-apps.spreadsheet',parents:[folderId]})
-    });
-    const spreadsheetId=sheet.id;
-    const init=initialData||{settings:{title:name,intro:'歡迎來到本分店',notice:''},tabs:{cart:{name:'購物車',icon:'🛒',order:0,description:'購物車'},products:{name:'商品',icon:'🛍️',order:1,description:'商品分頁'}},products:{}};
-    await googleApi('https://sheets.googleapis.com/v4/spreadsheets/'+encodeURIComponent(spreadsheetId)+':batchUpdate',{
-      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({requests:[
-        {addSheet:{properties:{title:'Settings'}}},
-        {addSheet:{properties:{title:'Tabs'}}},
-        {addSheet:{properties:{title:'Products'}}}
-      ]})
-    });
-    const rows=(obj)=>Object.keys(obj||{}).map(k=>[k,JSON.stringify(obj[k])]);
-    await googleApi('https://sheets.googleapis.com/v4/spreadsheets/'+encodeURIComponent(spreadsheetId)+'/values:batchUpdate',{
-      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({valueInputOption:'RAW',data:[
-        {range:'Settings!A1:B'+Math.max(1,rows(init.settings).length),values:rows(init.settings)},
-        {range:'Tabs!A1:B'+Math.max(1,rows(init.tabs).length),values:rows(init.tabs)},
-        {range:'Products!A1:B'+Math.max(1,rows(init.products).length),values:rows(init.products)}
-      ]})
-    });
-    return {sheetId:spreadsheetId,sheetUrl:'https://docs.google.com/spreadsheets/d/'+spreadsheetId+'/edit',driveFolderId:folderId,driveFolderUrl:'https://drive.google.com/drive/folders/'+folderId};
-  }
-
-  async function ensureOwnerPersonalDatabase(code,dir){
-    if(!dir || dir.approved!==true || dir.active===false) return dir;
-    if(dir.sheetId && dir.driveFolderId) return dir;
-    const user=firebase.auth().currentUser;
-    if(!user || user.email?.toLowerCase()===BRANCH_ADMIN_EMAIL.toLowerCase()) return dir;
-    if(dir.ownerUid!==user.uid) return dir;
-    const created=await createPersonalShopStorage(code,dir.name||code);
-    await firebase.database().ref('storeDirectory/'+code).update(Object.assign({},created,{dataBackend:'google-owner-drive',backendVersion:'16.4',storageOwnerUid:user.uid,storageOwnerEmail:user.email||''}));
-    return Object.assign({},dir,created,{dataBackend:'google-owner-drive',backendVersion:'16.4'});
-  }
   const isBranchRoute = /\/store\/[^/]+/.test(location.pathname);
   const branchCode = isBranchRoute ? decodeURIComponent(location.pathname.split('/store/')[1].split('/')[0]) : '';
   const originalBranchSelector = document.getElementById('mainBranchSelector');
@@ -7316,78 +7101,7 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
     const s=slug(name).replace(/-/g,'') || 'branch';
     return s.slice(0,18)+'-'+Math.random().toString(36).slice(2,7);
   }
-  // v16.3：Firebase 只負責登入/分店權限與目錄；分店內容改由 Google Apps Script 存取 Google Sheets/Drive。
-  const V16_CONFIG = {
-    // 請在部署 Apps Script 網頁應用程式後，把 /exec 網址貼到這裡。
-    appsScriptUrl: 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE'
-  };
-  function hasSheetsBackend(){
-    return !!V16_CONFIG.appsScriptUrl && V16_CONFIG.appsScriptUrl.indexOf('PASTE_YOUR_') !== 0;
-  }
-  function randomKey(){ return 'p_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,9); }
-  async function v16Api(payload, opts={}){
-    if(!hasSheetsBackend()) throw new Error('尚未設定 Google Apps Script 網址。請在 v16.3 HTML 的 V16_CONFIG.appsScriptUrl 貼上 /exec 網址。');
-    const body=Object.assign({},payload);
-    const user=firebase.auth().currentUser;
-    if(user) body.idToken=await user.getIdToken(false);
-    const res=await fetch(V16_CONFIG.appsScriptUrl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body),redirect:'follow'});
-    const text=await res.text();
-    let data; try{data=JSON.parse(text);}catch(e){throw new Error('Google Apps Script 回傳格式錯誤：'+text.slice(0,200));}
-    if(!data.ok) throw new Error(data.error||'Google Sheets API 操作失敗');
-    return data;
-  }
-  async function v16GetShop(){
-    if(!hasSheetsBackend()) throw new Error('尚未設定 Google Apps Script 網址。');
-    const url=V16_CONFIG.appsScriptUrl+'?action=getShop&code='+encodeURIComponent(branchCode);
-    const res=await fetch(url,{method:'GET',redirect:'follow'});
-    const text=await res.text();
-    let data; try{data=JSON.parse(text);}catch(e){throw new Error('Google Sheets API 回傳格式錯誤：'+text.slice(0,200));}
-    if(!data.ok) throw new Error(data.error||'讀取分店資料失敗');
-    return data;
-  }
-  function branchRef(path){
-    const clean=String(path||'').replace(/^\/+|\/+$/g,'');
-    return {
-      async once(){
-        const shop=await v16GetShop();
-        const parts=clean.split('/').filter(Boolean).slice(2); // branches/{code}/...
-        let value=shop;
-        for(const part of parts){ if(value==null){value=null;break;} value=value[part]; }
-        return {val:()=>value};
-      },
-      async set(value){return v16Api({action:'set',code:branchCode,path:clean,value});},
-      async update(value){return v16Api({action:'update',code:branchCode,path:clean,value});},
-      async remove(){return v16Api({action:'remove',code:branchCode,path:clean});},
-      push(){return {key:randomKey()};}
-    };
-  }
-  function dbRoot(){
-    const real=firebase.database();
-    return {
-      ref(path=''){
-        const clean=String(path||'').replace(/^\/+|\/+$/g,'');
-        if(clean==='branches' || clean.indexOf('branches/')===0) return branchRef(clean);
-        return real.ref(path);
-      }
-    };
-  }
-
-  // 統一計算網站根路徑，避免從 /index.html 之類的網址組成
-  // /index.html/store/xxx 造成「檔案不存在」或 404。
-  function siteBasePath(){
-    const path=location.pathname||'/';
-    const marker='/store/';
-    if(path.includes(marker)) return path.split(marker)[0].replace(/\/$/,'');
-    // 若目前是直接開啟 HTML 檔案，保留 HTML 所在資料夾，不把檔名當成資料夾。
-    if(/\.html?$/i.test(path)){
-      const dir=path.slice(0,path.lastIndexOf('/')+1);
-      return dir.replace(/\/$/,'');
-    }
-    return path.replace(/\/$/,'');
-  }
-  function goToBranch(code){
-    location.href=siteBasePath()+'/store/'+encodeURIComponent(code);
-  }
+  function dbRoot(){ return firebase.database(); }
 
   // 分店跳轉直接整合進主站分頁列，固定位於「米米班表」後方。
   function setupBranchMenu(){
@@ -7413,7 +7127,7 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
     const snap=await dbRoot().ref('storeDirectory').once('value');
     const raw=snap.val()||{};
     return Object.keys(raw).map(code=>({code,...raw[code]}))
-      .filter(x=>x.active!==false && x.adminLockedClosed!==true && x.approved===true && x.approvalStatus!=='rejected')
+      .filter(x=>x.active!==false && x.approved===true && x.approvalStatus==='approved')
       .sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0)||String(a.name||'').localeCompare(String(b.name||''),'zh-TW'));
   }
   const BRANCH_HEARTS = ['❤️','🩷','🧡','💛','💚','💙','🩵','💜'];
@@ -7450,7 +7164,10 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
           item.dataset.branchCode=x.code;
           const branchName=cleanBranchName(x.name, x.code);
           item.textContent=BRANCH_HEARTS[(index + 1) % BRANCH_HEARTS.length] + ' ' + branchName;
-          item.onclick=()=>goToBranch(x.code);
+          item.onclick=()=>{
+            const base=location.pathname.includes('/store/')?location.pathname.split('/store/')[0]:'';
+            location.href=base+'/store/'+encodeURIComponent(x.code);
+          };
           menu.appendChild(item);
         });
       }else{
@@ -7491,29 +7208,27 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
   function openBranchApplication(){
     const body=`<div class="branch-form-grid">
       <input id="appName" class="full" placeholder="分店名稱（必填）">
+      <input id="appEmail" type="email" class="full" placeholder="分店主 Email（將建立 Firebase 登入帳號）">
+      <input id="appPassword" type="password" placeholder="登入密碼（至少 6 碼）">
       <textarea id="appDesc" class="full" placeholder="分店介紹 / 申請原因"></textarea>
     </div>
-    <p style="font-size:11px;color:#aaa;line-height:1.7">申請時直接使用 Google 帳號登入。Google 登入同時會成為你的 Firebase 分店身分；核准後，分店資料庫會建立在你的 Google Drive / Sheets。第一次授權會要求 Google Drive 與試算表權限。</p>
-    <div class="branch-row"><button class="branch-btn primary" id="googleApplyBtn">🔵 使用 Google 帳號申請</button><span id="appStatus" style="font-size:11px"></span></div>`;
+    <p style="font-size:11px;color:#aaa">送出後會建立 Firebase 帳號並提交審核；密碼不會寫入資料庫。管理員核准後即可登入管理分店。</p>
+    <div class="branch-row"><button class="branch-btn primary" id="submitBranchApp">送出申請</button><span id="appStatus" style="font-size:11px"></span></div>`;
     const el=modal('📝 分店主申請',body,'branchApplicationModal');
-    el.querySelector('#googleApplyBtn').onclick=async()=>{
+    el.querySelector('#submitBranchApp').onclick=async()=>{
       if(window.innerWidth<=768){alert('手機端禁止申請分店');return;}
-      const name=el.querySelector('#appName').value.trim(), desc=el.querySelector('#appDesc').value.trim(), st=el.querySelector('#appStatus'), btn=el.querySelector('#googleApplyBtn');
-      if(!name){st.textContent='請先填寫分店名稱。';return;}
-      btn.disabled=true; st.textContent='正在使用 Google 登入…';
+      const name=el.querySelector('#appName').value.trim(), email=el.querySelector('#appEmail').value.trim(), pass=el.querySelector('#appPassword').value, desc=el.querySelector('#appDesc').value.trim();
+      const st=el.querySelector('#appStatus');
+      if(!name||!email||pass.length<6){st.textContent='請完整填寫，密碼至少 6 碼';return;}
+      st.textContent='正在建立申請帳號...';
       try{
-        const {user}=await signInBranchOwnerWithGoogle();
-        const appId=dbRoot().ref('branchApplications').push().key, code=makeCode(name);
-        const existing=(await dbRoot().ref('branchApplications').once('value')).val()||{};
-        const duplicate=Object.values(existing).find(a=>a && a.uid===user.uid && a.status==='pending');
-        if(duplicate) throw new Error('你已經有一份待審核的分店申請。');
-        await dbRoot().ref('branchApplications/'+appId).set({id:appId,code,name,email:user.email||'',displayName:user.displayName||'',uid:user.uid,provider:'google.com',description:desc,status:'pending',createdAt:firebase.database.ServerValue.TIMESTAMP});
-        st.textContent='申請已送出，等待版主審核。';
-        btn.textContent='✓ 已送出申請';
-        setTimeout(()=>{el.remove();firebase.auth().signOut();googleAccessToken=null;googleAccessTokenExpiresAt=0;},900);
-      }catch(e){
-        btn.disabled=false; st.textContent='申請失敗：'+(e.message||e);
-      }
+        const cred=await firebase.auth().createUserWithEmailAndPassword(email,pass);
+        const uid=cred.user.uid, appId=dbRoot().ref('branchApplications').push().key, code=makeCode(name);
+        await dbRoot().ref('branchApplications/'+appId).set({id:appId,code,name,email,uid,description:desc,status:'pending',createdAt:firebase.database.ServerValue.TIMESTAMP});
+        await firebase.auth().signOut();
+        st.textContent='申請已送出，等待管理員審核。';
+        el.querySelector('#submitBranchApp').disabled=true;
+      }catch(e){st.textContent='申請失敗：'+(e.message||e); }
     };
   }
 
@@ -7533,75 +7248,18 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
     el.querySelector('#bmGoMainLogin').onclick=()=>{el.remove(); const b=document.getElementById('showLoginBtn'); if(b) b.click();};
   }
 
-  async function getOwnedBranches(user){
-    if(!user) return [];
-    const byCode=new Map();
-    try{
-      const ownSnap=await dbRoot().ref('branchOwners/'+user.uid).once('value');
-      const own=ownSnap.val()||{};
-      Object.keys(own).forEach(code=>{ if(own[code]===true) byCode.set(code,{code}); });
-    }catch(e){ console.warn('讀取 branchOwners 失敗:',e); }
-    // 相容舊資料：即使 branchOwners 遺失，只要 storeDirectory 有 ownerUid 仍能找到自己的分店。
-    try{
-      const dirSnap=await dbRoot().ref('storeDirectory').once('value');
-      const dir=dirSnap.val()||{};
-      Object.keys(dir).forEach(code=>{
-        const d=dir[code]||{};
-        if(d.ownerUid===user.uid && d.approved===true && d.approvalStatus!=='rejected') byCode.set(code,{code,...d});
-      });
-      // 補齊 branchOwners 只有 code、storeDirectory 有完整資料的情況。
-      byCode.forEach((item,code)=>{ if(dir[code]) byCode.set(code,{code,...dir[code]}); });
-    }catch(e){ console.warn('讀取 storeDirectory 失敗:',e); }
-    return Array.from(byCode.values()).filter(x=>x.approved===true && x.active!==undefined || x.approved===true);
-  }
-
   async function openManagement(){
     const role=await getRole(branchCode);
     if(!role.user){loginModal();return;}
     if(role.admin){openAdminPanel();return;}
     if(role.owner && branchCode){openOwnerPanel();return;}
-
-    // 在主站根路徑，分店主只看到自己的已核准分店。
-    if(!branchCode){
-      try{
-        const rows=await getOwnedBranches(role.user);
-        if(!rows.length){alert('此帳號目前沒有已核准的分店管理權限。');return;}
-        if(rows.length===1){ goToBranch(rows[0].code); return; }
-        const body=`<div style="line-height:1.7;margin-bottom:10px">請選擇你要管理的自己的分店：</div><div class="branch-list">${rows.map(x=>`<div class="branch-list-item"><button class="branch-btn" data-owner-code="${esc(x.code)}" style="width:100%;margin-bottom:6px;text-align:left">🏪 ${esc(x.name||x.code)} <small style="opacity:.7">${x.active===false?(x.adminLockedClosed?'（版主鎖定關店）':'（已關閉，可自行開啟）'):'（開啟中）'}</small></button><button class="branch-btn" data-owner-toggle="${esc(x.code)}" style="width:100%;margin-bottom:8px">${x.active===false?(x.adminLockedClosed?'🔒 聯絡版主重新開店':'▶️ 重新開啟'):'⏸ 關閉商店'}</button></div>`).join('')}</div>`;
-        const el=modal('⚙️ 管理中心',body,'ownerStorePicker');
-        el.querySelectorAll('[data-owner-code]').forEach(btn=>btn.onclick=()=>{ el.remove(); goToBranch(btn.dataset.ownerCode); });
-      }catch(e){alert('讀取你的分店權限失敗：'+(e.message||e));}
-      return;
-    }
     alert('目前帳號沒有此分店管理權限。');
   }
   // 提供給主站分頁列使用，避免跨 IIFE 作用域造成「管理中心」點擊無反應。
   window.openBranchManagement = openManagement;
 
-  // 最終權限保護：
-  // 1. 未登入訪客：完全不顯示管理中心
-  // 2. 主站管理員：顯示管理中心，可使用全部功能
-  // 3. 分店主：只有在目前網址是「自己擁有的分店」時才顯示管理中心，
-  //    管理操作仍由 openManagement + getRole 再次驗證，不能管理其他分店。
-  async function enforceMainAdminTabVisibility(){
-    const tab=document.getElementById('mainAdminManageTab');
-    if(!tab) return;
-
-    tab.style.display='none';
-    const user=firebase.auth().currentUser;
-    if(!user) return;
-
-    const role=await getRole(branchCode);
-    if(role.admin || (role.owner && !!branchCode)){
-      tab.style.display='flex';
-      tab.textContent='🛡️ 管理中心';
-      tab.onclick=()=>{ if(window.openBranchManagement) window.openBranchManagement(); };
-    }
-  }
-  window.enforceMainAdminTabVisibility=enforceMainAdminTabVisibility;
-
   function ownerPanel(){
-    return `<div class="branch-owner-note">你是本分店版主：可修改分店文字、分頁、商品格子資訊與商品圖片。商品/設定資料寫入專屬 Google 試算表，商品圖片寫入專屬 Google Drive 資料夾。</div>
+    return `<div class="branch-owner-note">你是本分店版主：可修改分店文字、分頁、商品格子資訊與商品圖片。所有分店資料寫入 Firebase。</div>
     <div class="branch-edit-toolbar"><button class="branch-btn primary" id="addTabBtn">＋ 新增分頁</button><label class="branch-upload-label">＋ 上傳商品圖片<input type="file" id="branchProductUpload" accept="image/*" multiple></label><button class="branch-btn" id="editBranchTextBtn">✏️ 分店文字</button><button class="branch-btn" id="toggleOwnerBranchBtn">⏸ 開關分店</button></div>
     <div id="ownerSettingsArea"></div>`;
   }
@@ -7615,27 +7273,15 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
     const toggleBtn=root.querySelector('#toggleOwnerBranchBtn');
     if(toggleBtn){
       const snap=await dbRoot().ref('storeDirectory/'+branchCode).once('value');
-      const d=snap.val()||{}, isOpen=d.active!==false, adminLocked=d.adminLockedClosed===true;
-      if(adminLocked){
-        toggleBtn.textContent='🔒 版主鎖定關店';
-        toggleBtn.disabled=true;
-        toggleBtn.title='此分店已由版主強制關閉，必須由版主重新核准開店。';
-      }else{
-        toggleBtn.textContent=isOpen?'⏸ 關閉分店':'▶️ 開啟分店';
-        toggleBtn.onclick=async()=>{
-          try{
-            const latest=(await dbRoot().ref('storeDirectory/'+branchCode).once('value')).val()||{};
-            if(latest.adminLockedClosed===true){
-              alert('此分店已由版主關閉並鎖定。\n\n你無法自行重新開啟，請聯絡版主重新核准開店。');
-              return;
-            }
-            const nextOpen=latest.active===false;
-            await dbRoot().ref('storeDirectory/'+branchCode).update({active:nextOpen,closedBy:nextOpen?null:'owner',adminLockedClosed:false,closureMode:nextOpen?'open':'owner_closed',closedAt:nextOpen?null:firebase.database.ServerValue.TIMESTAMP,updatedAt:firebase.database.ServerValue.TIMESTAMP});
-            alert(nextOpen?'分店已開啟。':'分店已關閉。');
-            await openOwnerPanel();
-          }catch(e){alert('更新分店狀態失敗：'+(e.message||e));}
-        };
-      }
+      const d=snap.val()||{}, isOpen=d.active!==false;
+      toggleBtn.textContent=isOpen?'⏸ 關閉分店':'▶️ 開啟分店';
+      toggleBtn.onclick=async()=>{
+        try{
+          await dbRoot().ref('storeDirectory/'+branchCode).update({active:!isOpen,updatedAt:firebase.database.ServerValue.TIMESTAMP});
+          alert(!isOpen?'分店已開啟。':'分店已關閉。');
+          await openOwnerPanel();
+        }catch(e){alert('更新分店狀態失敗：'+(e.message||e));}
+      };
     }
     await renderOwnerSettings();
   }
@@ -7675,47 +7321,18 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
     el.querySelector('#saveBranchText').onclick=async()=>{await dbRoot().ref('branches/'+branchCode+'/settings').update({title:el.querySelector('#bsTitle').value.trim(),intro:el.querySelector('#bsIntro').value,notice:el.querySelector('#bsNotice').value});el.remove();await bootBranch();};
   }
 
-  function readImageAsDataUrl(file,maxW=1600,maxH=1600,quality=.82){
-    return new Promise((resolve,reject)=>{
-      if(!file || !file.type.startsWith('image/')) return reject(new Error('請選擇圖片檔案'));
-      const reader=new FileReader();
-      reader.onerror=()=>reject(new Error('圖片讀取失敗'));
-      reader.onload=()=>{
-        const img=new Image();
-        img.onload=()=>{
-          const scale=Math.min(1,maxW/img.width,maxH/img.height);
-          const w=Math.max(1,Math.round(img.width*scale)), h=Math.max(1,Math.round(img.height*scale));
-          const canvas=document.createElement('canvas'); canvas.width=w; canvas.height=h;
-          const ctx=canvas.getContext('2d'); ctx.drawImage(img,0,0,w,h);
-          resolve(canvas.toDataURL('image/jpeg',quality));
-        };
-        img.onerror=()=>reject(new Error('圖片格式無法讀取'));
-        img.src=reader.result;
-      };
-      reader.readAsDataURL(file);
-    });
-  }
-
-  async function uploadImageToDrive(file){
-    if(!file || !file.type.startsWith('image/')) throw new Error('請選擇圖片檔案');
-    // 先壓縮到適合網頁商店的尺寸，再交給 Apps Script 存進 Google Drive。
-    const data=await readImageAsDataUrl(file,1400,1400,.80);
-    return v16Api({action:'uploadImage',code:branchCode,fileName:file.name,data});
-  }
-
   async function uploadBranchProducts(files){
-    const role=await getRole(branchCode);if(!role.owner&&!role.admin){alert('你沒有這間分店的管理權限。');return;}
+    const role=await getRole(branchCode);if(!role.owner&&!role.admin)return;
     let tabs=(await dbRoot().ref('branches/'+branchCode+'/tabs').once('value')).val()||{};
     if(!Object.keys(tabs).length){tabs={products:{name:'商品',icon:'🛍️',order:1,description:'商品分頁'}};}
     const cats=Object.keys(tabs).filter(k=>k!=='cart');if(!cats.length){alert('請先建立商品分頁');return;}
-    const cat=prompt('請輸入商品要放入的分頁代碼：\n'+cats.map(k=>k+' = '+tabs[k].name).join('\n'),cats[0]);if(!cat||!tabs[cat])return;
+    const cat=prompt('請輸入商品要放入的分頁代碼：\\n'+cats.map(k=>k+' = '+tabs[k].name).join('\\n'),cats[0]);if(!cat||!tabs[cat])return;
     for(const file of Array.from(files||[])){
       try{
-        if(file.size>10*1024*1024){alert('原始圖片不可超過 10MB：'+file.name);continue;}
-        const image=await uploadImageToDrive(file);
-        const id=dbRoot().ref('branches/'+branchCode+'/products').push().key;
-        await dbRoot().ref('branches/'+branchCode+'/products/'+id).set({id,image:image.url,driveFileId:image.fileId,storagePath:'',imageMode:'google-drive',category:cat,caption:file.name.replace(/\.[^.]+$/,''),price:'0',quantity:'數量: 1',interact:'無互動',note:'',real_img:'一般',createdAt:Date.now()});
-      }catch(e){console.error(e);alert('商品新增失敗：'+e.message);}
+        const ref=firebase.storage().ref('branchFiles/'+firebase.auth().currentUser.uid+'/'+branchCode+'/products/'+Date.now()+'_'+slug(file.name));
+        const snap=await ref.put(file), url=await snap.ref.getDownloadURL(), id=dbRoot().ref('branches/'+branchCode+'/products').push().key;
+        await dbRoot().ref('branches/'+branchCode+'/products/'+id).set({id,image:url,storagePath:ref.fullPath,ownerUid:firebase.auth().currentUser.uid,category:cat,caption:file.name.replace(/\.[^.]+$/,''),price:'0',quantity:'數量: 1',interact:'無互動',note:'',real_img:'一般',createdAt:firebase.database.ServerValue.TIMESTAMP});
+      }catch(e){console.error(e);alert('圖片上傳失敗：'+e.message);}
     }
     await bootBranch();
   }
@@ -7723,11 +7340,14 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
   async function replaceBranchProductImage(id,oldPath,file){
     const role=await getRole(branchCode); if(!role.owner&&!role.admin)return;
     if(!file||!file.type.startsWith('image/'))return;
-    if(file.size>10*1024*1024){alert('原始圖片不可超過 10MB');return;}
+    if(file.size>5*1024*1024){alert('圖片不可超過 5MB');return;}
     try{
-      const image=await uploadImageToDrive(file);
-      await dbRoot().ref('branches/'+branchCode+'/products/'+id).update({image:image.url,driveFileId:image.fileId,storagePath:'',imageMode:'google-drive',updatedAt:Date.now()});
-      if(oldPath){try{await v16Api({action:'deleteImage',code:branchCode,fileId:oldPath});}catch(e){console.warn('舊圖片刪除失敗:',e);}}
+      const uid=firebase.auth().currentUser.uid;
+      const ref=firebase.storage().ref('branchFiles/'+uid+'/'+branchCode+'/products/'+Date.now()+'_'+slug(file.name));
+      const snap=await ref.put(file,{contentType:file.type});
+      const url=await snap.ref.getDownloadURL();
+      await dbRoot().ref('branches/'+branchCode+'/products/'+id).update({image:url,storagePath:ref.fullPath,ownerUid:uid,updatedAt:firebase.database.ServerValue.TIMESTAMP});
+      if(oldPath && oldPath!==ref.fullPath)try{await firebase.storage().ref(oldPath).delete();}catch(e){}
       await bootBranch();
     }catch(e){alert('更換圖片失敗：'+(e.message||e));}
   }
@@ -7738,11 +7358,8 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
   }
   async function deleteProduct(id,storagePath){
     if(!confirm('確定刪除商品？'))return;
-    const products=(await dbRoot().ref('branches/'+branchCode+'/products').once('value')).val()||{};
-    const p=products[id]||{};
     await dbRoot().ref('branches/'+branchCode+'/products/'+id).remove();
-    const fileId=p.driveFileId||storagePath;
-    if(fileId){try{await v16Api({action:'deleteImage',code:branchCode,fileId});}catch(e){console.warn('圖片刪除失敗:',e);}}
+    if(storagePath)try{await firebase.storage().ref(storagePath).delete();}catch(e){}
     await bootBranch();
   }
 
@@ -7754,14 +7371,14 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
     gal.innerHTML=arr.map(p=>`<article class="branch-card" data-id="${esc(p.id)}">
       <img src="${esc(p.image||'')}" alt="${esc(p.caption||'商品')}">
       <div class="branch-card-body"><div class="branch-card-title">${esc(p.caption||'')}</div><div class="branch-price">$ ${esc(p.price||'0')}</div><div class="branch-meta">${esc(p.quantity||'')} · ${esc(p.interact||'')}</div><div class="branch-meta">${esc(p.note||'')}</div></div>
-      <div class="branch-card-edit"><div class="image-replace"><label class="branch-image-btn">🖼️ 更換圖片<input type="file" accept="image/*" data-image-replace></label><span style="font-size:10px;color:#888">圖片儲存於 Google Drive</span></div><input data-field="caption" value="${esc(p.caption||'')}" placeholder="商品文字"><input data-field="price" value="${esc(p.price||'0')}" placeholder="價格"><input data-field="quantity" value="${esc(p.quantity||'')}" placeholder="數量"><select data-field="interact"><option ${p.interact==='無互動'?'selected':''}>無互動</option><option ${p.interact==='單人互動'?'selected':''}>單人互動</option><option ${p.interact==='雙人互動'?'selected':''}>雙人互動</option><option ${p.interact==='多人互動'?'selected':''}>多人互動</option></select><textarea data-field="note" placeholder="備註">${esc(p.note||'')}</textarea><div class="branch-row"><button class="branch-btn primary" data-save>儲存格子資訊</button><button class="branch-btn danger" data-delete>刪除</button></div></div>
+      <div class="branch-card-edit"><div class="image-replace"><label class="branch-image-btn">🖼️ 更換圖片<input type="file" accept="image/*" data-image-replace></label><span style="font-size:10px;color:#888">Firebase Storage</span></div><input data-field="caption" value="${esc(p.caption||'')}" placeholder="商品文字"><input data-field="price" value="${esc(p.price||'0')}" placeholder="價格"><input data-field="quantity" value="${esc(p.quantity||'')}" placeholder="數量"><select data-field="interact"><option ${p.interact==='無互動'?'selected':''}>無互動</option><option ${p.interact==='單人互動'?'selected':''}>單人互動</option><option ${p.interact==='雙人互動'?'selected':''}>雙人互動</option><option ${p.interact==='多人互動'?'selected':''}>多人互動</option></select><textarea data-field="note" placeholder="備註">${esc(p.note||'')}</textarea><div class="branch-row"><button class="branch-btn primary" data-save>儲存格子資訊</button><button class="branch-btn danger" data-delete>刪除</button></div></div>
     </article>`).join('');
     if(role.owner||role.admin){
       gal.querySelectorAll('.branch-card').forEach(card=>{
         const id=card.dataset.id, p=products[id];
         card.querySelector('[data-save]').onclick=async()=>{const updates={};card.querySelectorAll('[data-field]').forEach(el=>updates[el.dataset.field]=el.value);await dbRoot().ref('branches/'+branchCode+'/products/'+id).update(updates);await bootBranch();};
-        const imgInput=card.querySelector('[data-image-replace]'); if(imgInput) imgInput.onchange=async e=>replaceBranchProductImage(id,p.driveFileId||p.storagePath,e.target.files[0]);
-        card.querySelector('[data-delete]').onclick=()=>deleteProduct(id,p.driveFileId||p.storagePath);
+        const imgInput=card.querySelector('[data-image-replace]'); if(imgInput) imgInput.onchange=async e=>replaceBranchProductImage(id,p.storagePath,e.target.files[0]);
+        card.querySelector('[data-delete]').onclick=()=>deleteProduct(id,p.storagePath);
       });
     }
   }
@@ -7778,13 +7395,8 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
       box.appendChild(action);
     }
     const role=await getRole(branchCode);
-    let canManage=role.admin || role.owner;
-    if(!branchCode && !role.admin){
-      try{ canManage=(await getOwnedBranches(user)).length>0; }catch(e){ canManage=false; }
-    }
-    // 只有版主或真正擁有已核准分店的分店主才顯示管理中心。
-    action.style.display=canManage?'block':'none';
-    action.textContent=role.admin?'🛡️ 管理中心':'⚙️ 管理中心';
+    action.style.display=(role.admin || (role.owner && branchCode))?'block':'none';
+    action.textContent=role.admin?'🛡️ 管理中心':'⚙️ 分店管理';
   }
 
   async function bootBranch(){
@@ -7792,21 +7404,8 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
     document.body.classList.add('branch-mode');
     const root=document.getElementById('branchAppRoot');
     const dir=(await dbRoot().ref('storeDirectory/'+branchCode).once('value')).val();
-    if(!dir||dir.approved!==true){root.innerHTML='<div class="branch-app"><h2>此分店不存在或尚未開放</h2><button class="branch-btn" onclick="history.back()">返回</button></div>';return;}
-    if(dir.active===false){
-      const locked=dir.adminLockedClosed===true;
-      root.innerHTML='<div class="branch-app"><h2>⏸ 此分店目前已關閉</h2><p style="color:#aaa;line-height:1.7">'+(locked?'此分店已由版主關閉並鎖定。分店主無法自行重新開啟，請聯絡版主重新核准開店。':'分店主暫時關閉了這間商店。')+'</p><button class="branch-btn" onclick="history.back()">返回</button></div>';
-      return;
-    }
+    if(!dir||dir.active===false||dir.approved!==true){root.innerHTML='<div class="branch-app"><h2>此分店不存在或尚未開放</h2><button class="branch-btn" onclick="history.back()">返回</button></div>';return;}
     const role=await getRole(branchCode);
-    const currentUser=firebase.auth().currentUser;
-    if(role.owner && !dir.sheetId){
-      root.innerHTML='<div class="branch-app"><h2>🎉 分店已核准</h2><p style="line-height:1.8;color:#aaa">你的分店已通過版主審核。請使用你的 Google 帳號授權後建立個人 Google Drive / Sheets 資料庫。</p><button class="branch-btn primary" id="createPersonalDbBtn">🔵 建立我的 Google 資料庫</button><button class="branch-btn" onclick="history.back()">返回</button><div id="personalDbStatus" style="margin-top:10px;font-size:11px;color:#aaa"></div></div>';
-      const b=document.getElementById('createPersonalDbBtn'), st=document.getElementById('personalDbStatus');
-      b.onclick=async()=>{b.disabled=true;st.textContent='正在建立你的個人 Google Drive / Sheets…';try{const latest=await ensureOwnerPersonalDatabase(branchCode,dir);st.textContent='建立完成，正在開啟分店…';setTimeout(()=>bootBranch(),300);}catch(e){b.disabled=false;st.textContent='建立失敗：'+(e.message||e);}};
-      return;
-    }
-    if (typeof enforceMainAdminTabVisibility === 'function') await enforceMainAdminTabVisibility();
     const settings=(await dbRoot().ref('branches/'+branchCode+'/settings').once('value')).val()||{};
     let tabs=(await dbRoot().ref('branches/'+branchCode+'/tabs').once('value')).val()||{};
     // 新分店預設只有：購物車 + 商品；舊分店若尚未建立任何分頁，也套用同樣的預設顯示。
@@ -7836,104 +7435,53 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
     if(role.owner)await openOwnerPanel();
   }
 
-  async function toggleOwnerShop(code){
-    const user=firebase.auth().currentUser;
-    if(!user) throw new Error('請先使用 Google 帳號登入。');
-    const snap=await dbRoot().ref('storeDirectory/'+code).once('value');
-    const d=snap.val()||{};
-    if(d.ownerUid!==user.uid) throw new Error('你沒有權限管理這間分店。');
-    if(d.adminLockedClosed){
-      alert('此分店已由版主關閉並鎖定。\n\n你無法自行重新開啟，請聯絡版主重新核准開店。');
-      return;
-    }
-    const next=d.active===false;
-    if(!confirm(next?'確定要重新開啟你的分店？':'確定要關閉你的分店？'))return;
-    await dbRoot().ref('storeDirectory/'+code).update({active:next,closedBy:next?null:'owner',adminLockedClosed:false,closureMode:next?'open':'owner_closed',closedAt:next?null:firebase.database.ServerValue.TIMESTAMP,updatedAt:firebase.database.ServerValue.TIMESTAMP});
-    await bootBranch();
-  }
-
   async function openAdminPanel(){
     const apps=(await dbRoot().ref('branchApplications').once('value')).val()||{};
     const dir=(await dbRoot().ref('storeDirectory').once('value')).val()||{};
     const pending=Object.keys(apps).map(k=>({id:k,...apps[k]})).filter(x=>x.status==='pending');
     const branches=Object.keys(dir).map(k=>({code:k,...dir[k]})).sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0));
-    const activeCount=branches.filter(x=>x.active!==false&&x.approved===true).length;
-    const closedCount=branches.filter(x=>x.active===false&&x.approved===true).length;
     const body=`
-      <div class="branch-admin-dashboard">
-        <div class="branch-admin-toolbar">
-          <div class="branch-admin-stat"><b>${pending.length}</b><span>待審申請</span></div>
-          <div class="branch-admin-stat"><b>${activeCount}</b><span>營業中</span></div>
-          <div class="branch-admin-stat"><b>${closedCount}</b><span>已暫停</span></div>
-          <div class="branch-admin-stat"><b>${branches.length}</b><span>全部分店</span></div>
-          <button class="branch-btn" id="refreshBranchAdmin">↻ 重新整理</button>
-        </div>
-        <div class="branch-admin-section">
-          <div class="branch-admin-section-head"><h4>📝 待審分店申請</h4><span>${pending.length ? '請確認資料後再核准' : '目前沒有待審申請'}</span></div>
-          <div class="branch-list">${pending.map(a=>`
-            <div class="branch-list-item">
-              <strong>${esc(a.icon||'🏪')} ${esc(a.name)}</strong>
-              <br><small>${esc(a.email)} · ${esc(a.code)}</small>
-              <p style="font-size:11px;color:#bbb">${esc(a.description||'尚未提供介紹')}</p>
-              <div class="branch-row">
-                <button class="branch-btn primary" data-approve="${esc(a.id)}">✓ 核准</button>
-                <button class="branch-btn danger" data-reject="${esc(a.id)}">✕ 拒絕</button>
-              </div>
-            </div>`).join('')||'<div style="color:#888;padding:10px 0">目前沒有待審申請。</div>'}</div>
-        </div>
-        <div class="branch-admin-section">
-          <div class="branch-admin-section-head"><h4>🏪 已核准分店管理</h4><span>可編輯、開關或刪除分店</span></div>
-          <div class="branch-list">${branches.map(b=>`
-            <div class="branch-list-item admin-branch-item">
-              <div class="admin-branch-main">
-                <strong>${esc(b.icon||'🏪')} ${esc(b.name||b.code)}</strong>
-                <small>代碼：${esc(b.code)} · ${esc(b.ownerEmail||'未設定主理人')}</small>${b.sheetUrl?`<small>📊 <a href="${esc(b.sheetUrl)}" target="_blank" rel="noopener">Google 試算表</a>${b.driveFolderUrl?` · <a href="${esc(b.driveFolderUrl)}" target="_blank" rel="noopener">圖片資料夾</a>`:''}</small>`:''}
-                <span class="admin-status ${b.active===false?'closed':'open'}">${b.active===false?(b.adminLockedClosed?'🔒 版主鎖定':'⏸ 已關閉'):'● 開啟中'}</span>
-              </div>
-              <div class="branch-row admin-branch-actions">
-                <button class="branch-btn" data-edit-branch="${esc(b.code)}">✏️ 編輯</button>
-                ${b.sheetId?'<button class="branch-btn" data-open-sheet="'+esc(b.code)+'">📊 試算表</button>':'<button class="branch-btn" data-migrate-branch="'+esc(b.code)+'">📊 建立試算表</button>'}
-                <button class="branch-btn" data-toggle-branch="${esc(b.code)}" data-active="${b.active!==false}">${b.active===false?(b.adminLockedClosed?'🔓 版主重新開店':'▶️ 開啟'):'⏸ 版主關店'}</button>
-                <button class="branch-btn" data-view-branch="${esc(b.code)}">↗ 開啟</button>
-                <button class="branch-btn danger" data-delete-branch="${esc(b.code)}">🗑 刪除</button>
-              </div>
-            </div>`).join('')||'<div style="color:#888;padding:10px 0">尚無已核准分店。</div>'}</div>
-        </div>
+      <div class="branch-admin-toolbar">
+        <span class="branch-admin-stat">待審：${pending.length}</span>
+        <span class="branch-admin-stat">分店：${branches.length}</span>
+        <button class="branch-btn" id="refreshBranchAdmin">↻ 重新整理</button>
+      </div>
+      <div class="branch-admin-section">
+        <h4>📝 待審分店申請</h4>
+        <div class="branch-list">${pending.map(a=>`
+          <div class="branch-list-item">
+            <strong>${esc(a.icon||'🏪')} ${esc(a.name)}</strong>
+            <br><small>${esc(a.email)} · ${esc(a.code)}</small>
+            <p style="font-size:11px;color:#bbb">${esc(a.description||'')}</p>
+            <div class="branch-row">
+              <button class="branch-btn primary" data-approve="${esc(a.id)}">核准並建立</button>
+              <button class="branch-btn danger" data-reject="${esc(a.id)}">拒絕</button>
+            </div>
+          </div>`).join('')||'<div style="color:#888">目前沒有待審申請</div>'}</div>
+      </div>
+      <div class="branch-admin-section">
+        <h4>🏪 分店總管理</h4>
+        <div class="branch-list">${branches.map(b=>`
+          <div class="branch-list-item">
+            <div class="branch-row">
+              <strong>${esc(b.icon||'🏪')} ${esc(b.name||b.code)}</strong>
+              <span style="margin-left:auto;font-size:10px"><span class="branch-status-dot ${b.active!==false?'on':'off'}"></span>${b.active!==false?'開放中':'已停用'}</span>
+            </div>
+            <small>代碼：${esc(b.code)}　主理人：${esc(b.ownerEmail||'未設定')}</small>
+            <div class="branch-row" style="margin-top:8px">
+              <button class="branch-btn" data-edit-branch="${esc(b.code)}">✏️ 編輯</button>
+              <button class="branch-btn" data-toggle-branch="${esc(b.code)}" data-active="${b.active!==false}">${b.active!==false?'⏸ 停用分店':'▶️ 重新開放'}</button>
+              <button class="branch-btn" data-view-branch="${esc(b.code)}">↗ 開啟</button>
+            </div>
+          </div>`).join('')||'<div style="color:#888">尚無分店</div>'}</div>
       </div>`;
-    const el=modal('🛡️ 版主管理中心',body,'branchAdminModal');
-    const refresh=()=>{el.remove();openAdminPanel();};
-    el.querySelector('#refreshBranchAdmin').onclick=refresh;
+    const el=modal('🛡️ 版主管理系統',body,'branchAdminModal');
+    el.querySelector('#refreshBranchAdmin').onclick=()=>{el.remove();openAdminPanel();};
     el.querySelectorAll('[data-approve]').forEach(b=>b.onclick=async()=>approveApplication(b.dataset.approve,apps[b.dataset.approve],el));
     el.querySelectorAll('[data-reject]').forEach(b=>b.onclick=async()=>rejectApplication(b.dataset.reject,el));
     el.querySelectorAll('[data-edit-branch]').forEach(b=>b.onclick=()=>editDirectoryBranch(b.dataset.editBranch,dir[b.dataset.editBranch],el));
-    el.querySelectorAll('[data-open-sheet]').forEach(b=>b.onclick=()=>{const d=dir[b.dataset.openSheet]||{};if(d.sheetUrl)window.open(d.sheetUrl,'_blank','noopener');});
-    el.querySelectorAll('[data-migrate-branch]').forEach(b=>b.onclick=async()=>migrateExistingBranch(b.dataset.migrateBranch,dir[b.dataset.migrateBranch],el));
-    el.querySelectorAll('[data-toggle-branch]').forEach(b=>b.onclick=async()=>toggleDirectoryBranch(b.dataset.toggleBranch,b.dataset.active==='true',el));
-    el.querySelectorAll('[data-view-branch]').forEach(b=>b.onclick=()=>{el.remove();goToBranch(b.dataset.viewBranch);});
-    el.querySelectorAll('[data-delete-branch]').forEach(b=>b.onclick=async()=>deleteApprovedBranch(b.dataset.deleteBranch,dir[b.dataset.deleteBranch],el));
-  }
-
-  async function deleteApprovedBranch(code,data,el){
-    if(!code)return;
-    const name=data?.name||code;
-    const ok=confirm(`確定要刪除「${name}」嗎？\n\n將同步刪除：\n• 分店目錄資料\n• 分店內容與商品資料\n• 分店主的管理權限\n\nFirebase Storage 中的圖片檔案不會由網站刪除。\n\n此操作無法復原，確定繼續？`);
-    if(!ok)return;
-    const btn=el.querySelector(`[data-delete-branch="${CSS.escape(code)}"]`);
-    if(btn){btn.disabled=true;btn.textContent='🗑️ 刪除中…';}
-    try{
-      if(hasSheetsBackend()) await v16Api({action:'deleteShop',code});
-      const updates={};
-      updates['storeDirectory/'+code]=null;
-      if(data?.ownerUid) updates['branchOwners/'+data.ownerUid+'/'+code]=null;
-      await dbRoot().ref().update(updates);
-      alert(`「${name}」已刪除。\n\n分店 Google 試算表、Google Drive 圖片資料夾、目錄資料與管理權限已清除。`);
-      el.remove();
-      await renderDirectory();
-      openAdminPanel();
-    }catch(e){
-      if(btn){btn.disabled=false;btn.textContent='🗑 刪除';}
-      alert('刪除分店失敗，分店資料尚未刪除。\n\n原因：'+(e.message||e));
-    }
+    el.querySelectorAll('[data-toggle-branch]').forEach(b=>b.onclick=()=>toggleDirectoryBranch(b.dataset.toggleBranch,b.dataset.active==='true',el));
+    el.querySelectorAll('[data-view-branch]').forEach(b=>b.onclick=()=>location.href=(location.pathname.includes('/store/')?location.pathname.split('/store/')[0]:'')+'/store/'+encodeURIComponent(b.dataset.viewBranch));
   }
 
   async function editDirectoryBranch(code,data,el){
@@ -7951,57 +7499,27 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
     };
   }
 
-  async function migrateExistingBranch(code,data,el){
-    if(!hasSheetsBackend()){alert('請先設定 Google Apps Script 網址。');return;}
-    if(!code)return;
-    const btn=el.querySelector(`[data-migrate-branch="${CSS.escape(code)}"]`);
-    if(btn){btn.disabled=true;btn.textContent='📊 建立中…';}
-    try{
-      // 直接從 v15.12 舊 RTDB 讀取一次，送進 v16 Google Sheets。
-      const old=(await firebase.database().ref('branches/'+code).once('value')).val()||{};
-      const created=await v16Api({action:'createShop',code,name:data?.name||code,ownerUid:data?.ownerUid||'',initialData:{settings:old.settings||{title:data?.name||code,intro:'歡迎來到本分店',notice:''},tabs:old.tabs||{cart:{name:'購物車',icon:'🛒',order:0,description:'購物車'},products:{name:'商品',icon:'🛍️',order:1,description:'商品分頁'}},products:old.products||{}}});
-      await firebase.database().ref('storeDirectory/'+code).update({sheetId:created.sheetId,driveFolderId:created.driveFolderId,sheetUrl:created.sheetUrl,driveFolderUrl:created.driveFolderUrl,dataBackend:'google-sheets-drive',backendVersion:'16.0'});
-      alert('分店「'+(data?.name||code)+'」已完成 v16.3 資料庫建立。');
-      el.remove();openAdminPanel();
-    }catch(e){
-      if(btn){btn.disabled=false;btn.textContent='📊 建立試算表';}
-      alert('建立 Google 試算表失敗：'+(e.message||e));
-    }
-  }
-
   async function toggleDirectoryBranch(code,current,el){
-    const dir=(await dbRoot().ref('storeDirectory/'+code).once('value')).val()||{};
-    if(current){
-      if(!confirm('確定要暫停這間分店？\n\n版主關閉後，分店主將無法自行重新開啟，必須聯絡版主重新核准。'))return;
-      await dbRoot().ref('storeDirectory/'+code).update({active:false,closedBy:'admin',adminLockedClosed:true,closureMode:'admin_closed',closedAt:firebase.database.ServerValue.TIMESTAMP,updatedAt:firebase.database.ServerValue.TIMESTAMP});
-    }else{
-      if(dir.adminLockedClosed){
-        if(!confirm('這間分店目前是「版主鎖定關店」。\n\n重新開店必須由版主核准，確定要解除鎖定並重新開放嗎？'))return;
-        await dbRoot().ref('storeDirectory/'+code).update({active:true,closedBy:null,adminLockedClosed:false,closureMode:'open',reopenedBy:'admin',reopenedAt:firebase.database.ServerValue.TIMESTAMP,updatedAt:firebase.database.ServerValue.TIMESTAMP});
-      }else{
-        if(!confirm('確定要重新開放這間分店？'))return;
-        await dbRoot().ref('storeDirectory/'+code).update({active:true,closedBy:null,updatedAt:firebase.database.ServerValue.TIMESTAMP});
-      }
-    }
+    if(!confirm(current?'確定要暫停這間分店？':'確定要重新開放這間分店？'))return;
+    await dbRoot().ref('storeDirectory/'+code+'/active').set(!current);
     el.remove();await renderDirectory();openAdminPanel();
   }
 
   async function approveApplication(id,a,el){
     if(!a)return;
-    if(!confirm(`確定核准「${a.name}」並建立分店？\n\n核准後由分店主使用自己的 Google 帳號建立個人 Drive / Sheets 資料庫。`))return;
+    if(!confirm(`確定核准「${a.name}」並建立分店？`))return;
     const order=Date.now();
-    try{
-      const updates={};
-      updates['storeDirectory/'+a.code]={name:a.name,active:true,approved:true,approvalStatus:'approved',order,ownerEmail:a.email||'',ownerUid:a.uid,adminLockedClosed:false,closureMode:'open',dataBackend:'google-owner-drive',backendVersion:'16.4',storageStatus:'waiting-owner-google-consent'};
-      updates['branchOwners/'+a.uid+'/'+a.code]=true;
-      updates['branchApplications/'+id+'/status']='approved';
-      updates['branchApplications/'+id+'/approvedAt']=firebase.database.ServerValue.TIMESTAMP;
-      await dbRoot().ref().update(updates);
-      alert('分店已核准！\n\n接下來請分店主使用同一個 Google 帳號登入，建立自己的 Google Drive / Sheets 個人資料庫。');
-      el.remove();await renderDirectory();openAdminPanel();
-    }catch(e){alert('核准失敗：'+(e.message||e));}
+    const updates={};
+    updates['storeDirectory/'+a.code]={name:a.name,active:true,approved:true,approvalStatus:'approved',order,ownerEmail:a.email,ownerUid:a.uid};
+    updates['branchOwners/'+a.uid+'/'+a.code]=true;
+    updates['branches/'+a.code]={settings:{title:a.name,intro:a.description||'歡迎來到本分店',notice:''},tabs:{
+      cart:{name:'購物車',icon:'🛒',order:0,description:'購物車'},
+      products:{name:'商品',icon:'🛍️',order:1,description:'商品分頁'}
+    },products:{},createdAt:firebase.database.ServerValue.TIMESTAMP};
+    updates['branchApplications/'+id+'/status']='approved';
+    updates['branchApplications/'+id+'/approvedAt']=firebase.database.ServerValue.TIMESTAMP;
+    try{await dbRoot().ref().update(updates);alert('分店已核准建立');el.remove();await renderDirectory();openAdminPanel();}catch(e){alert('核准失敗：'+(e.message||e));}
   }
-
   async function rejectApplication(id,el){
     if(!confirm('確定拒絕這份分店申請？'))return;
     try{await dbRoot().ref('branchApplications/'+id).update({status:'rejected',rejectedAt:firebase.database.ServerValue.TIMESTAMP});el.remove();alert('已拒絕申請');openAdminPanel();}catch(e){alert('操作失敗：'+(e.message||e));}
@@ -8076,215 +7594,143 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
 </style>
 <script>
 (function(){
-  /*
-   * v15.3：鎖定主分頁寬度
-   * 問題：切換分頁時重新計算 --tabs-unified-width，
-   *       會因 active 樣式/內容變化造成整組主分頁瞬間變形。
-   * 修正：只在初始版面穩定後計算一次；切換分頁不再重新計算。
-   */
-  let lockedWidth = null;
-
   function syncTabWidthToLogin(){
-    const panel = document.getElementById('sideTabsPanel');
+    const panel=document.getElementById('sideTabsPanel');
     if(!panel) return;
-
-    // 已鎖定後，任何分頁切換/內容更新都不再改變主分頁寬度
-    if(lockedWidth !== null){
-      panel.style.setProperty('--tabs-unified-width', lockedWidth + 'px');
-      return;
-    }
-
-    const candidates = Array.from(panel.querySelectorAll(
-      '.tab-btn, .dropdown-toggle, #collapseToggleBtn, .auth-btn'
-    ));
-
+    const candidates=Array.from(panel.querySelectorAll('.tab-btn,.dropdown-toggle,#collapseToggleBtn,.auth-btn'));
     if(!candidates.length) return;
-
-    // 暫時用內容寬度量測，但不包含下拉選單本體
-    const widths = candidates.map(el => {
-      const oldWidth = el.style.width;
-      const oldMin = el.style.minWidth;
-      const oldMax = el.style.maxWidth;
-
-      el.style.setProperty('width','max-content','important');
-      el.style.setProperty('min-width','0','important');
-      el.style.setProperty('max-width','none','important');
-
-      const w = Math.ceil(el.getBoundingClientRect().width);
-
-      el.style.width = oldWidth;
-      el.style.minWidth = oldMin;
-      el.style.maxWidth = oldMax;
-      return w;
-    }).filter(w => w > 0);
-
-    if(!widths.length) return;
-
-    lockedWidth = Math.max.apply(null, widths);
-    panel.style.setProperty('--tabs-unified-width', lockedWidth + 'px');
-  }
-
-  window.syncTabWidthToLogin = syncTabWidthToLogin;
-
-  function lockInitialLayout(){
-    // 等瀏覽器完成一輪以上 layout，再鎖定寬度
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        syncTabWidthToLogin();
-      });
+    candidates.forEach(el=>{
+      el.style.width='max-content';
+      el.style.minWidth='0';
+      el.style.maxWidth='none';
     });
+    const widths=candidates.map(el=>Math.ceil(el.getBoundingClientRect().width)).filter(w=>w>0);
+    if(!widths.length) return;
+    const width=Math.max.apply(null,widths);
+    panel.style.setProperty('--tabs-unified-width',width+'px');
   }
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', lockInitialLayout, {once:true});
-  }else{
-    lockInitialLayout();
-  }
-
-  window.addEventListener('load', () => {
-    if(lockedWidth === null) syncTabWidthToLogin();
-  });
-
-  window.addEventListener('pageshow', () => {
-    if(lockedWidth === null) syncTabWidthToLogin();
-  });
-
-  // 字型完成後只允許「尚未鎖定」時重新量測
-  if(document.fonts && document.fonts.ready){
-    document.fonts.ready.then(() => {
-      if(lockedWidth === null) syncTabWidthToLogin();
-    }).catch(() => {});
+  window.syncTabWidthToLogin=syncTabWidthToLogin;
+  window.addEventListener('load',()=>setTimeout(syncTabWidthToLogin,50));
+  window.addEventListener('resize',syncTabWidthToLogin);
+  if(window.MutationObserver){
+    new MutationObserver(()=>requestAnimationFrame(syncTabWidthToLogin)).observe(document.body,{subtree:true,childList:true});
   }
 })();
 </script>
 
-<style id="dropdown-width-fix-v15">
-/* v15.1：主分頁與下拉選單完全分離 */
-#sideTabsPanel > #mainBranchSelector > #mainBranchSelect{
-  border-radius:12px !important;
-}
+<style id="v13-correct-login-width">
+/* ===== 修正：登入表單跟分頁列同寬，不反過來改變分頁寬度 ===== */
 @media (min-width:769px){
-  #sideTabsPanel .dropdown-menu{
-    width:130px !important;
-    min-width:130px !important;
-    max-width:130px !important;
-    box-sizing:border-box !important;
-    border-radius:12px !important;
+  /* 其他商店分頁圓角與其他桌面分頁一致 */
+  #sideTabsPanel #mainBranchSelector > #mainBranchSelect{
+    border-radius:6px !important;
   }
-  #sideTabsPanel .dropdown-menu > .dropdown-item{
-    width:100% !important;
-    box-sizing:border-box !important;
-    border-radius:8px !important;
-  }
-}
-@media (max-width:768px){
-  #sideTabsPanel .dropdown-menu{
-    width:130px !important;
-    min-width:130px !important;
-    max-width:calc(100vw - 16px) !important;
-    box-sizing:border-box !important;
-    border-radius:12px !important;
-  }
-  #sideTabsPanel .dropdown-menu > .dropdown-item{
-    width:100% !important;
-    box-sizing:border-box !important;
-    border-radius:8px !important;
-  }
-}
-</style>
 
-
-<style id="permission-and-login-width-v15-4">
-/* ===== v15.4 權限與登入表單版型 ===== */
-/* 訪客永遠不顯示管理中心 */
-.main-admin-tab{display:none !important;}
-body.is-admin .main-admin-tab{display:flex !important;}
-
-/* 分店主只有經 JS 權限驗證後才顯示，避免 CSS 預設狀態露出 */
-body:not(.is-admin) .main-admin-tab{display:none !important;}
-
-/* 桌面版：登入區與目前主分頁列使用同一個統一寬度 */
-@media (min-width:769px){
-  #sideTabsPanel .auth-section-wrapper{
-    width:var(--tabs-unified-width,124px) !important;
-    min-width:var(--tabs-unified-width,124px) !important;
-    max-width:var(--tabs-unified-width,124px) !important;
-    box-sizing:border-box !important;
-  }
+  /* 登入區直接使用既有分頁統一寬度變數 */
+  #sideTabsPanel .auth-section-wrapper,
   #sideTabsPanel .auth-box,
   #sideTabsPanel .auth-inputs{
-    width:100% !important;
-    max-width:100% !important;
+    width:var(--tabs-unified-width, 100px) !important;
+    min-width:var(--tabs-unified-width, 100px) !important;
+    max-width:var(--tabs-unified-width, 100px) !important;
     box-sizing:border-box !important;
   }
+
+  #sideTabsPanel .auth-box{
+    align-items:stretch !important;
+  }
+
   #sideTabsPanel .auth-inputs input,
-  #sideTabsPanel .auth-inputs .auth-btn,
-  #sideTabsPanel .auth-inputs .cancel-btn{
+  #sideTabsPanel .auth-inputs #loginBtn,
+  #sideTabsPanel .auth-inputs #cancelBtn{
     width:100% !important;
-    max-width:100% !important;
-    box-sizing:border-box !important;
-  }
-}
-
-/* 手機版登入表單仍以螢幕可用寬度為準，不拉動主分頁列 */
-@media (max-width:768px){
-  #sideTabsPanel .auth-inputs{
-    width:min(var(--tabs-unified-width,290px),calc(100vw - 24px)) !important;
-    max-width:calc(100vw - 24px) !important;
+    min-width:0 !important;
+    max-width:none !important;
     box-sizing:border-box !important;
   }
 }
 </style>
-<script id="permission-refresh-v15-7">
-(function(){
-  async function refreshMainAdminPermission(){
-    const tab=document.getElementById('mainAdminManageTab');
-    if(!tab) return;
-    tab.style.display='none';
-
-    const user = window.firebase && firebase.auth ? firebase.auth().currentUser : null;
-    if(!user) return;
-
-    // 主站管理員永遠可以看到管理中心。
-    if(typeof window.enforceMainAdminTabVisibility === 'function'){
-      await window.enforceMainAdminTabVisibility();
-    }
-  }
-
-  // Firebase 登入狀態改變後重新判斷，確保登出後立即消失、登入後依角色顯示。
-  if(window.firebase && firebase.auth){
-    firebase.auth().onAuthStateChanged(function(){
-      setTimeout(refreshMainAdminPermission, 0);
-    });
-  }
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', refreshMainAdminPermission, {once:true});
-  }else{
-    refreshMainAdminPermission();
-  }
-})();
-</script>
 
 
-<style id="v15-7-management-single-entry">
-/* v15.7：管理中心只保留登入區入口，主分頁列不顯示重複入口 */
-#sideTabsPanel > #mainAdminManageTab{display:none !important;}
+<style id="other-store-subtab-width">
+/* ===== 其他商店：只獨立調整「商店名稱」子分頁寬度，其他子分頁不變 ===== */
 @media (min-width:769px){
-  #sideTabsPanel .auth-section-wrapper{
-    width:var(--tabs-unified-width,124px) !important;
-    min-width:var(--tabs-unified-width,124px) !important;
-    max-width:var(--tabs-unified-width,124px) !important;
+  #sideTabsPanel #mainBranchMenu .dropdown-item.tab-btn{
+    width:100px !important;
+    min-width:100px !important;
+    max-width:100px !important;
+    box-sizing:border-box !important;
   }
 }
 </style>
 
-<style id="v16-backend-badge">
-.branch-owner-note{line-height:1.7}
-.branch-owner-note::after{content:"  ·  v16.2：Google 登入 + 個人 Google Sheets / Drive + HTTP 環境檢查";color:#777}
+<style id="cart-tab-screenshot-style">
+/* ===== 購物車分頁：依照提供的截圖調整，其他分頁維持不變 ===== */
+@media (min-width:769px){
+  #sideTabsPanel > #cartTabBtn{
+    width:100px !important;
+    min-width:100px !important;
+    max-width:100px !important;
+    min-height:36px !important;
+    height:36px !important;
+    padding:6px 5px !important;
+    box-sizing:border-box !important;
+    border-radius:6px !important;
+    border:1px solid var(--cart-color) !important;
+    display:grid !important;
+    grid-template-columns:24px minmax(0,1fr) 20px !important;
+    align-items:center !important;
+    overflow:visible !important;
+  }
+
+  #sideTabsPanel > #cartTabBtn .tab-zone-emoji{
+    grid-column:1 !important;
+    width:24px !important;
+    min-width:24px !important;
+    justify-self:start !important;
+    text-align:left !important;
+  }
+
+  #sideTabsPanel > #cartTabBtn .tab-zone-label{
+    grid-column:2 !important;
+    width:100% !important;
+    min-width:0 !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:space-around !important;
+    white-space:nowrap !important;
+    overflow:visible !important;
+    margin:0 !important;
+    padding:0 !important;
+  }
+
+  #sideTabsPanel > #cartTabBtn .tab-label-char{
+    flex:0 0 auto !important;
+    margin:0 !important;
+    padding:0 !important;
+    line-height:1.2 !important;
+  }
+
+  #sideTabsPanel > #cartTabBtn .cart-badge-count{
+    grid-column:3 !important;
+    justify-self:end !important;
+    align-self:center !important;
+    min-width:18px !important;
+    width:auto !important;
+    height:18px !important;
+    padding:0 4px !important;
+    border-radius:999px !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    box-sizing:border-box !important;
+    font-size:10px !important;
+    line-height:18px !important;
+  }
+}
+
+/* 手機維持原本購物車樣式 */
 </style>
-<style id="v15-12-fixes">
-/* v15.12：分店主導向、自己的分店辨識、商品圖片不依賴 Storage */
-</style>
+
 </body>
 </html>
