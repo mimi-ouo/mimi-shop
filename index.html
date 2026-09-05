@@ -2564,7 +2564,7 @@ body::after
     position:fixed!important;
     left:8px!important;
     right:8px!important;
-    bottom:calc(max(10px,env(safe-area-inset-bottom)) + 76px)!important;
+    bottom:calc(max(10px,env(safe-area-inset-bottom)) + 82px)!important;
     width:auto!important;
     max-width:none!important;
     z-index:2147483646!important;
@@ -3840,7 +3840,7 @@ body::after
   </div>
   <div class="schedule-container" id="scheduleContainer">
     <div class="schedule-header">
-      <h3 id="scheduleMonthTitle">2026年 8月 班表</h3>
+      <h3 id="scheduleMonthTitle">班表</h3>
       <div class="schedule-nav-btns">
         <button class="schedule-btn" id="prevMonthBtn">◀ 上個月</button>
         <button class="schedule-btn" id="todayMonthBtn">今天</button>
@@ -3944,8 +3944,11 @@ body::after
     let currentAlbumList = [];
     let currentAlbumIndex = 0;
 
-    let scheduleYear = 2026;
-    let scheduleMonth = 7;
+    // 班表預設顯示「目前月份」
+    // 月份由瀏覽器當下日期自動取得：例如 2026/9 就顯示 2026年9月
+    const scheduleNow = new Date();
+    let scheduleYear = scheduleNow.getFullYear();
+    let scheduleMonth = scheduleNow.getMonth();
 
     let initialDataHash = '';
 
@@ -4076,6 +4079,7 @@ function setupCartPreferences() {
       setupClearCartBtn();
       setupCartPreferences();
       setupCartCapture();
+      syncScheduleToCurrentMonth();
       setupScheduleEvents();
       setupDropZone();
       
@@ -4746,6 +4750,12 @@ function setupCartPreferences() {
           }
         });
       });
+    }
+
+    function syncScheduleToCurrentMonth() {
+      const now = new Date();
+      scheduleYear = now.getFullYear();
+      scheduleMonth = now.getMonth();
     }
 
     function setupScheduleEvents() {
@@ -6105,33 +6115,58 @@ function setupCartPreferences() {
 
 <script id="mobile-login-tap-outside-original-style">
 (function () {
+  /* 手機登入表單：點浮窗外空白處即可關閉 */
   function setupLoginOutsideClose() {
     const wrapper = document.querySelector('#sideTabsPanel .auth-section-wrapper');
     if (!wrapper || wrapper.dataset.loginOutsideCloseBound === '1') return;
 
     wrapper.dataset.loginOutsideCloseBound = '1';
 
-    document.addEventListener('click', function (event) {
+    function closeLoginForm() {
       if (window.innerWidth > 768) return;
-      if (!wrapper.classList.contains('mobile-auth-open')) return;
-
-      // 點浮窗內部不關閉
-      if (wrapper.contains(event.target)) return;
-
-      const showLoginBtn = document.getElementById('showLoginBtn');
-      // 點「登入」按鈕本身交給原本登入流程處理
-      if (showLoginBtn && showLoginBtn.contains(event.target)) return;
 
       const authInputs = document.getElementById('authInputs');
-      const loginBtn = document.getElementById('loginBtn');
+      const showLoginBtn = document.getElementById('showLoginBtn');
 
-      if (authInputs) authInputs.style.display = 'none';
-      if (showLoginBtn) showLoginBtn.style.display = 'block';
+      if (authInputs) {
+        authInputs.style.display = 'none';
+      }
+      if (showLoginBtn) {
+        showLoginBtn.style.display = 'block';
+      }
+
+      wrapper.classList.remove('mobile-auth-open');
 
       if (typeof window.syncMobileAuthPopup === 'function') {
         window.syncMobileAuthPopup();
       }
+    }
+
+    document.addEventListener('click', function (event) {
+      if (window.innerWidth > 768) return;
+      if (!wrapper.classList.contains('mobile-auth-open')) return;
+
+      /* 點登入表單本身，不關閉 */
+      if (wrapper.contains(event.target)) return;
+
+      /* 點搜尋欄右側的登入按鈕，交給原本流程處理 */
+      const showLoginBtn = document.getElementById('showLoginBtn');
+      if (showLoginBtn && showLoginBtn.contains(event.target)) return;
+
+      closeLoginForm();
     }, true);
+
+    /* 手機也支援返回/取消習慣：按 ESC 可關閉 */
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        closeLoginForm();
+      }
+    });
+
+    /* 點擊表單外的空白區域時，避免誤觸重新打開 */
+    wrapper.addEventListener('click', function (event) {
+      event.stopPropagation();
+    });
   }
 
   if (document.readyState === 'loading') {
@@ -6170,6 +6205,193 @@ function setupCartPreferences() {
   document.addEventListener('DOMContentLoaded', function () {
     const authBox = document.getElementById('authBox');
     if (authBox) observer.observe(authBox, { childList:true, subtree:true });
+  });
+})();
+</script>
+
+
+<style id="mobile-login-search-layout-final">
+/* ===== 手機登入：移到搜尋欄右側 + 清除左側殘留陰影/分隔線 ===== */
+@media (max-width:768px){
+  .search-sort-wrapper.mobile-login-search-layout{
+    display:flex!important;
+    align-items:center!important;
+    gap:8px!important;
+    width:100%!important;
+    box-sizing:border-box!important;
+  }
+  .search-sort-wrapper.mobile-login-search-layout .search-input{
+    flex:1 1 auto!important;
+    width:auto!important;
+    min-width:0!important;
+  }
+  .search-sort-wrapper.mobile-login-search-layout > .auth-section-wrapper{
+    position:static!important;
+    flex:0 0 auto!important;
+    width:auto!important;
+    min-width:0!important;
+    max-width:none!important;
+    margin:0!important;
+    padding:0!important;
+    border:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    border-radius:0!important;
+    display:block!important;
+    box-sizing:border-box!important;
+  }
+  .search-sort-wrapper.mobile-login-search-layout > .auth-section-wrapper::before,
+  .search-sort-wrapper.mobile-login-search-layout > .auth-section-wrapper::after{
+    display:none!important;
+    content:none!important;
+  }
+  .search-sort-wrapper.mobile-login-search-layout .auth-box{
+    width:auto!important;
+    margin:0!important;
+    padding:0!important;
+    border:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+  .search-sort-wrapper.mobile-login-search-layout #showLoginBtn{
+    width:auto!important;
+    min-width:72px!important;
+    min-height:44px!important;
+    margin:0!important;
+    padding:9px 13px!important;
+    border-radius:11px!important;
+    box-shadow:none!important;
+    white-space:nowrap!important;
+  }
+  /* 登入表單改成搜尋欄上方的獨立浮窗，位置更穩定 */
+  .search-sort-wrapper.mobile-login-search-layout .auth-section-wrapper.mobile-auth-open{
+    position:fixed!important;
+    left:12px!important;
+    right:12px!important;
+    bottom:calc(max(10px,env(safe-area-inset-bottom)) + 76px)!important;
+    width:auto!important;
+    max-width:none!important;
+    z-index:2147483646!important;
+    margin:0!important;
+    padding:10px!important;
+    border:1px solid rgba(226,190,255,.34)!important;
+    border-radius:14px!important;
+    background:linear-gradient(145deg,rgba(29,14,54,.995),rgba(54,24,77,.99))!important;
+    box-shadow:0 14px 36px rgba(4,1,14,.72),0 0 22px rgba(171,99,255,.16)!important;
+  }
+  .search-sort-wrapper.mobile-login-search-layout .mobile-auth-open .auth-box{
+    width:100%!important;
+  }
+  .search-sort-wrapper.mobile-login-search-layout .mobile-auth-open .auth-inputs{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:8px!important;
+    width:100%!important;
+  }
+  .search-sort-wrapper.mobile-login-search-layout .mobile-auth-open .auth-inputs input{
+    width:100%!important;
+    min-height:42px!important;
+    box-sizing:border-box!important;
+    padding:9px 11px!important;
+    border-radius:9px!important;
+    font-size:14px!important;
+  }
+  .search-sort-wrapper.mobile-login-search-layout .mobile-auth-open #loginBtn{
+    width:100%!important;
+    min-height:42px!important;
+    margin:0!important;
+  }
+  .search-sort-wrapper.mobile-login-search-layout .mobile-auth-open #cancelBtn{
+    display:none!important;
+  }
+}
+
+@media (max-width:430px){
+  .search-sort-wrapper.mobile-login-search-layout{gap:6px!important;}
+  .search-sort-wrapper.mobile-login-search-layout #showLoginBtn{
+    min-width:66px!important;
+    padding:8px 10px!important;
+    font-size:12px!important;
+  }
+}
+</style>
+
+<script id="mobile-login-search-layout-final-js">
+(function(){
+  const MOBILE_MAX=768;
+  let originalParent=null;
+  let originalNext=null;
+
+  function isMobile(){ return window.innerWidth<=MOBILE_MAX; }
+
+  function moveLoginToSearch(){
+    const wrapper=document.querySelector('.auth-section-wrapper');
+    const search=document.querySelector('.search-sort-wrapper');
+    if(!wrapper || !search) return;
+
+    if(!originalParent){
+      originalParent=wrapper.parentElement;
+      originalNext=wrapper.nextSibling;
+    }
+
+    if(isMobile()){
+      search.classList.add('mobile-login-search-layout');
+      if(wrapper.parentElement!==search){
+        search.appendChild(wrapper);
+      }
+    }else{
+      search.classList.remove('mobile-login-search-layout');
+      if(wrapper.parentElement!==originalParent){
+        if(originalNext && originalNext.parentNode===originalParent){
+          originalParent.insertBefore(wrapper,originalNext);
+        }else{
+          originalParent.appendChild(wrapper);
+        }
+      }
+      wrapper.classList.remove('mobile-auth-open');
+      wrapper.style.bottom='';
+    }
+  }
+
+  function syncPopup(){
+    const wrapper=document.querySelector('.auth-section-wrapper');
+    const inputs=document.getElementById('authInputs');
+    if(!wrapper || !inputs) return;
+    if(isMobile()){
+      const visible=getComputedStyle(inputs).display!=='none';
+      wrapper.classList.toggle('mobile-auth-open',visible);
+    }
+  }
+
+  function init(){
+    moveLoginToSearch();
+    syncPopup();
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',init);
+  }else{
+    init();
+  }
+
+  window.addEventListener('resize',function(){
+    moveLoginToSearch();
+    syncPopup();
+  },{passive:true});
+
+  window.addEventListener('orientationchange',function(){
+    setTimeout(function(){moveLoginToSearch();syncPopup();},80);
+  },{passive:true});
+
+  const observer=new MutationObserver(function(){
+    const wrapper=document.querySelector('.auth-section-wrapper');
+    if(wrapper && isMobile() && wrapper.parentElement!==document.querySelector('.search-sort-wrapper')){
+      moveLoginToSearch();
+    }
+  });
+  document.addEventListener('DOMContentLoaded',function(){
+    const authBox=document.getElementById('authBox');
+    if(authBox) observer.observe(authBox,{childList:true,subtree:true});
   });
 })();
 </script>
