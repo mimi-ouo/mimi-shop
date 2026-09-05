@@ -4261,14 +4261,27 @@ body.is-admin .main-admin-tab{display:flex !important;}
       <button class="tab-btn" data-category="schedule">📅 米米班表</button>
     </div>
 
+    <style>
+      .firebase-login-label {
+        width: 100%;
+        font-size: 11px;
+        font-weight: 700;
+        opacity: .72;
+        text-align: center;
+        margin: 2px 0 -2px;
+      }
+      #googleOwnerLoginBtn { order: -10; }
+    </style>
+
     <div class="auth-section-wrapper">
       <div class="auth-box" id="authBox">
         <button class="auth-btn" id="showLoginBtn">登入</button>
         <div class="auth-inputs" id="authInputs">
+          <button class="auth-btn" id="googleOwnerLoginBtn" type="button">🔵 Google 登入（分店主）</button>
+          <div class="firebase-login-label">版主 Firebase 登入</div>
           <input type="email" id="emailInput" placeholder="管理員 Email">
           <input type="password" id="passwordInput" placeholder="Firebase 密碼">
           <button class="auth-btn" id="loginBtn">確認</button>
-          <button class="auth-btn" id="googleOwnerLoginBtn" type="button">🔵 Google 登入（分店主）</button>
           <button class="cancel-btn" id="cancelBtn">✕</button>
         </div>
       </div>
@@ -4454,25 +4467,52 @@ body.is-admin .main-admin-tab{display:flex !important;}
     const auth = firebase.auth();
 
     const userStatusDatabaseRef = db.ref('status');
+    // 每個瀏覽分頁只使用一個固定的 presence 節點；重新連線時重用它，避免重連造成重複計數。
+    const myPresenceRef = userStatusDatabaseRef.push();
+    let presenceConnected = false;
+
+    function setOnlineCounterText(value) {
+      const countElem = document.getElementById('count');
+      if (countElem) countElem.innerText = String(value);
+    }
+
+    // 先顯示 0，不因 Firebase 短暫斷線而顯示「—」。
+    setOnlineCounterText(0);
 
     db.ref('.info/connected').on('value', function(snapshot) {
-      if (snapshot.val() === false) {
+      const connected = snapshot.val() === true;
+      presenceConnected = connected;
+
+      if (!connected) {
+        // Firebase 重新連線後會再次執行下面的 set；這裡不清空目前的計數。
         return;
       }
-      const myConnectionRef = userStatusDatabaseRef.push();
-      myConnectionRef.onDisconnect().remove();
-      myConnectionRef.set({
-        online: true,
-        timestamp: firebase.database.ServerValue.TIMESTAMP
+
+      // Firebase 官方 presence 模式：先註冊斷線清除，再寫入在線狀態。
+      myPresenceRef.onDisconnect().remove().then(function() {
+        return myPresenceRef.set({
+          online: true,
+          timestamp: firebase.database.ServerValue.TIMESTAMP
+        });
+      }).catch(function(err) {
+        console.error('在線人數寫入失敗：', err);
+        // 保持數字顯示，不再改成「—」。
       });
+    }, function(err) {
+      console.error('Firebase 連線狀態讀取失敗：', err);
+      // 保持目前數字，避免 UI 出現「—」。
     });
 
     userStatusDatabaseRef.on('value', function(snapshot) {
-      const onlineCount = snapshot.numChildren();
-      const countElem = document.getElementById('count');
-      if (countElem) {
-        countElem.innerText = onlineCount;
-      }
+      let onlineCount = 0;
+      snapshot.forEach(function(child) {
+        const value = child.val();
+        if (value && value.online === true) onlineCount++;
+      });
+      setOnlineCounterText(onlineCount);
+    }, function(err) {
+      console.error('在線人數讀取失敗：', err);
+      // 讀取失敗時保留目前數字，不顯示「—」。
     });
 
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxVrP__g-bnoVRQQrJkKLlMZDhSbFeUuTMyw6-zVRhtYkkSedoVbJXKUwN0bUyc4vs3rQ/exec";
@@ -5210,6 +5250,8 @@ function setupCartPreferences() {
         authBox.innerHTML = `
           <button class="auth-btn" id="showLoginBtn">登入</button>
           <div class="auth-inputs" id="authInputs">
+            <button class="auth-btn" id="googleOwnerLoginBtn" type="button">🔵 Google 登入（分店主）</button>
+            <div class="firebase-login-label">版主 Firebase 登入</div>
             <input type="email" id="emailInput" placeholder="Email">
             <input type="password" id="passwordInput" placeholder="Firebase 密碼">
             <button class="auth-btn" id="loginBtn">確認</button>
@@ -7126,7 +7168,13 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
   let googleAccessToken = null;
   let googleAccessTokenExpiresAt = 0;
 
-  function makeGoogleProvider(){
+  // 一般 Google 登入只用於 Firebase 身分辨識，不要求 Drive / Sheets 權限。
+  function makeGoogleLoginProvider(){
+    return new firebase.auth.GoogleAuthProvider();
+  }
+
+  // 只有分店已核准、分店主按下「建立我的 Google 資料庫」時，才要求額外權限。
+  function makeGoogleStorageProvider(){
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.addScope(GOOGLE_DRIVE_SCOPE);
     provider.addScope(GOOGLE_SHEETS_SCOPE);
@@ -7149,26 +7197,24 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
 
   async function signInBranchOwnerWithGoogle(){
     ensureFirebaseWebEnvironment();
-    const provider = makeGoogleProvider();
+    const provider = makeGoogleLoginProvider();
     const result = await firebase.auth().signInWithPopup(provider);
     const user = result.user;
-    const credential = result.credential;
     if(!user) throw new Error('Google 登入後沒有取得使用者身分。');
     if(user.email && user.email.toLowerCase()===BRANCH_ADMIN_EMAIL.toLowerCase()){
       await firebase.auth().signOut();
       throw new Error('版主請使用原本的版主登入方式；Google 分店主登入不會取代版主權限。');
     }
-    if(credential && credential.accessToken){
-      googleAccessToken = credential.accessToken;
-      googleAccessTokenExpiresAt = Date.now() + 55*60*1000;
-    }
-    return {user,accessToken:googleAccessToken};
+    // 申請階段不保留 Google Drive / Sheets token。
+    googleAccessToken = null;
+    googleAccessTokenExpiresAt = 0;
+    return {user,accessToken:null};
   }
 
   async function ensureFreshGoogleToken(){
     ensureFirebaseWebEnvironment();
     if(googleAccessToken && Date.now() < googleAccessTokenExpiresAt) return googleAccessToken;
-    const provider = makeGoogleProvider();
+    const provider = makeGoogleStorageProvider();
     const result = await firebase.auth().signInWithPopup(provider);
     const user = result.user;
     if(user && user.email && user.email.toLowerCase()===BRANCH_ADMIN_EMAIL.toLowerCase()){
@@ -7177,7 +7223,7 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
     }
     googleAccessToken = result.credential && result.credential.accessToken || null;
     googleAccessTokenExpiresAt = googleAccessToken ? Date.now()+55*60*1000 : 0;
-    if(!googleAccessToken) throw new Error('未取得 Google Drive/Sheets 授權。請重新使用 Google 登入並允許資料庫授權。');
+    if(!googleAccessToken) throw new Error('未取得 Google Drive/Sheets 授權。請重新按「建立我的 Google 資料庫」並允許資料庫授權。');
     return googleAccessToken;
   }
 
@@ -7230,8 +7276,8 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
     if(!user || user.email?.toLowerCase()===BRANCH_ADMIN_EMAIL.toLowerCase()) return dir;
     if(dir.ownerUid!==user.uid) return dir;
     const created=await createPersonalShopStorage(code,dir.name||code);
-    await firebase.database().ref('storeDirectory/'+code).update(Object.assign({},created,{dataBackend:'google-owner-drive',backendVersion:'16.3',storageOwnerUid:user.uid,storageOwnerEmail:user.email||''}));
-    return Object.assign({},dir,created,{dataBackend:'google-owner-drive',backendVersion:'16.3'});
+    await firebase.database().ref('storeDirectory/'+code).update(Object.assign({},created,{dataBackend:'google-owner-drive',backendVersion:'16.4',storageOwnerUid:user.uid,storageOwnerEmail:user.email||''}));
+    return Object.assign({},dir,created,{dataBackend:'google-owner-drive',backendVersion:'16.4'});
   }
   const isBranchRoute = /\/store\/[^/]+/.test(location.pathname);
   const branchCode = isBranchRoute ? decodeURIComponent(location.pathname.split('/store/')[1].split('/')[0]) : '';
@@ -7805,7 +7851,7 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
               <br><small>${esc(a.email)} · ${esc(a.code)}</small>
               <p style="font-size:11px;color:#bbb">${esc(a.description||'尚未提供介紹')}</p>
               <div class="branch-row">
-                <button class="branch-btn primary" data-approve="${esc(a.id)}">✓ 核准並建立</button>
+                <button class="branch-btn primary" data-approve="${esc(a.id)}">✓ 核准</button>
                 <button class="branch-btn danger" data-reject="${esc(a.id)}">✕ 拒絕</button>
               </div>
             </div>`).join('')||'<div style="color:#888;padding:10px 0">目前沒有待審申請。</div>'}</div>
@@ -7921,7 +7967,7 @@ body.branch-mode #branchAppRoot{display:block!important;min-height:100vh;}
     const order=Date.now();
     try{
       const updates={};
-      updates['storeDirectory/'+a.code]={name:a.name,active:true,approved:true,approvalStatus:'approved',order,ownerEmail:a.email||'',ownerUid:a.uid,adminLockedClosed:false,closureMode:'open',dataBackend:'google-owner-drive',backendVersion:'16.3',storageStatus:'waiting-owner-google-consent'};
+      updates['storeDirectory/'+a.code]={name:a.name,active:true,approved:true,approvalStatus:'approved',order,ownerEmail:a.email||'',ownerUid:a.uid,adminLockedClosed:false,closureMode:'open',dataBackend:'google-owner-drive',backendVersion:'16.4',storageStatus:'waiting-owner-google-consent'};
       updates['branchOwners/'+a.uid+'/'+a.code]=true;
       updates['branchApplications/'+id+'/status']='approved';
       updates['branchApplications/'+id+'/approvedAt']=firebase.database.ServerValue.TIMESTAMP;
