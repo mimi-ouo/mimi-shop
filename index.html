@@ -3671,9 +3671,65 @@ body::after
     display:none !important;
   }
 }
+
+/* ===== 管理端可編輯設定與班表控制；不改動既有主要元件樣式 ===== */
+.contact-settings-btn{display:none;background:var(--card-bg);color:var(--text-color);border:1px solid var(--border-color);padding:7px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer}
+.is-admin .contact-settings-btn{display:inline-flex;align-items:center}
+.contact-settings-form{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:100000;width:min(92vw,520px);max-height:80vh;overflow:auto;margin:0;padding:16px;border:1px solid var(--border-color);border-radius:10px;background:var(--card-bg);box-sizing:border-box;box-shadow:0 12px 40px rgba(0,0,0,.7)}
+.is-admin #siteSettingsStatus{display:block;text-align:center;min-height:24px;margin:8px 0 4px;font-size:14px;font-weight:bold;color:var(--accent-color)}
+#siteSettingsStatus:empty{display:none!important}
+.tab-settings-btn{display:none}
+.is-admin .tab-settings-btn{display:block}
+.tab-settings-form{display:none!important;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:100000;width:min(92vw,560px);height:min(82vh,760px);max-height:82vh;overflow:hidden;padding:16px;border:1px solid var(--border-color);border-radius:10px;background:var(--card-bg);box-shadow:0 12px 40px rgba(0,0,0,.7);box-sizing:border-box;flex-direction:column}
+.tab-settings-form.open{display:flex!important}
+.tab-settings-form.open{position:fixed!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;}
+.contact-settings-form.open{position:fixed!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;}
+.schedule-btn:disabled{opacity:.6;cursor:wait;}
+.tab-settings-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;margin:8px 0}
+.tab-settings-row input[type="text"]{width:100%;box-sizing:border-box;background:var(--bg-color);color:var(--text-color);border:1px solid var(--border-color);border-radius:6px;padding:7px}
+.tab-settings-title{font-weight:bold;font-size:16px;margin-bottom:8px;flex:0 0 auto}
+.tab-settings-scroll{flex:1 1 auto;min-height:0;overflow:auto;padding-right:4px}
+.tab-settings-footer{flex:0 0 auto;margin-top:8px;padding-top:10px;border-top:1px solid var(--border-color);background:var(--card-bg)}
+.tab-settings-actions{margin-top:0}
+.tab-settings-main-row{margin-top:12px}
+.tab-settings-sub-row{margin-left:18px}
+
+@media (max-width:768px){.contact-settings-btn,.contact-settings-form,.tab-settings-btn,.tab-settings-form{display:none!important}}
+.contact-settings-form.open{display:block!important}
+.contact-settings-form label{display:block;font-size:12px;font-weight:bold;margin:7px 0 4px}
+.contact-settings-form input{width:100%;box-sizing:border-box;background:var(--bg-color);color:var(--text-color);border:1px solid var(--border-color);border-radius:6px;padding:7px 8px}
+.contact-settings-form-actions{display:flex;gap:8px;margin-top:10px}
+@media (max-width:768px){.contact-settings-btn,.contact-settings-form{display:none!important}}
+.editable-site-setting{white-space:pre-wrap;overflow-wrap:anywhere}
+.is-admin .editable-site-setting{outline:1px dashed rgba(255,255,255,.22);outline-offset:2px;cursor:text}
+.tab-description-container{display:none;width:100%;margin:15px 0 0 0;text-align:center}
+.tab-description-box{display:flex;align-items:flex-start;gap:6px;background-color:var(--card-bg);border:1px solid var(--border-color);color:var(--text-color);padding:12px 16px;border-radius:8px;font-size:15px;line-height:1.5;text-align:left;box-sizing:border-box;width:100%}
+.tab-description-content{flex:1;min-width:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.schedule-admin-panel{display:none;margin:0 0 15px 0;padding:14px;border:1px solid var(--border-color);border-radius:10px;background:var(--bg-color)}
+.is-admin .schedule-admin-panel{display:block}
+.schedule-admin-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:10px}
+.schedule-admin-row:last-child{margin-bottom:0}
+.schedule-admin-row label{font-weight:bold;font-size:13px}
+.schedule-admin-row input,.schedule-admin-row select,.schedule-admin-row textarea{background:var(--card-bg);color:var(--text-color);border:1px solid var(--border-color);border-radius:5px;padding:6px 8px;box-sizing:border-box}
+.schedule-admin-row textarea{width:100%;min-height:90px;resize:vertical;white-space:pre-wrap}
+.schedule-weekday-list{display:flex;flex-wrap:wrap;gap:6px}
+.schedule-weekday-list label{display:inline-flex;align-items:center;gap:3px;font-weight:normal}
+.schedule-admin-actions{display:flex;flex-wrap:wrap;gap:8px}
+.schedule-admin-hint{font-size:12px;line-height:1.5;color:#aaa;width:100%}
+.schedule-custom-editor{display:none}
+.is-admin .editable-site-setting[data-placeholder]::before{content:attr(data-placeholder);color:#777}
+<style id="settings-subtab-and-placeholder-v5">
+.tab-settings-group-title{font-weight:800;font-size:14px;margin:12px 0 6px;padding-top:8px;border-top:1px solid var(--border-color)}
+.tab-settings-label{min-width:120px;font-size:12px;opacity:.8}
+.tab-settings-desc-row{display:flex;flex-direction:column;gap:4px;margin:0 0 8px;padding:6px 8px 10px;border-left:2px solid var(--border-color)}
+.tab-settings-desc-row textarea{width:100%;min-height:55px;resize:vertical;background:var(--card-bg);color:var(--text-color);border:1px solid var(--border-color);border-radius:5px;padding:6px 8px;box-sizing:border-box}
+.tab-settings-id-list{margin-top:12px;padding-top:8px;border-top:1px dashed var(--border-color);word-break:break-all}
+.is-admin .editable-site-setting[data-placeholder]::before{content:attr(data-placeholder);color:#777;font-style:normal}
 </style>
 
-</head>
+<style id="branch-store-system-v1">
+.branch-store-menu{display:none;position:relative}.branch-store-menu.visible{display:block}.branch-store-toggle{border:1px solid var(--border-color);background:var(--card-bg);color:var(--text-color);border-radius:20px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer}.branch-store-dropdown{display:none;position:absolute;left:0;top:calc(100% + 6px);min-width:240px;max-width:320px;max-height:55vh;overflow:auto;z-index:100500;background:var(--card-bg);border:1px solid var(--border-color);border-radius:10px;padding:6px;box-shadow:0 10px 30px rgba(0,0,0,.35)}.branch-store-menu.open .branch-store-dropdown{display:block}.branch-store-option{display:block;width:100%;border:0;background:transparent;color:var(--text-color);text-align:left;padding:9px 10px;border-radius:7px;cursor:pointer}.branch-store-option:hover,.branch-store-option.active{background:var(--bg-color)}.branch-store-form,.branch-management-form{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:101000;width:min(94vw,620px);max-height:86vh;overflow:auto;padding:18px;border:1px solid var(--border-color);border-radius:12px;background:var(--card-bg);box-shadow:0 14px 50px rgba(0,0,0,.65);box-sizing:border-box}.branch-store-form.open,.branch-management-form.open{display:block}.branch-store-form label,.branch-management-form label{display:block;font-size:12px;font-weight:800;margin:9px 0 4px}.branch-store-form input{width:100%;box-sizing:border-box;background:var(--bg-color);color:var(--text-color);border:1px solid var(--border-color);border-radius:6px;padding:8px}.branch-store-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.branch-store-hint{font-size:12px;line-height:1.55;color:#aaa;margin-top:8px}.branch-store-status{font-size:12px;font-weight:800;margin-top:8px;white-space:pre-wrap}.branch-store-card{border:1px solid var(--border-color);border-radius:9px;padding:10px;margin:8px 0;background:var(--bg-color)}.branch-store-card-title{font-weight:800;margin-bottom:5px}.branch-store-card-meta{font-size:12px;line-height:1.5;color:#aaa}.branch-store-danger{background:#9b2335!important;color:#fff!important}@media(max-width:768px){.branch-store-form,.branch-management-form{display:none!important}.branch-store-form.open,.branch-management-form.open{display:block!important}}
+</style></head>
 <body>
   <div class="update-banner" id="updateBanner">
     ✨ 偵測到管理端有新的更新內容！
@@ -3685,6 +3741,36 @@ body::after
     <button class="tab-btn" id="cartTabBtn" data-category="cart">
       <span>🛒 購物車</span>
     </button>
+    <div class="branch-store-menu" id="branchStoreMenu">
+      <button type="button" class="branch-store-toggle" id="branchStoreToggle">🏪 逛逛分店 ▾</button>
+      <div class="branch-store-dropdown" id="branchStoreDropdown"></div>
+    </div>
+    <button type="button" id="branchApplyBtn" class="tab-settings-btn auth-btn" style="display:none">🏪 申請分店</button>
+    <button type="button" id="branchManageBtn" class="tab-settings-btn auth-btn" style="display:none">🏪 分店管理中心</button>
+    <div class="branch-store-form" id="branchApplyForm" role="dialog" aria-modal="true">
+      <div class="tab-settings-title">🏪 申請建立分店</div>
+      <div class="branch-store-hint">審核通過前不能新增商品。Firebase 密碼只用於建立／登入帳號，不會寫入 Google Sheet。</div>
+      <label>分店名稱</label><input id="branchNameInput" maxlength="60" placeholder="例如：米米小舖－小可愛分店">
+      <label>Firebase 帳號 Email</label><input id="branchFirebaseEmailInput" type="email" autocomplete="email">
+      <label>Firebase 密碼</label><input id="branchFirebasePasswordInput" type="password" autocomplete="new-password" placeholder="至少 6 碼">
+      <label>settings_contact_discord_url（聯絡網址）</label><input id="branchDiscordUrlInput" placeholder="https://discord.com/users/... 或「無」">
+      <label>settings_contact_tally_url（留言網址）</label><input id="branchTallyUrlInput" placeholder="https://tally.so/r/... 或「無」">
+      <label>Google 試算表網址／Spreadsheet ID</label><input id="branchSpreadsheetInput" placeholder="請先複製模板試算表">
+      <label>Google Apps Script Web App 網址</label><input id="branchApiUrlInput" type="url" placeholder="https://script.google.com/macros/s/.../exec">
+      <div class="branch-store-hint">請先複製模板：<a href="https://docs.google.com/spreadsheets/d/1HVsEhQ7CxgoFUrO1__KbuO8PNGfeBVDrdkhJ7qdw5O0/edit?usp=sharing" target="_blank" rel="noopener noreferrer">開啟分店模板</a>。再於該試算表「擴充功能 → Apps Script」部署 Web App 並完成 Google 授權，將 Web App 網址貼入上方。這樣商品與設定才會完全寫入分店自己的試算表。</div>
+      <div id="branchApplyStatus" class="branch-store-status"></div>
+      <div class="branch-store-actions"><button type="button" class="schedule-btn" id="branchApplySubmitBtn">送出申請</button><button type="button" class="cancel-btn" id="branchApplyCancelBtn">取消</button></div>
+    </div>
+    <div class="branch-management-form" id="branchManagementForm" role="dialog" aria-modal="true">
+      <div class="tab-settings-title">🏪 分店管理中心</div>
+      <div class="branch-store-hint">版主可核准、關閉及重新開啟分店。被版主關閉的分店，分店主無法自行恢復。</div>
+      <div id="branchManagementList"></div><div id="branchManagementStatus" class="branch-store-status"></div>
+      <div class="branch-store-actions"><button type="button" class="cancel-btn" id="branchManagementCloseBtn">關閉</button></div>
+    </div>
+    <div class="branch-store-form" id="branchOwnerForm" role="dialog" aria-modal="true">
+      <div class="tab-settings-title">🏪 我的分店</div><div id="branchOwnerInfo" class="branch-store-hint"></div>
+      <div class="branch-store-actions"><button type="button" class="schedule-btn" id="branchOwnerToggleBtn"></button><button type="button" class="cancel-btn" id="branchOwnerCloseBtn">關閉</button></div>
+    </div>
     <div class="collapse-content" id="collapseContent">
       <div class="dropdown" id="dropdown-furniture">
         <button class="dropdown-toggle" data-dropdown="dropdown-furniture" id="furnitureToggleBtn">🏠 家具 ▾</button>
@@ -3699,14 +3785,23 @@ body::after
         <div class="dropdown-menu">
           <button class="dropdown-item tab-btn" data-category="memes">🧸 熊熊</button>
           <button class="dropdown-item tab-btn" data-category="animal_other">🐧 其他</button>
+          <button class="dropdown-item tab-btn" data-category="animal_special">🦊 特別</button>
         </div>
       </div>
-      <button class="tab-btn" data-category="pot">🪴 花盆</button>
+      <div class="dropdown" id="dropdown-pot">
+        <button class="dropdown-toggle" data-dropdown="dropdown-pot">🪴 花盆 ▾</button>
+        <div class="dropdown-menu">
+          <button class="dropdown-item tab-btn" data-category="pot_new">🪴 新花盆</button>
+          <button class="dropdown-item tab-btn" data-category="pot_other">🌿 其他花盆</button>
+          <button class="dropdown-item tab-btn" data-category="pot_special">🌱 特別花盆</button>
+        </div>
+      </div>
       <div class="dropdown" id="dropdown-ring">
         <button class="dropdown-toggle" data-dropdown="dropdown-ring">💍 戒指 ▾</button>
         <div class="dropdown-menu">
           <button class="dropdown-item tab-btn" data-category="ring_male">👦 限男</button>
           <button class="dropdown-item tab-btn" data-category="ring_female">👧 限女</button>
+          <button class="dropdown-item tab-btn" data-category="ring_other">💎 其他</button>
         </div>
       </div>
       <div class="dropdown" id="dropdown-crop">
@@ -3714,10 +3809,25 @@ body::after
         <div class="dropdown-menu">
           <button class="dropdown-item tab-btn" data-category="crop_male">👦 限男</button>
           <button class="dropdown-item tab-btn" data-category="crop_female">👧 限女</button>
+          <button class="dropdown-item tab-btn" data-category="crop_other">🌾 其他</button>
         </div>
       </div>
-      <button class="tab-btn" data-category="gift">🎁 甩賣區</button>
+      <div class="dropdown" id="dropdown-gift">
+        <button class="dropdown-toggle" data-dropdown="dropdown-gift">🎁 甩賣區 ▾</button>
+        <div class="dropdown-menu">
+          <button class="dropdown-item tab-btn" data-category="gift_new">🎁 新商品</button>
+          <button class="dropdown-item tab-btn" data-category="gift_other">🛍️ 其他</button>
+          <button class="dropdown-item tab-btn" data-category="gift_special">🎀 特別</button>
+        </div>
+      </div>
       <button class="tab-btn" data-category="schedule">📅 米米班表</button>
+    </div>
+    <button type="button" id="tabSettingsBtn" class="tab-settings-btn auth-btn">⚙️ 修改分頁</button>
+    <div class="tab-settings-form" id="tabSettingsForm" role="dialog" aria-modal="true">
+      <div class="tab-settings-title">⚙️ 分頁設定</div>
+      <div id="tabSettingsRows" class="tab-settings-scroll"></div>
+      <div class="tab-settings-footer"><div class="tab-settings-actions"><button type="button" class="auth-btn" id="tabSettingsSaveBtn">儲存並立即套用</button><button type="button" class="cancel-btn" id="tabSettingsCancelBtn">取消</button></div>
+      <div id="tabSettingsSaving" class="schedule-admin-hint" style="display:none;text-align:center;font-weight:bold;">正在儲存，請稍後...</div></div>
     </div>
     <div class="auth-section-wrapper">
       <div class="auth-box" id="authBox">
@@ -3747,21 +3857,39 @@ body::after
               <div class="title-area">
                 <h1 class="mimi-title">
                   <span class="title-decoration">୨୧</span>
-                  米米小舖
+                  <span id="mimiTitleText" class="editable-site-setting" contenteditable="false">米米小舖</span>
                   <span class="title-decoration right">୨୧</span>
                 </h1>
               </div>
               <div class="discord-wrapper">
                 <div class="discord-container">
-                  <a class="discord-badge" href="https://discord.com/users/764264607543459870" target="_blank" rel="noopener noreferrer" title="discord:mimi_ouo">
+                  <a class="discord-badge" id="discordContactBtn" href="https://discord.com/users/764264607543459870" target="_blank" rel="noopener noreferrer" title="discord:mimi_ouo">
                     <svg class="discord-icon" viewBox="0 0 127.14 96.36">
-                      <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0, -3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c2.64-27.38-4.51-51.11-20.14-72.13ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74c6.51,0,11.66,5.77,11.44,12.74C53.89,60,48.81,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74c6.41,0,11.62,5.77,11.43,12.74C96.12,60,91,65.69,84.69,65.69Z"/>
+                      <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0 -3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c2.64-27.38-4.51-51.11-20.14-72.13ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74c6.51,0,11.66,5.77,11.44,12.74C53.89,60,48.81,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74c6.41,0,11.62,5.77,11.43,12.74C96.12,60,91,65.69,84.69,65.69Z"/>
                     </svg>
-                    <span>聯絡米米</span>
+                    <span id="discordContactText">聯絡米米</span>
                   </a>
-                  <button class="tally-badge" data-tally-open="q48xO2" data-tally-align-left="1" data-tally-hide-title="1" data-tally-overlay="1" data-tally-emoji-text="✉️" data-tally-emoji-animation="heart-beat">
-                    <span>💬 留言給米米</span>
-                  </button>
+                  <a class="tally-badge" id="tallyContactBtn" href="https://tally.so/r/q48xO2" target="_blank" rel="noopener noreferrer">
+                    <span id="tallyContactText">💬 留言給米米</span>
+                  </a>
+                  <button type="button" id="contactSettingsBtn" class="contact-settings-btn">⚙️ 修改聯絡按鈕</button>
+                </div>
+                <div class="contact-settings-form" id="contactSettingsForm" role="dialog" aria-modal="true">
+                  <label for="contactDiscordTextInput">DC 按鈕文字</label>
+                  <input id="contactDiscordTextInput" type="text">
+                  <label for="contactDiscordUrlInput">DC 聯絡網址</label>
+                  <input id="contactDiscordUrlInput" type="text" placeholder="https://discord.com/users/你的ID 或填「無」">
+                  <div id="contactSettingsSaving" class="schedule-admin-hint" style="display:none;text-align:center;font-weight:bold;">正在儲存，請稍後...</div>
+                   <div class="schedule-admin-hint">如果不使用此聯絡按鈕，網址請填「無」，儲存後按鈕會隱藏。<br>DC 網址取得：Discord 開啟「開發者模式」→ 你的頭像／名稱右鍵 →「複製使用者 ID」，再組成 https://discord.com/users/使用者ID</div>
+                  <label for="contactTallyTextInput">Tally 按鈕文字</label>
+                  <input id="contactTallyTextInput" type="text">
+                  <label for="contactTallyUrlInput">Tally 聯絡網址</label>
+                  <input id="contactTallyUrlInput" type="text" placeholder="https://tally.so/r/xxxxx 或填「無」">
+                  <div class="schedule-admin-hint">如果不使用此聯絡按鈕，網址請填「無」，儲存後按鈕會隱藏。<br>Tally 網址取得：打開 Tally 表單 → 右上角「Share／分享」→ 複製分享連結（不要複製 Embed code）。</div>
+                  <div class="contact-settings-form-actions">
+                    <button type="button" class="schedule-btn" id="contactSettingsSaveBtn">儲存</button>
+                    <button type="button" class="schedule-btn" id="contactSettingsCancelBtn">取消</button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -3774,7 +3902,7 @@ body::after
   </div>
   <div id="cartSummary" class="cart-summary">
     <div class="cart-summary-main-row">
-      <div class="cart-total-text">購物車總金額(甩賣區另計): <span id="totalAmount">0</span></div>
+      <div class="cart-total-text"><span id="cartTotalLabel" class="editable-site-setting" contenteditable="false">購物車總金額(甩賣區另計):</span> <span id="totalAmount">0</span></div>
       <div class="cart-summary-right">
         <div class="cart-preference-row" aria-label="購物車交易設定">
           <div class="cart-preference-group">
@@ -3801,24 +3929,15 @@ body::after
     </div>
     <div id="cartCaptureStatus" class="cart-capture-status" aria-live="polite"></div>
   </div>
-  <div class="custom-notice-container" id="giftNoticeContainer">
-    <div class="custom-notice-box">
-      <span>🎁</span>
-      <span class="editable-text" id="giftDescription" contenteditable="false">本區一律2糖, 如有購買任一商品或本區滿五件, 可選本區一件免費贈送，單次滿百=本區隨便挑無上限!!!</span>
+  <div class="tab-description-container" id="tabDescriptionContainer">
+    <div class="tab-description-box">
+      <span id="tabDescriptionEmoji">📌</span>
+      <span class="tab-description-content editable-site-setting" id="tabDescriptionText" contenteditable="false"></span>
     </div>
   </div>
-  <div class="custom-notice-container" id="ringNoticeContainer">
-    <div class="custom-notice-box">
-      <span>💍</span>
-      <span class="editable-text" id="ringDescription" contenteditable="false">情侶等級由買家負擔</span>
-    </div>
-  </div>
-  <div class="custom-notice-container" id="cropNoticeContainer">
-    <div class="custom-notice-box">
-      <span>🌱</span>
-      <span class="editable-text" id="cropDescription" contenteditable="false">誕生作物只收T, 一律種植後付款<br>卡牌保S+不含基底，限男</span>
-    </div>
-  </div>
+  <span id="giftDescription" style="display:none"></span>
+  <span id="ringDescription" style="display:none"></span>
+  <span id="cropDescription" style="display:none"></span>
   <div class="drop-zone" id="dropZone">
     <p style="font-size: 16px; margin-bottom: 8px;">💡 當前分頁：<b id="currentTabName">尚未選擇分頁</b>（Ctrl + V 貼上圖片 / 拖曳上傳）</p>
     <p id="status" style="color: var(--accent-color); margin: 0; font-weight: bold;"></p>
@@ -3831,6 +3950,7 @@ body::after
       <option value="time_asc">⏳ 上傳時間：舊 → 新</option>
     </select>
   </div>
+  <div id="siteSettingsStatus" aria-live="polite"></div>
   <div class="gallery" id="gallery"></div>
   <div class="online-counter-wrapper">
     <div class="counter-box">
@@ -3839,6 +3959,50 @@ body::after
     </div>
   </div>
   <div class="schedule-container" id="scheduleContainer">
+    <div class="schedule-admin-panel" id="scheduleAdminPanel">
+      <div class="schedule-admin-hint">班表雲端設定欄位 ID：<b>settings_schedule_config</b>（Google Sheet 請建立此 ID；整份班表設定會儲存在此欄位的 caption）</div>
+      <div class="schedule-admin-row">
+        <label>班表方式：</label>
+        <label><input type="radio" name="scheduleMode" value="weekday_off" class="schedule-mode-radio"> 固定放假星期幾</label>
+        <label><input type="radio" name="scheduleMode" value="cycle" class="schedule-mode-radio"> 固定上班幾天／休假幾天</label>
+        <label><input type="radio" name="scheduleMode" value="custom" class="schedule-mode-radio"> 全部自訂上班或放假</label>
+      </div>
+      <div class="schedule-admin-row" id="scheduleWeekdayRow">
+        <label>固定放假星期：</label>
+        <div class="schedule-weekday-list">
+          <label><input type="checkbox" value="0" class="schedule-off-weekday">日</label>
+          <label><input type="checkbox" value="1" class="schedule-off-weekday">一</label>
+          <label><input type="checkbox" value="2" class="schedule-off-weekday">二</label>
+          <label><input type="checkbox" value="3" class="schedule-off-weekday">三</label>
+          <label><input type="checkbox" value="4" class="schedule-off-weekday">四</label>
+          <label><input type="checkbox" value="5" class="schedule-off-weekday">五</label>
+          <label><input type="checkbox" value="6" class="schedule-off-weekday">六</label>
+        </div>
+      </div>
+      <div class="schedule-admin-row" id="scheduleCycleRow">
+        <label for="scheduleWorkDays">上班天數</label>
+        <input id="scheduleWorkDays" type="number" min="1" max="31" value="2" style="width:70px;">
+        <label for="scheduleOffDays">休假天數</label>
+        <input id="scheduleOffDays" type="number" min="1" max="31" value="2" style="width:70px;">
+        <label for="scheduleCycleStart">循環基準開始日</label>
+        <input id="scheduleCycleStart" type="date" style="width:150px;">
+        <span>～結束日（僅供記錄）</span>
+        <input id="scheduleCycleEnd" type="date" style="width:150px;">
+      </div>
+      <div class="schedule-admin-row schedule-custom-editor" id="scheduleCustomRow">
+        <label>自訂日期：</label>
+        <input id="scheduleCustomDate" type="date" style="width:150px;">
+        <select id="scheduleCustomState" style="width:110px;"><option value="work">🫠 上班</option><option value="off">😍 休假</option></select>
+        <button type="button" class="schedule-btn" id="scheduleCustomAddBtn">加入日期</button>
+        <textarea id="scheduleCustomText" placeholder="每行一筆，例如：&#10;2026-09-07=上班&#10;2026-09-08=休假"></textarea>
+        <div class="schedule-admin-hint">請先新增一個日期以開啟自訂班表，開啟後直接點選下方班表日期的「上班／休假」選單即可完成修改及儲存。文字區可用來批次檢查／編輯。未填寫的日期會沿用目前預設規則。</div>
+      </div>
+      <div class="schedule-admin-actions">
+        <button type="button" class="schedule-btn" id="scheduleApplyBtn">套用並儲存班表</button>
+        <button type="button" class="schedule-btn" id="scheduleResetBtn">恢復預設</button>
+      </div>
+      <div class="schedule-admin-hint">管理端修改後會儲存到 Google Sheet；訪客重新整理或切換月份即可看到修改後班表，如果你是自訂班表，訪客只會看到當月班表。</div>
+    </div>
     <div class="schedule-header">
       <h3 id="scheduleMonthTitle">班表</h3>
       <div class="schedule-nav-btns">
@@ -3932,6 +4096,263 @@ body::after
     });
 
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxVrP__g-bnoVRQQrJkKLlMZDhSbFeUuTMyw6-zVRhtYkkSedoVbJXKUwN0bUyc4vs3rQ/exec";
+    const MAIN_OWNER_EMAIL = "comtw919@gmail.com";
+    const BRANCH_TEMPLATE_SHEET_URL = "https://docs.google.com/spreadsheets/d/1HVsEhQ7CxgoFUrO1__KbuO8PNGfeBVDrdkhJ7qdw5O0/edit?usp=sharing";
+    let activeBranchId='main', activeBranch=null, branchRegistry={}, branchAuthUser=null, isMainOwner=false, branchAdminApproved=false;
+
+    // ===== 網站可編輯設定：以下全部是「預設文字」；Google Sheet 已存在的內容永遠優先，不會被這些預設值覆蓋 =====
+    const SETTINGS_DEFAULTS = {
+      settings_title: '米米小舖',
+      settings_welcome_title: '✨ 歡迎來到米米小舖 ✨',
+      settings_welcome_1: '🛒 購物方式',
+      settings_welcome_2: '☑ 左上角打勾加入購物車後截圖給我即可！全區可議價，甩賣區半買半相送~',
+      settings_welcome_3: '💰 交易方式',
+      settings_welcome_4: '可糖果可T，比值 1:1，可提供中信/合庫帳戶或LINE好友轉帳',
+      settings_welcome_5: '🕒 交易時間',
+      settings_welcome_6: '本人夜班，需要晚上交易可參考右側「米米班表」分頁查詢休假與上班日❤',
+      settings_welcome_7: '💡 貼心提醒',
+      settings_welcome_8: '點擊商品圖片可查看實體圖(大多暫未上傳)，或到 DC 告訴我你想看的商品！',
+      settings_welcome_9: '⭐ 米米一不',
+      settings_welcome_10: '不接急單，只接待耐心等我的寶貝嘿嘿~',
+      settings_welcome_footer_tip: '謝謝寶貝看完~現在~',
+      settings_welcome_footer_button: '❤ 點擊右側分頁開始選購 ❤',
+      settings_cart_total: '購物車總金額(甩賣區另計):',
+      settings_tab_desc_furniture: '',
+      settings_tab_desc_animal: '',
+      settings_tab_desc_pot: '',
+      settings_tab_desc_ring: '',
+      settings_tab_desc_crop: '',
+      settings_tab_desc_gift: '',
+      settings_contact_discord_text: '聯絡米米',
+      settings_contact_discord_url: 'https://discord.com/users/764264607543459870',
+      settings_contact_tally_text: '💬 留言給米米',
+      settings_contact_tally_url: 'https://tally.so/r/q48xO2',
+      settings_desc: '',
+      settings_gift: '',
+      settings_ring: '',
+      settings_crop: '',
+      settings_schedule_config: JSON.stringify({
+        mode: 'cycle', offWeekdays: [0], workDays: 2, offDays: 2,
+        cycleStart: '2026-08-08', cycleEnd: '2026-08-09', custom: {}
+      }),
+      // ===== 子分頁：名稱／顯示（名稱使用預設文字；說明欄一律預設空白並與主分頁共用） =====
+    };
+    let SETTINGS_IDS = Object.keys(SETTINGS_DEFAULTS);
+    // ===== 每個主分頁只共用 1 個說明欄 =====
+    // 同一主分頁底下的所有子分頁，都讀取並寫入同一個 ID。
+    const TAB_SETTING_BY_MAIN_CATEGORY = {
+      furniture:'settings_tab_desc_furniture',
+      animal:'settings_tab_desc_animal',
+      pot:'settings_tab_desc_pot',
+      ring:'settings_tab_desc_ring',
+      crop:'settings_tab_desc_crop',
+      gift:'settings_tab_desc_gift'
+    };
+    const TAB_PARENT_BY_CATEGORY = {
+      general_new:'furniture', general_misc:'furniture', general_consumable:'furniture',
+      memes:'animal', animal_other:'animal', animal_special:'animal',
+      pot_new:'pot', pot_other:'pot', pot_special:'pot',
+      ring_male:'ring', ring_female:'ring', ring_other:'ring',
+      crop_male:'crop', crop_female:'crop', crop_other:'crop',
+      gift_new:'gift', gift_other:'gift', gift_special:'gift'
+    };
+    const TAB_SETTING_BY_CATEGORY = Object.fromEntries(
+      Object.entries(TAB_PARENT_BY_CATEGORY).map(([category,parent])=>[category,TAB_SETTING_BY_MAIN_CATEGORY[parent]])
+    );
+    const SUB_TAB_SETTINGS = [
+      {category:'general_new',parent:'furniture',id:'settings_subtab_general_new',defaultName:'✨ 本周信封',defaultVisible:true},
+      {category:'general_misc',parent:'furniture',id:'settings_subtab_general_misc',defaultName:'🖼️ 家具擺設',defaultVisible:true},
+      {category:'general_consumable',parent:'furniture',id:'settings_subtab_general_consumable',defaultName:'🧪 消耗品',defaultVisible:true},
+      {category:'memes',parent:'animal',id:'settings_subtab_memes',defaultName:'🧸 熊熊',defaultVisible:true},
+      {category:'animal_other',parent:'animal',id:'settings_subtab_animal_other',defaultName:'🐧 其他',defaultVisible:true},
+      {category:'animal_special',parent:'animal',id:'settings_subtab_animal_special',defaultName:'🦊 特別',defaultVisible:false},
+      {category:'pot_new',parent:'pot',id:'settings_subtab_pot_new',defaultName:'🪴 新花盆',defaultVisible:true},
+      {category:'pot_other',parent:'pot',id:'settings_subtab_pot_other',defaultName:'🌿 其他花盆',defaultVisible:false},
+      {category:'pot_special',parent:'pot',id:'settings_subtab_pot_special',defaultName:'🌱 特別花盆',defaultVisible:false},
+      {category:'ring_male',parent:'ring',id:'settings_subtab_ring_male',defaultName:'👦 限男',defaultVisible:true},
+      {category:'ring_female',parent:'ring',id:'settings_subtab_ring_female',defaultName:'👧 限女',defaultVisible:true},
+      {category:'ring_other',parent:'ring',id:'settings_subtab_ring_other',defaultName:'💎 其他',defaultVisible:false},
+      {category:'crop_male',parent:'crop',id:'settings_subtab_crop_male',defaultName:'👦 限男',defaultVisible:true},
+      {category:'crop_female',parent:'crop',id:'settings_subtab_crop_female',defaultName:'👧 限女',defaultVisible:true},
+      {category:'crop_other',parent:'crop',id:'settings_subtab_crop_other',defaultName:'🌾 其他',defaultVisible:false},
+      {category:'gift_new',parent:'gift',id:'settings_subtab_gift_new',defaultName:'🎁 新商品',defaultVisible:true},
+      {category:'gift_other',parent:'gift',id:'settings_subtab_gift_other',defaultName:'🛍️ 其他',defaultVisible:false},
+      {category:'gift_special',parent:'gift',id:'settings_subtab_gift_special',defaultName:'🎀 特別',defaultVisible:false}
+    ];
+    SUB_TAB_SETTINGS.forEach(item=>{
+      SETTINGS_DEFAULTS[item.id+'_visible']=item.defaultVisible?'true':'false';
+      SETTINGS_DEFAULTS[item.id+'_name']=item.defaultName;
+    });
+    const TAB_META_BY_CATEGORY = {
+      general_new:{emoji:'🏠',name:'家具'}, general_misc:{emoji:'🏠',name:'家具'},
+      general_consumable:{emoji:'🏠',name:'家具'}, memes:{emoji:'🐾',name:'小動物'},
+      animal_other:{emoji:'🐾',name:'小動物'}, animal_special:{emoji:'🐾',name:'小動物'},
+      pot_new:{emoji:'🪴',name:'花盆'}, pot_other:{emoji:'🪴',name:'花盆'}, pot_special:{emoji:'🪴',name:'花盆'},
+      ring_male:{emoji:'💍',name:'戒指'}, ring_female:{emoji:'💍',name:'戒指'}, ring_other:{emoji:'💍',name:'戒指'},
+      crop_male:{emoji:'🌱',name:'作物'}, crop_female:{emoji:'🌱',name:'作物'}, crop_other:{emoji:'🌱',name:'作物'},
+      gift_new:{emoji:'🎁',name:'甩賣區'}, gift_other:{emoji:'🎁',name:'甩賣區'}, gift_special:{emoji:'🎁',name:'甩賣區'}
+    };
+    const MAIN_TAB_SETTINGS = [
+      {category:'cart',id:'settings_tab_cart',defaultName:'🛒 購物車'},
+      {category:'furniture',id:'settings_tab_furniture',defaultName:'🏠 家具'},
+      {category:'animal',id:'settings_tab_animal',defaultName:'🐾 小動物'},
+      {category:'pot',id:'settings_tab_pot',defaultName:'🪴 花盆'},
+      {category:'ring',id:'settings_tab_ring',defaultName:'💍 戒指'},
+      {category:'crop',id:'settings_tab_crop',defaultName:'🌱 作物'},
+      {category:'gift',id:'settings_tab_gift',defaultName:'🎁 甩賣區'},
+      {category:'schedule',id:'settings_tab_schedule',defaultName:'📅 米米班表'}
+    ];
+    const TAB_VISIBILITY_DEFAULTS = Object.fromEntries(MAIN_TAB_SETTINGS.map(x=>[x.id+'_visible','true']));
+    const TAB_NAME_DEFAULTS = Object.fromEntries(MAIN_TAB_SETTINGS.map(x=>[x.id+'_name',x.defaultName]));
+    Object.assign(SETTINGS_DEFAULTS,TAB_VISIBILITY_DEFAULTS,TAB_NAME_DEFAULTS);
+    SETTINGS_IDS = Object.keys(SETTINGS_DEFAULTS);
+
+    const LEGACY_TAB_SETTING_IDS = {
+      gift:'settings_gift', ring_male:'settings_ring', ring_female:'settings_ring',
+      crop_male:'settings_crop', crop_female:'settings_crop'
+    };
+    function getMainTabSetting(serverData,id){ return getSettingValue(serverData,id); }
+
+    // 主分頁只有 1 個可見子分頁時，直接把該子分頁放到分頁列；
+    // 有 2 個以上可見子分頁才使用下拉選單。所有按鈕本身不重建，保留既有事件。
+    function syncMainTabStructure(serverData){
+      const collapseContent=document.getElementById('collapseContent');
+      if(!collapseContent) return;
+      const parentMap={};
+      SUB_TAB_SETTINGS.forEach(item=>{(parentMap[item.parent] ||= []).push(item);});
+      MAIN_TAB_SETTINGS.forEach(main=>{
+        if(main.category==='cart' || main.category==='schedule') return;
+        const dropdown=document.getElementById(`dropdown-${main.category}`);
+        if(!dropdown) return;
+        const toggle=dropdown.querySelector('.dropdown-toggle');
+        const menu=dropdown.querySelector('.dropdown-menu');
+        const subs=parentMap[main.category]||[];
+        const visibleSubs=subs.filter(item=>getSettingValue(serverData,item.id+'_visible')!=='false');
+        const buttons=subs.map(item=>document.querySelector(`.tab-btn[data-category=\"${item.category}\"]`)).filter(Boolean);
+        const mainVisible=getSettingValue(serverData,main.id+'_visible')!=='false';
+
+        // 先把所有子分頁按原本順序放回 dropdown-menu。
+        buttons.forEach(btn=>{ if(btn.parentElement!==menu) menu.appendChild(btn); });
+        dropdown.style.display=mainVisible?'':'none';
+        buttons.forEach(btn=>{ btn.style.display='none'; });
+
+        if(!mainVisible) return;
+        if(visibleSubs.length===1){
+          const onlyBtn=document.querySelector(`.tab-btn[data-category=\"${visibleSubs[0].category}\"]`);
+          if(onlyBtn){
+            collapseContent.insertBefore(onlyBtn, dropdown.nextSibling);
+            onlyBtn.style.display='';
+            dropdown.style.display='none';
+          }
+        }else{
+          dropdown.style.display='';
+          buttons.forEach(btn=>{
+            const item=subs.find(x=>x.category===btn.dataset.category);
+            btn.style.display=item && getSettingValue(serverData,item.id+'_visible')!=='false'?'':'none';
+          });
+        }
+      });
+    }
+
+    function applyMainTabSettings(serverData){
+      const byCat={furniture:['#furnitureToggleBtn'],animal:['#dropdown-animal > .dropdown-toggle'],pot:['#dropdown-pot > .dropdown-toggle'],ring:['#dropdown-ring > .dropdown-toggle'],crop:['#dropdown-crop > .dropdown-toggle'],gift:['#dropdown-gift > .dropdown-toggle'],schedule:['.tab-btn[data-category="schedule"]'],cart:['#cartTabBtn']};
+      MAIN_TAB_SETTINGS.forEach(item=>{
+        const visible=getMainTabSetting(serverData,item.id+'_visible')!=='false';
+        const name=getMainTabSetting(serverData,item.id+'_name')||item.defaultName;
+        (byCat[item.category]||[]).forEach(sel=>document.querySelectorAll(sel).forEach(el=>{
+          el.style.display=visible?'':'none';
+          if(el.classList.contains('tab-btn')||el.classList.contains('dropdown-toggle')){
+            el.childNodes.forEach(n=>{if(n.nodeType===3&&n.textContent.trim())n.textContent=name+' ';});
+            const span=el.querySelector('span'); if(span) span.textContent=name;
+          }
+        }));
+      });
+      SUB_TAB_SETTINGS.forEach(item=>{
+        const btn=document.querySelector(`.tab-btn[data-category="${item.category}"]`);
+        if(!btn)return;
+        const visible=getSettingValue(serverData,item.id+'_visible')!=='false';
+        const name=getSettingValue(serverData,item.id+'_name')||item.defaultName;
+        btn.style.display=visible?'':'none';
+        btn.textContent=name;
+      });
+      syncMainTabStructure(serverData);
+    }
+    function setupTabSettings(){
+      const btn=document.getElementById('tabSettingsBtn'),form=document.getElementById('tabSettingsForm'),rows=document.getElementById('tabSettingsRows');
+      const save=document.getElementById('tabSettingsSaveBtn'),cancel=document.getElementById('tabSettingsCancelBtn'),saving=document.getElementById('tabSettingsSaving');
+      if(!btn||!form||!rows||btn.dataset.bound==='1')return; btn.dataset.bound='1';
+      if(form.parentElement!==document.body) document.body.appendChild(form);
+      const esc=(v)=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;');
+      const allItemsByParent={};
+      SUB_TAB_SETTINGS.forEach(item=>{(allItemsByParent[item.parent] ||= []).push(item);});
+      const ordered=[];
+      MAIN_TAB_SETTINGS.forEach(main=>{ ordered.push({main,subs:allItemsByParent[main.category]||[]}); });
+      const fill=()=>{
+        rows.innerHTML='';
+        const data=window._rawServerData||[];
+        ordered.forEach(({main,subs})=>{
+          const mainVisibleId=main.id+'_visible', mainNameId=main.id+'_name';
+          const mainVisible=getSettingValue(data,mainVisibleId)!=='false';
+          const mainName=getSettingValue(data,mainNameId)||main.defaultName;
+          const mainRow=document.createElement('div'); mainRow.className='tab-settings-row tab-settings-main-row';
+          mainRow.innerHTML=`<span class="tab-settings-label"><b>${esc(main.defaultName)}</b></span><input type="text" data-name-id="${mainNameId}" value="${esc(mainName)}"><label><input type="checkbox" data-visible-id="${mainVisibleId}" ${mainVisible?'checked':''}> 顯示</label>`;
+          rows.appendChild(mainRow);
+          subs.forEach(item=>{
+            const visibleId=item.id+'_visible',nameId=item.id+'_name';
+            const visible=getSettingValue(data,visibleId)!=='false';
+            const name=getSettingValue(data,nameId)||item.defaultName;
+            const row=document.createElement('div'); row.className='tab-settings-row tab-settings-sub-row';
+            row.innerHTML=`<span class="tab-settings-label">↳ ${esc(item.defaultName)}</span><input type="text" data-name-id="${nameId}" value="${esc(name)}"><label><input type="checkbox" data-visible-id="${visibleId}" ${visible?'checked':''}> 顯示</label>`;
+            rows.appendChild(row);
+          });
+        });
+      };
+      btn.addEventListener('click',(e)=>{e.preventDefault();e.stopPropagation();fill();form.classList.add('open');});
+      cancel.addEventListener('click',()=>form.classList.remove('open'));
+      form.addEventListener('click',e=>{if(e.target===form)form.classList.remove('open');});
+      save.addEventListener('click',async()=>{
+        if(!isAdmin)return;
+        const data=window._rawServerData||[];
+        const changed=[];
+        rows.querySelectorAll('[data-name-id]').forEach(el=>{
+          const id=el.dataset.nameId, next=el.value.trim(), old=getSettingValue(data,id);
+          if(next!==old) changed.push([id,next]);
+        });
+        rows.querySelectorAll('[data-visible-id]').forEach(el=>{
+          const id=el.dataset.visibleId, next=el.checked?'true':'false', old=getSettingValue(data,id);
+          if(next!==old) changed.push([id,next]);
+        });
+        if(!changed.length){saving.style.display='block';saving.innerText='沒有修改，不需儲存。';setTimeout(()=>saving.style.display='none',900);return;}
+        saving.style.display='block'; saving.innerText=`正在儲存 ${changed.length} 項修改，請稍後...`; save.disabled=true;
+        try{
+          for(const [id,val] of changed){
+            const ok=await updateItemById(id,'caption',val);
+            if(!ok) throw new Error(id);
+            const row=(window._rawServerData||[]).find(i=>String(i.id)===id);
+            if(row) row.caption=val; else (window._rawServerData||[]).push({id,caption:val});
+          }
+          applyMainTabSettings(window._rawServerData||[]);
+          saving.innerText='✅ 已儲存修改並立即套用！';
+          setTimeout(()=>{saving.style.display='none';form.classList.remove('open');},900);
+        }catch(err){
+          console.error('分頁設定儲存失敗:',err);
+          saving.innerText=`❌ 儲存失敗：${err.message||'請確認 Google Sheet 設定 ID'}`;
+        }finally{save.disabled=false;}
+      });
+    }
+    function getSettingValue(serverData,id){
+      const item=(serverData||[]).find(i=>String(i.id)===String(id));
+      // 只要資料庫已有此 ID，就以資料庫內容為準；即使 caption 是空字串，也代表管理員刻意清空。
+      if(item && item.caption!==undefined && item.caption!==null) return String(item.caption);
+      return Object.prototype.hasOwnProperty.call(SETTINGS_DEFAULTS,id)?String(SETTINGS_DEFAULTS[id]):'';
+    }
+    function getTabDescription(serverData,category){
+      const settingId=TAB_SETTING_BY_CATEGORY[category];
+      return settingId ? getSettingValue(serverData,settingId) : '';
+    }
+    function normalizeEditableText(value){return String(value??'').replace(/\r\n/g,'\n').replace(/\r/g,'\n');}
+    function setEditableTextElement(elem,value){if(elem) elem.textContent=normalizeEditableText(value);}
+    function getEditableTextElement(elem){return elem?normalizeEditableText(elem.innerText):'';}
 
     let currentCategory = ''; 
     let currentCategoryDisplayName = '尚未選擇分頁';
@@ -3951,6 +4372,7 @@ body::after
     let scheduleMonth = scheduleNow.getMonth();
 
     let initialDataHash = '';
+    let initialSettingsHash = '';
 
     function loadCartFromStorage() {
       try {
@@ -4059,20 +4481,32 @@ function setupCartPreferences() {
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      auth.onAuthStateChanged((user) => {
-        if (user && user.email === "comtw919@gmail.com") {
-          isAdmin = true;
-        } else {
-          isAdmin = false;
-          if (user) {
-            // 如果不是指定帳號，強制登出
-            auth.signOut();
-          }
+      auth.onAuthStateChanged(async (user) => {
+        branchAuthUser=user||null;
+        isMainOwner=!!(user&&user.email===MAIN_OWNER_EMAIL);
+        await loadBranchRegistry();
+        activeBranchId=new URLSearchParams(location.search).get('branch')||'main';
+        activeBranch=activeBranchId==='main'?null:branchRegistry[activeBranchId]||null;
+
+        const ownerBranch=user?Object.values(branchRegistry).find(b=>b.ownerUid===user.uid):null;
+        const canOwnerManage=!!(ownerBranch&&ownerBranch.id===activeBranchId&&ownerBranch.status==='approved');
+
+        if(activeBranchId!=='main' && !activeBranch){
+          alert('此分店不存在，將返回主店。');
+          const u=new URL(location.href);u.searchParams.delete('branch');location.href=u.toString();return;
         }
-        initAuthUI();
+        if(activeBranchId!=='main' && activeBranch && activeBranch.status!=='approved'){
+          alert('此分店尚未核准，將返回主店。');
+          const u=new URL(location.href);u.searchParams.delete('branch');location.href=u.toString();return;
+        }
+
+        branchAdminApproved=canOwnerManage;
+        isAdmin=isMainOwner||branchAdminApproved;
+        initAuthUI(); syncBranchUI(); fetchData(true);
       });
 
       setupTabs();
+      bindBranchUI();
       setupCollapseToggle();
       setupModalEvents();
       setupBackToTop();
@@ -4083,8 +4517,6 @@ function setupCartPreferences() {
       setupScheduleEvents();
       setupDropZone();
       
-      fetchData(true); 
-
       if (!isAdmin) {
         setInterval(checkForUpdates, 10000);
       }
@@ -4096,6 +4528,149 @@ function setupCartPreferences() {
       document.getElementById('sortSelect').addEventListener('change', renderGallery);
     });
 
+    function branchIsOpen(b){return !!(b&&b.status==='approved'&&b.enabled===true&&b.ownerUid&&b.apiUrl&&b.spreadsheetId);}
+    function branchIsApproved(b){return !!(b&&b.status==='approved'&&b.ownerUid&&b.apiUrl&&b.spreadsheetId);}
+    async function loadBranchRegistry(){
+      try{
+        const snap=await db.ref('branchStores').once('value');
+        branchRegistry=snap.val()||{};
+      }catch(e){console.error('讀取分店資料失敗',e);branchRegistry={};}
+    }
+    async function loadBranchApplications(){
+      try{
+        const snap=await db.ref('branchApplications').once('value');
+        return snap.val()||{};
+      }catch(e){console.error('讀取分店申請失敗',e);return {};}
+    }
+    function escBranch(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+    function switchStore(id){const u=new URL(location.href);if(id==='main')u.searchParams.delete('branch');else u.searchParams.set('branch',id);location.href=u.toString();}
+    function syncBranchUI(){
+      const menu=document.getElementById('branchStoreMenu'),dd=document.getElementById('branchStoreDropdown');
+      if(!menu||!dd)return;
+      menu.classList.add('visible');dd.innerHTML='';
+      const add=(id,label)=>{const b=document.createElement('button');b.type='button';b.className='branch-store-option'+(activeBranchId===id?' active':'');b.textContent=label+(activeBranchId===id?'（目前）':'');b.onclick=()=>switchStore(id);dd.appendChild(b);};
+      add('main','🏠 '+(getSettingValue(window._rawServerData||[],'settings_title')||'主店'));
+      Object.values(branchRegistry).filter(branchIsOpen).sort((a,b)=>String(a.name).localeCompare(String(b.name),'zh-TW')).forEach(b=>add(b.code||b.id,'🏪 '+b.name));
+      const apply=document.getElementById('branchApplyBtn'),manage=document.getElementById('branchManageBtn');
+      if(apply){apply.style.display=(activeBranchId==='main'?'block':'none');}
+      if(manage){manage.style.display=(isMainOwner||branchAdminApproved)?'block':'none';manage.textContent=isMainOwner?'🏪 分店管理中心':'🏪 我的分店';}
+      document.title=`⭐ ${activeBranch?.name||getSettingValue(window._rawServerData||[],'settings_title')||'米米小舖'}-Club MStar ⭐`;
+      if(activeBranchId!=='main'){const t=document.getElementById('mimiTitleText');if(t)t.textContent=activeBranch.name;}
+    }
+    function bindBranchUI(){
+      const t=document.getElementById('branchStoreToggle'),m=document.getElementById('branchStoreMenu');if(t&&t.dataset.bound!=='1'){t.dataset.bound='1';t.onclick=e=>{e.stopPropagation();m.classList.toggle('open');};document.addEventListener('click',()=>m.classList.remove('open'));}
+      const a=document.getElementById('branchApplyBtn');if(a&&a.dataset.bound!=='1'){a.dataset.bound='1';a.onclick=()=>document.getElementById('branchApplyForm').classList.add('open');}
+      const ac=document.getElementById('branchApplyCancelBtn');if(ac&&ac.dataset.bound!=='1'){ac.dataset.bound='1';ac.onclick=()=>document.getElementById('branchApplyForm').classList.remove('open');}
+      const ms=document.getElementById('branchManageBtn');if(ms&&ms.dataset.bound!=='1'){ms.dataset.bound='1';ms.onclick=()=>isMainOwner?openBranchManagement():openBranchOwner();}
+      const mc=document.getElementById('branchManagementCloseBtn');if(mc&&mc.dataset.bound!=='1'){mc.dataset.bound='1';mc.onclick=()=>document.getElementById('branchManagementForm').classList.remove('open');}
+      const oc=document.getElementById('branchOwnerCloseBtn');if(oc&&oc.dataset.bound!=='1'){oc.dataset.bound='1';oc.onclick=()=>document.getElementById('branchOwnerForm').classList.remove('open');}
+      const sub=document.getElementById('branchApplySubmitBtn');if(sub&&sub.dataset.bound!=='1'){sub.dataset.bound='1';sub.onclick=submitBranchApplication;}
+      const ot=document.getElementById('branchOwnerToggleBtn');if(ot&&ot.dataset.bound!=='1'){ot.dataset.bound='1';ot.onclick=toggleOwnBranch;}
+    }
+    async function submitBranchApplication(){
+      const v=id=>document.getElementById(id).value.trim(), name=v('branchNameInput'),email=v('branchFirebaseEmailInput'),pass=document.getElementById('branchFirebasePasswordInput').value,discord=v('branchDiscordUrlInput')||'無',tally=v('branchTallyUrlInput')||'無',raw=v('branchSpreadsheetInput'),api=v('branchApiUrlInput'),st=document.getElementById('branchApplyStatus');
+      const mm=raw.match(/\/spreadsheets\/d\/([A-Za-z0-9-_]+)/),sheet=mm?mm[1]:raw;
+      if(!name||!email||!pass||!sheet||!api){st.textContent='❌ 請完整填寫申請資料。';return;}
+      if(pass.length<6){st.textContent='❌ Firebase 密碼至少 6 碼。';return;}
+      st.textContent='正在建立／登入 Firebase 帳號並送出申請...';
+      try{
+        let c;
+        try{c=await auth.createUserWithEmailAndPassword(email,pass)}
+        catch(e){if(e.code==='auth/email-already-in-use')c=await auth.signInWithEmailAndPassword(email,pass);else throw e;}
+        const uid=c.user.uid;
+        const code='branch_'+uid.replace(/[^A-Za-z0-9_-]/g,'').slice(0,32);
+        const existingSnap=await db.ref('branchApplications/'+uid).once('value');
+        const existing=existingSnap.val();
+        if(existing?.status==='approved' && branchRegistry[existing.code]) throw new Error('此 Firebase 帳號已經有已核准的分店。');
+        const application={uid,email,displayName:name,name,code,status:'pending',createdAt:existing?.createdAt||firebase.database.ServerValue.TIMESTAMP,updatedAt:firebase.database.ServerValue.TIMESTAMP,spreadsheetId:sheet,apiUrl:api,discordUrl:discord,tallyUrl:tally};
+        await db.ref('branchApplications/'+uid).set(application);
+        await auth.signOut();
+        st.textContent='✅ 已送出，等待版主審核；審核通過前無法新增商品。';
+        setTimeout(()=>document.getElementById('branchApplyForm').classList.remove('open'),1300);
+        await loadBranchRegistry();syncBranchUI();
+      }catch(e){console.error(e);st.textContent='❌ 申請失敗：'+(e.message||'請檢查 Firebase 與 Web App 設定。');}
+    }
+    async function openBranchManagement(){
+      if(!isMainOwner)return;
+      const [apps]=await Promise.all([loadBranchApplications(),loadBranchRegistry()]);
+      const f=document.getElementById('branchManagementForm'),l=document.getElementById('branchManagementList');l.innerHTML='';
+      const pending=Object.values(apps).filter(x=>x.status==='pending').sort((a,b)=>Number(b.createdAt||0)-Number(a.createdAt||0));
+      const stores=Object.values(branchRegistry).sort((a,b)=>Number(b.approvedAt||b.createdAt||0)-Number(a.approvedAt||a.createdAt||0));
+      if(!pending.length&&!stores.length)l.innerHTML='<div class="branch-store-hint">目前沒有分店申請或分店資料。</div>';
+      if(pending.length){
+        const h=document.createElement('div');h.className='branch-store-card';h.innerHTML='<div class="branch-store-card-title">⏳ 待審核申請</div>';l.appendChild(h);
+        pending.forEach(x=>{
+          const c=document.createElement('div');c.className='branch-store-card';
+          c.innerHTML=`<div class="branch-store-card-title">${escBranch(x.name)}</div><div class="branch-store-card-meta">Firebase：${escBranch(x.email)}<br>Spreadsheet：${escBranch(x.spreadsheetId)}<br>Web App：${escBranch(x.apiUrl)}</div>`;
+          const approve=document.createElement('button');approve.className='schedule-btn';approve.textContent='核准開店';approve.onclick=()=>approveBranchApplication(x.uid);c.appendChild(approve);
+          const reject=document.createElement('button');reject.className='schedule-btn branch-store-danger';reject.textContent='拒絕申請';reject.onclick=()=>rejectBranchApplication(x.uid);c.appendChild(reject);
+          l.appendChild(c);
+        });
+      }
+      if(stores.length){
+        const h=document.createElement('div');h.className='branch-store-card';h.innerHTML='<div class="branch-store-card-title">🏪 已建立分店</div>';l.appendChild(h);
+        stores.forEach(x=>{
+          const c=document.createElement('div');c.className='branch-store-card';
+          const state=x.enabled===true?'🟢 開啟中':(x.adminClosed===true?'🔴 版主關閉':'⚪ 分店主關閉');
+          c.innerHTML=`<div class="branch-store-card-title">${escBranch(x.name)}</div><div class="branch-store-card-meta">狀態：${state}<br>Firebase：${escBranch(x.ownerEmail||x.ownerUid)}<br>Spreadsheet：${escBranch(x.spreadsheetId)}</div>`;
+          const btn=document.createElement('button');btn.className='schedule-btn'+(x.enabled===true?' branch-store-danger':'');btn.textContent=x.enabled===true?'版主關閉':'版主重新開啟';btn.onclick=()=>setBranchAdminClosed(x.code||x.id,x.enabled===true);c.appendChild(btn);
+          l.appendChild(c);
+        });
+      }
+      f.classList.add('open');
+    }
+    async function approveBranchApplication(uid){
+      if(!isMainOwner)return;
+      try{
+        const snap=await db.ref('branchApplications/'+uid).once('value'),x=snap.val();
+        if(!x||x.status!=='pending')throw new Error('此申請已不是待審核狀態。');
+        const code=x.code;
+        const now=firebase.database.ServerValue.TIMESTAMP;
+        const store={code,name:x.name,ownerUid:x.uid,ownerEmail:x.email,status:'approved',enabled:true,approvedAt:now,createdAt:x.createdAt||now,updatedAt:now,spreadsheetId:x.spreadsheetId,apiUrl:x.apiUrl,discordUrl:x.discordUrl||'無',tallyUrl:x.tallyUrl||'無',adminClosed:false};
+        const updates={};
+        updates['branchApplications/'+uid+'/status']='approved';
+        updates['branchApplications/'+uid+'/approvedAt']=now;
+        updates['branchApplications/'+uid+'/updatedAt']=now;
+        updates['branchStores/'+code]=store;
+        updates['branchOwners/'+uid+'/stores/'+code]={code,name:x.name};
+        await db.ref().update(updates);
+        await loadBranchRegistry();syncBranchUI();await openBranchManagement();
+      }catch(e){alert('核准失敗：'+(e.message||'請確認 Firebase Rules 與 admin 權限。'));}
+    }
+    async function rejectBranchApplication(uid){
+      if(!isMainOwner)return;
+      try{await db.ref('branchApplications/'+uid).update({status:'rejected',updatedAt:firebase.database.ServerValue.TIMESTAMP});await openBranchManagement();}
+      catch(e){alert('拒絕申請失敗：'+(e.message||'請確認 Firebase Rules。'));}
+    }
+    async function setBranchAdminClosed(code,closeIt){
+      if(!isMainOwner)return;
+      try{
+        await db.ref('branchStores/'+code).update({enabled:!closeIt,adminClosed:!!closeIt,updatedAt:firebase.database.ServerValue.TIMESTAMP});
+        await loadBranchRegistry();syncBranchUI();await openBranchManagement();
+      }catch(e){alert('分店狀態更新失敗：'+(e.message||'請確認 Firebase Rules 與 admin 權限。'));}
+    }
+    function openBranchOwner(){
+      const b=Object.values(branchRegistry).find(x=>x.ownerUid===branchAuthUser?.uid);
+      if(!b)return;
+      const f=document.getElementById('branchOwnerForm'),i=document.getElementById('branchOwnerInfo'),btn=document.getElementById('branchOwnerToggleBtn');
+      let status='';
+      if(b.adminClosed===true) status='🔴 已被版主關閉，無法自行開啟。<br><b>如需重新開啟，請與版主聯絡。</b>';
+      else if(b.enabled===true) status='🟢 目前開啟中';
+      else status='⚪ 目前由分店主自行關閉，可自行重新開啟';
+      i.innerHTML=`分店：<b>${escBranch(b.name)}</b><br>狀態：${status}<br><br>分店經版主核准後，即可自行選擇開啟或關閉分店。`;
+      btn.disabled=b.adminClosed===true;
+      btn.textContent=b.enabled===true?'關閉我的分店':'開啟我的分店';
+      f.classList.add('open');
+    }
+    async function toggleOwnBranch(){
+      const b=Object.values(branchRegistry).find(x=>x.ownerUid===branchAuthUser?.uid);
+      if(!b||b.status!=='approved')return;
+      if(b.adminClosed===true){alert('此分店已由版主關閉，無法自行開啟。\n如需重新開啟，請與版主聯絡。');return;}
+      try{
+        await db.ref('branchStores/'+(b.code||b.id)).update({enabled:!(b.enabled===true),adminClosed:false,updatedAt:firebase.database.ServerValue.TIMESTAMP});
+        await loadBranchRegistry();syncBranchUI();openBranchOwner();
+      }catch(e){alert('分店狀態更新失敗：'+(e.message||'請確認 Firebase Rules。'));}
+    }
     function computeDataHash(data) {
       return JSON.stringify(data.map(i => i.id).sort());
     }
@@ -4104,14 +4679,19 @@ function setupCartPreferences() {
       if (isAdmin) return;
 
       try {
-        const response = await fetch(`${SCRIPT_URL}?action=getData`);
+        const dataUrl=apiUrl('getData'); if(!dataUrl) throw new Error('此分店尚未設定 Web App'); const response = await fetch(dataUrl);
         const result = await response.json();
         if (result.status === 'success') {
-          const settingsIds = ['settings_desc', 'settings_gift', 'settings_ring', 'settings_crop'];
+          const settingsIds = SETTINGS_IDS;
           const filtered = result.data.filter(item => !settingsIds.includes(String(item.id)) && item.category !== 'album_item');
           const newHash = computeDataHash(filtered);
+          const settingsHash = JSON.stringify(result.data
+            .filter(item => settingsIds.includes(String(item.id)))
+            .map(item => [String(item.id), String(item.caption || '')])
+            .sort((a,b) => a[0].localeCompare(b[0])));
 
-          if (initialDataHash && newHash !== initialDataHash) {
+          if ((initialDataHash && newHash !== initialDataHash) ||
+              (initialSettingsHash && settingsHash !== initialSettingsHash)) {
             document.getElementById('updateBanner').style.display = 'block';
           }
         }
@@ -4597,6 +5177,57 @@ function setupCartPreferences() {
       calculateTotal();
     }
 
+    function applyContactSettings(serverData){
+      const discord=document.getElementById('discordContactBtn');
+      const discordText=document.getElementById('discordContactText');
+      const tally=document.getElementById('tallyContactBtn');
+      const tallyText=document.getElementById('tallyContactText');
+      if(discord){ const raw=getSettingValue(serverData,'settings_contact_discord_url').trim(); const disabled=/^無$/i.test(raw); const url=disabled?'':raw; discord.href=url||'#'; discord.style.display=(!disabled&&url)?'inline-flex':'none'; }
+      if(discordText) discordText.textContent=getSettingValue(serverData,'settings_contact_discord_text');
+      if(tally){ const raw=getSettingValue(serverData,'settings_contact_tally_url').trim(); const disabled=/^無$/i.test(raw); const url=disabled?'':raw; tally.href=url||'#'; tally.style.display=(!disabled&&url)?'inline-flex':'none'; }
+      if(tallyText) tallyText.textContent=getSettingValue(serverData,'settings_contact_tally_text');
+    }
+    function setupContactSettings(){
+      const btn=document.getElementById('contactSettingsBtn'), form=document.getElementById('contactSettingsForm');
+      const save=document.getElementById('contactSettingsSaveBtn'), cancel=document.getElementById('contactSettingsCancelBtn');
+      if(!btn||!form||btn.dataset.bound==='1')return; btn.dataset.bound='1';
+      if(form.parentElement!==document.body) document.body.appendChild(form);
+      const fill=()=>{
+        document.getElementById('contactDiscordTextInput').value=getSettingValue(window._rawServerData||[],'settings_contact_discord_text');
+        document.getElementById('contactDiscordUrlInput').value=getSettingValue(window._rawServerData||[],'settings_contact_discord_url');
+        document.getElementById('contactTallyTextInput').value=getSettingValue(window._rawServerData||[],'settings_contact_tally_text');
+        document.getElementById('contactTallyUrlInput').value=getSettingValue(window._rawServerData||[],'settings_contact_tally_url');
+      };
+      btn.addEventListener('click',()=>{
+        if(!isAdmin)return;
+        fill();
+        form.classList.add('open');
+      });
+      cancel.addEventListener('click',()=>form.classList.remove('open'));
+      form.addEventListener('click',e=>{ if(e.target===form) form.classList.remove('open'); });
+      save.addEventListener('click',async()=>{
+        if(!isAdmin)return;
+        const values={
+          settings_contact_discord_text:document.getElementById('contactDiscordTextInput').value.trim(),
+          settings_contact_discord_url:document.getElementById('contactDiscordUrlInput').value.trim() || '無',
+          settings_contact_tally_text:document.getElementById('contactTallyTextInput').value.trim(),
+          settings_contact_tally_url:document.getElementById('contactTallyUrlInput').value.trim() || '無'
+        };
+        const changed=Object.entries(values).filter(([id,val])=>val!==getSettingValue(window._rawServerData||[],id));
+        const status=document.getElementById('status'); const saving=document.getElementById('contactSettingsSaving');
+        if(!changed.length){if(saving){saving.style.display='block';saving.innerText='沒有修改，不需儲存。';}setTimeout(()=>{if(saving)saving.style.display='none';},900);return;}
+        if(status)status.innerText=`正在儲存 ${changed.length} 項聯絡設定...`; if(saving){saving.style.display='block';saving.innerText='正在儲存，請稍後...';}
+        for(const [id,val] of changed){
+          const ok=await updateItemById(id,'caption',val);
+          if(!ok){if(status)status.innerText='❌ 聯絡設定儲存失敗，請檢查 Google Sheet ID 是否存在。'; if(saving)saving.innerText='❌ 儲存失敗，請重試'; return;}
+          const row=(window._rawServerData||[]).find(i=>String(i.id)===id); if(row)row.caption=val; else if(window._rawServerData)window._rawServerData.push({id,caption:val});
+        }
+        applyContactSettings(window._rawServerData||[]);
+        if(status)status.innerText='✅ 聯絡按鈕修改成功！';
+        form.classList.remove('open'); setTimeout(()=>{if(status)status.innerText='';},1800);
+      });
+    }
+
     function initAuthUI() {
       const authBox = document.getElementById('authBox');
       const dropZone = document.getElementById('dropZone');
@@ -4604,7 +5235,7 @@ function setupCartPreferences() {
       const ringDescElem = document.getElementById('ringDescription');
       const cropDescElem = document.getElementById('cropDescription');
 
-      if (isAdmin) {
+      if (isAdmin && (activeBranchId==='main' || branchAdminApproved)) {
         document.body.classList.add('is-admin');
         dropZone.style.display = currentCategory ? 'block' : 'none';
         giftDescElem.contentEditable = "true";
@@ -4640,9 +5271,261 @@ function setupCartPreferences() {
       setupEditableSave(giftDescElem, 'settings_gift', 'caption');
       setupEditableSave(ringDescElem, 'settings_ring', 'caption');
       setupEditableSave(cropDescElem, 'settings_crop', 'caption');
+      setupScheduleAdminEvents();
+      setupContactSettings();
+      setupTabSettings();
+      applyContactSettings(window._rawServerData || []);
+      applyAllSiteSettings(window._rawServerData || []);
       if (currentCategory && currentCategory !== 'schedule') {
         renderGallery();
       }
+    }
+
+    function setupSettingEditable(elem,id){
+      if(!elem) return;
+      if(elem.dataset.settingBound==='1'){ elem.dataset.settingId=id; return; }
+      elem.dataset.settingBound='1';
+      elem.dataset.settingId=id;
+      let originalText='';
+      elem.addEventListener('focus',()=>{ if(isAdmin) originalText=getEditableTextElement(elem); });
+      elem.addEventListener('blur',async()=>{
+        if(!isAdmin) return;
+        const newText=getEditableTextElement(elem);
+        if(newText===originalText) return;
+        const status=document.getElementById('siteSettingsStatus') || document.getElementById('status');
+        if(status) status.innerText='正在儲存至雲端，請稍後...';
+        const saveId=elem.dataset.settingId||id;
+        const success=await updateItemById(saveId,'caption',newText);
+        if(success){
+          originalText=newText;
+          const row=(window._rawServerData||[]).find(i=>String(i.id)===String(saveId));
+          if(row) row.caption=newText;
+          if(saveId.startsWith('settings_tab_desc_')){
+            const cat=Object.keys(TAB_SETTING_BY_CATEGORY).find(k=>TAB_SETTING_BY_CATEGORY[k]===saveId);
+            if(cat) applyTabDescription(window._rawServerData||[],currentCategory || cat);
+          }
+          if(status) status.innerText='修改成功！';
+          if(saveId==='settings_title') document.title=`⭐ ${newText||'米米小舖'}-Club MStar ⭐`;
+        }else{
+          setEditableTextElement(elem,originalText);
+          if(status) status.innerText='❌ 儲存失敗，內容已還原，請重試';
+        }
+        setTimeout(()=>{if(status) status.innerText='';},1500);
+      });
+      elem.addEventListener('keydown',(e)=>{
+        if(e.key==='Enter' && !e.shiftKey){e.preventDefault();elem.blur();}
+      });
+    }
+
+    function applyWelcomeSettings(serverData){
+      const mappings=[
+        ['settings_welcome_title','welcomeTitleText'],
+        ['settings_welcome_1','welcomeText1'],['settings_welcome_2','welcomeText2'],
+        ['settings_welcome_3','welcomeText3'],['settings_welcome_4','welcomeText4'],
+        ['settings_welcome_5','welcomeText5'],['settings_welcome_6','welcomeText6'],
+        ['settings_welcome_7','welcomeText7'],['settings_welcome_8','welcomeText8'],
+        ['settings_welcome_9','welcomeText9'],['settings_welcome_10','welcomeText10'],
+        ['settings_welcome_footer_tip','welcomeFooterTipText'],
+        ['settings_welcome_footer_button','welcomeFooterButtonText']
+      ];
+      mappings.forEach(([id,elemId])=>{
+        const elem=document.getElementById(elemId);
+        if(!elem)return;
+        setEditableTextElement(elem,getSettingValue(serverData,id));
+        setupSettingEditable(elem,id);
+        elem.contentEditable=isAdmin?'true':'false';
+      });
+    }
+
+    function applyAllSiteSettings(serverData){
+      const titleElem=document.getElementById('mimiTitleText');
+      if(titleElem){
+        const title=getSettingValue(serverData,'settings_title');
+        setEditableTextElement(titleElem,title);
+        titleElem.contentEditable=isAdmin?'true':'false';
+        setupSettingEditable(titleElem,'settings_title');
+        document.title=`⭐ ${title||'米米小舖'}-Club MStar ⭐`;
+      }
+      const cartLabel=document.getElementById('cartTotalLabel');
+      if(cartLabel){
+        setEditableTextElement(cartLabel,getSettingValue(serverData,'settings_cart_total'));
+        cartLabel.contentEditable=isAdmin?'true':'false';
+        setupSettingEditable(cartLabel,'settings_cart_total');
+      }
+      applyWelcomeSettings(serverData);
+      applyContactSettings(serverData);
+      applyMainTabSettings(serverData);
+      applyTabDescription(serverData,currentCategory);
+    }
+
+    function applyTabDescription(serverData,category){
+      const container=document.getElementById('tabDescriptionContainer');
+      const textElem=document.getElementById('tabDescriptionText');
+      const emojiElem=document.getElementById('tabDescriptionEmoji');
+      if(!container||!textElem||!emojiElem)return;
+      const meta=TAB_META_BY_CATEGORY[category];
+      if(!meta){container.style.display='none';return;}
+      const description=getTabDescription(serverData,category);
+      setEditableTextElement(textElem,description);
+      textElem.contentEditable=isAdmin?'true':'false';
+      const settingId=TAB_SETTING_BY_CATEGORY[category];
+      if(settingId){
+        setupSettingEditable(textElem,settingId);
+        textElem.dataset.settingId=settingId;
+      }
+      emojiElem.textContent=meta.emoji;
+      const isBlank=description.trim()==='';
+      container.style.display=(!isAdmin&&isBlank)?'none':'block';
+      if(isAdmin&&isBlank) textElem.setAttribute('data-placeholder','目前沒有文字，此欄為隱藏狀態');
+      else textElem.removeAttribute('data-placeholder');
+    }
+
+    function getScheduleConfig(serverData){
+      try{
+        const parsed=JSON.parse(getSettingValue(serverData,'settings_schedule_config'));
+        return {
+          mode:['weekday_off','cycle','custom'].includes(parsed.mode)?parsed.mode:'cycle',
+          offWeekdays:Array.isArray(parsed.offWeekdays)?parsed.offWeekdays.map(Number).filter(n=>n>=0&&n<=6):[],
+          workDays:Math.max(1,parseInt(parsed.workDays,10)||2),
+          offDays:Math.max(1,parseInt(parsed.offDays,10)||2),
+          cycleStart:normalizeScheduleDateInput(parsed.cycleStart)||'2026-08-08',
+          cycleEnd:normalizeScheduleDateInput(parsed.cycleEnd)||'2026-08-09',
+          custom:parsed.custom&&typeof parsed.custom==='object'?parsed.custom:{}
+        };
+      }catch(e){return JSON.parse(SETTINGS_DEFAULTS.settings_schedule_config);}
+    }
+    function formatDateKey(date){
+      return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+    }
+    function normalizeScheduleDateInput(value){
+      const raw=String(value||'').trim().replace(/[.\/]/g,'-');
+      if(/^\d{4}-\d{1,2}-\d{1,2}$/.test(raw)){
+        const [y,m,d]=raw.split('-').map(Number);
+        return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      }
+      if(/^\d{1,2}-\d{1,2}$/.test(raw)){
+        const [m,d]=raw.split('-').map(Number);
+        const y=new Date().getFullYear();
+        return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      }
+      return '';
+    }
+    function getScheduleWorkState(date,config){
+      const key=formatDateKey(date);
+      if(config.mode==='custom' && Object.prototype.hasOwnProperty.call(config.custom,key)) return config.custom[key]==='work';
+      if(config.mode==='weekday_off') return !config.offWeekdays.includes(date.getDay());
+      const startParts=String(config.cycleStart||'').split('-').map(Number);
+      const endParts=String(config.cycleEnd||config.cycleStart||'').split('-').map(Number);
+      const start=startParts.length===3?Date.UTC(startParts[0],startParts[1]-1,startParts[2]):NaN;
+      const end=endParts.length===3?Date.UTC(endParts[0],endParts[1]-1,endParts[2]):NaN;
+      const dateUtc=Date.UTC(date.getFullYear(),date.getMonth(),date.getDate());
+      if(!Number.isFinite(start)||!Number.isFinite(end)||end<start)return true;
+      const diffDays=Math.floor((dateUtc-start)/86400000);
+      const cycleLength=Math.max(2,config.workDays+config.offDays);
+      const mod=((diffDays%cycleLength)+cycleLength)%cycleLength;
+      return mod<config.workDays;
+    }
+    function syncScheduleAdminUI(){
+      const config=getScheduleConfig(window._rawServerData||[]);
+      const modeRadios=document.querySelectorAll('.schedule-mode-radio');
+      if(!modeRadios.length)return;
+      modeRadios.forEach(r=>r.checked=r.value===config.mode);
+      document.getElementById('scheduleWorkDays').value=config.workDays;
+      document.getElementById('scheduleOffDays').value=config.offDays;
+      document.getElementById('scheduleCycleStart').value=config.cycleStart;
+      document.getElementById('scheduleCycleEnd').value=config.cycleEnd;
+      document.querySelectorAll('.schedule-off-weekday').forEach(cb=>cb.checked=config.offWeekdays.includes(Number(cb.value)));
+      document.getElementById('scheduleCustomText').value=Object.entries(config.custom).sort(([a],[b])=>a.localeCompare(b)).map(([d,s])=>`${d}=${s==='work'?'上班':'休假'}`).join('\n');
+      document.getElementById('scheduleWeekdayRow').style.display=config.mode==='weekday_off'?'flex':'none';
+      document.getElementById('scheduleCycleRow').style.display=config.mode==='cycle'?'flex':'none';
+      document.getElementById('scheduleCustomRow').style.display=config.mode==='custom'?'flex':'none';
+    }
+    function parseCustomScheduleText(text){
+      const custom={};
+      String(text||'').split(/\n/).forEach(line=>{
+        const parts=line.trim().split('=');
+        if(parts.length<2)return;
+        const date=parts[0].trim(), state=parts.slice(1).join('=').trim();
+        if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return;
+        if(state.includes('上班'))custom[date]='work';
+        else if(state.includes('休假'))custom[date]='off';
+      });
+      return custom;
+    }
+    async function saveScheduleConfig(config){
+      const status=document.getElementById('status');
+      if(status)status.innerText='生成班表中，請稍後...';
+      const applyBtn=document.getElementById('scheduleApplyBtn');
+      if(applyBtn){applyBtn.disabled=true;applyBtn.dataset.originalText=applyBtn.innerText;applyBtn.innerText='生成班表中，請稍後...';}
+      const payload=JSON.stringify(config);
+      const success=await updateItemById('settings_schedule_config','caption',payload);
+      if(success){
+        if(!window._rawServerData) window._rawServerData=[];
+        const row=window._rawServerData.find(i=>String(i.id)==='settings_schedule_config');
+        if(row)row.caption=payload; else window._rawServerData.push({id:'settings_schedule_config',caption:payload});
+        syncScheduleAdminUI();
+        renderSchedule();
+        if(status)status.innerText='班表生成並儲存成功！';
+      }else if(status)status.innerText='班表儲存失敗：請確認 Google Sheet 已建立 settings_schedule_config 這個 ID';
+      if(applyBtn){applyBtn.disabled=false;applyBtn.innerText=applyBtn.dataset.originalText||'套用並儲存班表';}
+      setTimeout(()=>{if(status)status.innerText='';},1800);
+      return success;
+    }
+    function setupScheduleAdminEvents(){
+      const modeRadios=document.querySelectorAll('.schedule-mode-radio');
+      const applyBtn=document.getElementById('scheduleApplyBtn');
+      const resetBtn=document.getElementById('scheduleResetBtn');
+      if(!modeRadios.length||applyBtn?.dataset.bound==='1')return;
+      if(applyBtn)applyBtn.dataset.bound='1';
+      syncScheduleAdminUI();
+      modeRadios.forEach(r=>r.addEventListener('change',()=>{
+        const selected=(document.querySelector('.schedule-mode-radio:checked')||{}).value||'cycle';
+        document.getElementById('scheduleWeekdayRow').style.display=selected==='weekday_off'?'flex':'none';
+        document.getElementById('scheduleCycleRow').style.display=selected==='cycle'?'flex':'none';
+        document.getElementById('scheduleCustomRow').style.display=selected==='custom'?'flex':'none';
+        syncScheduleNavVisibility();
+      }));
+      const customAddBtn=document.getElementById('scheduleCustomAddBtn');
+      if(customAddBtn){customAddBtn.addEventListener('click',async()=>{
+        const date=document.getElementById('scheduleCustomDate').value;
+        const state=document.getElementById('scheduleCustomState').value;
+        if(!date){alert('請先選擇日期。');return;}
+        const cfg=getScheduleConfig(window._rawServerData||[]);
+        cfg.mode='custom';
+        cfg.custom[date]=state;
+        document.getElementById('scheduleCustomText').value=Object.entries(cfg.custom).sort(([a],[b])=>a.localeCompare(b)).map(([d,v])=>`${d}=${v==='work'?'上班':'休假'}`).join('\n');
+        document.getElementById('scheduleCustomDate').value='';
+        await saveScheduleConfig(cfg);
+      });}
+      applyBtn.addEventListener('click',async()=>{
+        if(!isAdmin)return;
+        const mode=(document.querySelector('.schedule-mode-radio:checked')||{}).value||'cycle';
+        const config=getScheduleConfig(window._rawServerData||[]);
+        config.mode=mode;
+        if(mode==='weekday_off')config.offWeekdays=Array.from(document.querySelectorAll('.schedule-off-weekday:checked')).map(cb=>Number(cb.value));
+        if(mode==='cycle'){
+          config.workDays=Math.max(1,parseInt(document.getElementById('scheduleWorkDays').value,10)||1);
+          config.offDays=Math.max(1,parseInt(document.getElementById('scheduleOffDays').value,10)||1);
+          config.cycleStart=normalizeScheduleDateInput(document.getElementById('scheduleCycleStart').value);
+          config.cycleEnd=normalizeScheduleDateInput(document.getElementById('scheduleCycleEnd').value);
+          if(!config.cycleStart){alert('請選擇循環開始日期。');return;}
+          if(!config.cycleEnd) config.cycleEnd=config.cycleStart;
+          if(config.cycleEnd<config.cycleStart){alert('日期結束不可早於開始日期。');return;}
+        }
+        if(mode==='custom')config.custom=parseCustomScheduleText(document.getElementById('scheduleCustomText').value);
+        const currentConfig=getScheduleConfig(window._rawServerData||[]);
+        if(JSON.stringify(config)!==JSON.stringify(currentConfig)){
+          await saveScheduleConfig(config);
+        }else{
+          const status=document.getElementById('status');
+          if(status){status.innerText='沒有修改，不需儲存。';setTimeout(()=>status.innerText='',900);}
+        }
+      });
+      resetBtn.addEventListener('click',async()=>{
+        if(!isAdmin||!confirm('確定要恢復班表預設值嗎？'))return;
+        await saveScheduleConfig(JSON.parse(SETTINGS_DEFAULTS.settings_schedule_config));
+        syncScheduleAdminUI();
+      });
     }
 
     function setupEditableSave(elem, id, field) {
@@ -4693,11 +5576,7 @@ function setupCartPreferences() {
         const email = document.getElementById('emailInput').value.trim();
         const pass = document.getElementById('passwordInput').value;
 
-        if (email !== "comtw919@gmail.com") {
-          alert('權限不足無法登入');
-          return;
-        }
-
+        if (!email) { alert('請輸入 Email'); return; }
         auth.signInWithEmailAndPassword(email, pass)
           .then((userCredential) => {
             location.reload();
@@ -4751,9 +5630,7 @@ function setupCartPreferences() {
           currentCategoryDisplayName = btn.getAttribute('data-category') === 'cart' ? '🛒 購物車' : btn.innerText.trim();
           document.getElementById('currentTabName').innerText = currentCategoryDisplayName;
           
-          document.getElementById('giftNoticeContainer').style.display = (currentCategory === 'gift') ? 'block' : 'none';
-          document.getElementById('ringNoticeContainer').style.display = (currentCategory === 'ring_male' || currentCategory === 'ring_female') ? 'block' : 'none';
-          document.getElementById('cropNoticeContainer').style.display = (currentCategory === 'crop_male' || currentCategory === 'crop_female') ? 'block' : 'none';
+          applyTabDescription(window._rawServerData || [], currentCategory);
 
           document.getElementById('cartSummary').style.display = (currentCategory === 'cart') ? 'flex' : 'none';
           if (currentCategory === 'cart') {
@@ -4772,6 +5649,7 @@ function setupCartPreferences() {
           }
 
           if (currentCategory === 'schedule') {
+            syncScheduleAdminUI();
             renderSchedule();
           }
 
@@ -4824,14 +5702,22 @@ function setupCartPreferences() {
     }
 
     function isWorkDay(date) {
-      const baseDate = new Date(2026, 7, 8); 
-      const diffTime = date.getTime() - baseDate.getTime();
-      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-      const mod = ((diffDays % 4) + 4) % 4;
-      return mod === 2 || mod === 3;
+      return getScheduleWorkState(date, getScheduleConfig(window._rawServerData || []));
     }
 
+    function syncScheduleNavVisibility(){
+      const cfg=getScheduleConfig(window._rawServerData||[]);
+      const customVisitor=!isAdmin && cfg.mode==='custom';
+      const prev=document.getElementById('prevMonthBtn'), next=document.getElementById('nextMonthBtn');
+      if(prev)prev.style.display=customVisitor?'none':'';
+      if(next)next.style.display=customVisitor?'none':'';
+      if(customVisitor){
+        const now=new Date();
+        scheduleYear=now.getFullYear(); scheduleMonth=now.getMonth();
+      }
+    }
     function renderSchedule() {
+      syncScheduleNavVisibility();
       const titleElem = document.getElementById('scheduleMonthTitle');
       const gridElem = document.getElementById('calendarDaysGrid');
       
@@ -4867,11 +5753,37 @@ function setupCartPreferences() {
           cell.style.borderColor = 'var(--accent-color)';
         }
 
+        const scheduleConfig = getScheduleConfig(window._rawServerData || []);
+        const dateKey = formatDateKey(d);
+        const customEditorHTML = isAdmin && scheduleConfig.mode === 'custom'
+          ? `<button type="button" class="schedule-day-editor" data-date="${dateKey}" data-state="${work?'work':'off'}" style="width:100%;margin-top:4px;background:var(--card-bg);color:var(--text-color);border:1px solid var(--border-color);border-radius:4px;padding:3px;font-size:11px;cursor:pointer;">${work?'🫠 上班':'😍 休假'}（點擊切換）</button>`
+          : '';
         cell.innerHTML = `
           <div class="calendar-date-num" ${isToday ? 'style="color:var(--warning-color);"' : ''}>${i}${isToday ? ' <span class="rotating-star">⭐</span> 今天' : ''}</div>
           <div class="calendar-badge ${work ? 'badge-work' : 'badge-off'}">${work ? '🫠 上班' : '😍 休假'}</div>
+          ${customEditorHTML}
         `;
         gridElem.appendChild(cell);
+        if (isAdmin && scheduleConfig.mode === 'custom') {
+          // 自訂模式：整個日期格點一下即可切換，不必再點第二次按鈕。
+          cell.style.cursor='pointer';
+          cell.title='點一下切換上班／休假並儲存到雲端';
+          cell.addEventListener('click', async (e) => {
+            if(e.target.closest('.schedule-day-editor')) e.preventDefault();
+            e.stopPropagation();
+            if(cell.dataset.saving==='1') return;
+            cell.dataset.saving='1';
+            const cfg = getScheduleConfig(window._rawServerData || []);
+            cfg.mode = 'custom';
+            const nextState = getScheduleWorkState(d,cfg) ? 'off' : 'work';
+            cfg.custom[dateKey] = nextState;
+            const editor=cell.querySelector('.schedule-day-editor');
+            if(editor){editor.disabled=true;editor.innerText='生成班表中，請稍後...';}
+            const ok=await saveScheduleConfig(cfg);
+            if(!ok && editor){editor.disabled=false;editor.innerText=`${nextState==='work'?'🫠 上班':'😍 休假'}（點擊切換）`;}
+            cell.dataset.saving='';
+          });
+        }
       }
 
       const totalCells = firstDayIndex + totalDays;
@@ -4891,16 +5803,20 @@ function setupCartPreferences() {
 
     async function fetchData(isInitial = false) {
       try {
-        const response = await fetch(`${SCRIPT_URL}?action=getData`);
+        const dataUrl=apiUrl('getData'); if(!dataUrl) throw new Error('此分店尚未設定 Web App'); const response = await fetch(dataUrl);
         const result = await response.json();
         if (result.status === 'success') {
-          const settingsIds = ['settings_desc', 'settings_gift', 'settings_ring', 'settings_crop'];
+          const settingsIds = SETTINGS_IDS;
           
           allData = result.data.filter(item => !settingsIds.includes(String(item.id)) && item.category !== 'album_item');
           window._rawServerData = result.data;
 
           if (isInitial) {
             initialDataHash = computeDataHash(allData);
+            initialSettingsHash = JSON.stringify(result.data
+              .filter(item => SETTINGS_IDS.includes(String(item.id)))
+              .map(item => [String(item.id), String(item.caption || '')])
+              .sort((a,b) => a[0].localeCompare(b[0])));
           }
 
           allData.forEach(item => {
@@ -4909,15 +5825,20 @@ function setupCartPreferences() {
             }
           });
 
-          const loadSetting = (id, elemId) => {
-            const item = result.data.find(i => String(i.id) === id);
-            const elem = document.getElementById(elemId);
-            if (item && item.caption && elem) elem.innerText = item.caption;
-          };
+          applyAllSiteSettings(result.data);
+          if(activeBranch && branchAdminApproved && activeBranch.discordUrl){
+            const d=String(getSettingValue(result.data,'settings_contact_discord_url')||'');
+            const t=String(getSettingValue(result.data,'settings_contact_tally_url')||'');
+            if(!d) updateItemById('settings_contact_discord_url','caption',activeBranch.discordUrl).catch(()=>{});
+            if(!t) updateItemById('settings_contact_tally_url','caption',activeBranch.tallyUrl||'無').catch(()=>{});
+          }
 
-          loadSetting('settings_gift', 'giftDescription');
-          loadSetting('settings_ring', 'ringDescription');
-          loadSetting('settings_crop', 'cropDescription');
+          const legacyGiftElem = document.getElementById('giftDescription');
+          const legacyRingElem = document.getElementById('ringDescription');
+          const legacyCropElem = document.getElementById('cropDescription');
+          if (legacyGiftElem) legacyGiftElem.textContent = getSettingValue(result.data, 'settings_gift');
+          if (legacyRingElem) legacyRingElem.textContent = getSettingValue(result.data, 'settings_ring');
+          if (legacyCropElem) legacyCropElem.textContent = getSettingValue(result.data, 'settings_crop');
 
           if (currentCategory && currentCategory !== 'schedule') {
             renderGallery();
@@ -4935,9 +5856,13 @@ function setupCartPreferences() {
       }
     }
 
+    function getActiveApiUrl(){return activeBranchId==='main'?SCRIPT_URL:(activeBranch?.apiUrl||'');}
+    function apiUrl(action,params=''){const base=getActiveApiUrl();return base?`${base}?action=${encodeURIComponent(action)}${params?'&'+params:''}`:'';}
     async function updateItemById(id, field, value) {
       try {
-        const response = await fetch(`${SCRIPT_URL}?action=updateItem&id=${id}&field=${field}&value=${encodeURIComponent(value)}`);
+        const url=apiUrl('updateItem',`id=${encodeURIComponent(id)}&field=${encodeURIComponent(field)}&value=${encodeURIComponent(value)}`);
+        if(!url) throw new Error('此分店尚未設定 Web App');
+        const response = await fetch(url);
         const result = await response.json();
         return result.status === 'success';
       } catch (err) {
@@ -5014,39 +5939,21 @@ function setupCartPreferences() {
         const welcomeDiv = document.createElement('div');
         welcomeDiv.className = 'welcome-message';
         welcomeDiv.innerHTML = `
-          <div class="welcome-title">✨ 歡迎來到米米小舖 ✨</div>
+          <div class="welcome-title"><span id="welcomeTitleText" class="editable-site-setting" contenteditable="false">✨ 歡迎來到米米小舖 ✨</span></div>
           <div class="welcome-content-box">
-            <div class="welcome-item">
-              <div class="welcome-label">🛒 購物方式</div>
-              <div class="welcome-desc">☑ 左上角打勾加入購物車後截圖給我即可！全區可議價，甩賣區半買半相送~</div>
-            </div>
-            
-            <div class="welcome-item">
-              <div class="welcome-label">💰 交易方式</div>
-              <div class="welcome-desc">可糖果可T，比值 1:1，可提供中信/合庫帳戶或LINE好友轉帳</div>
-            </div>
-            
-            <div class="welcome-item">
-              <div class="welcome-label">🕒 交易時間</div>
-              <div class="welcome-desc">本人夜班，需要晚上交易可參考右側「米米班表」分頁查詢休假與上班日❤</div>
-            </div>
-            
-            <div class="welcome-item">
-              <div class="welcome-label">💡 貼心提醒</div>
-              <div class="welcome-desc">點擊商品圖片可查看實體圖(大多暫未上傳)，或到 DC 告訴我你想看的商品！</div>
-            </div>
-            
-            <div class="welcome-item">
-              <div class="welcome-label">⭐ 米米一不</div>
-              <div class="welcome-desc">不接急單，只接待耐心等我的寶貝嘿嘿~</div>
-            </div>
+            <div class="welcome-item"><div class="welcome-label"><span id="welcomeText1" class="editable-site-setting" contenteditable="false"></span></div><div class="welcome-desc"><span id="welcomeText2" class="editable-site-setting" contenteditable="false"></span></div></div>
+            <div class="welcome-item"><div class="welcome-label"><span id="welcomeText3" class="editable-site-setting" contenteditable="false"></span></div><div class="welcome-desc"><span id="welcomeText4" class="editable-site-setting" contenteditable="false"></span></div></div>
+            <div class="welcome-item"><div class="welcome-label"><span id="welcomeText5" class="editable-site-setting" contenteditable="false"></span></div><div class="welcome-desc"><span id="welcomeText6" class="editable-site-setting" contenteditable="false"></span></div></div>
+            <div class="welcome-item"><div class="welcome-label"><span id="welcomeText7" class="editable-site-setting" contenteditable="false"></span></div><div class="welcome-desc"><span id="welcomeText8" class="editable-site-setting" contenteditable="false"></span></div></div>
+            <div class="welcome-item"><div class="welcome-label"><span id="welcomeText9" class="editable-site-setting" contenteditable="false"></span></div><div class="welcome-desc"><span id="welcomeText10" class="editable-site-setting" contenteditable="false"></span></div></div>
           </div>
           <div class="welcome-footer-action">
-            <div class="welcome-sweet-tip">謝謝寶貝看完~現在~</div>
-            <div class="welcome-action-btn" onclick="toggleSidePanel()">❤ 點擊右側分頁開始選購 ❤</div>
+            <div class="welcome-sweet-tip editable-site-setting" id="welcomeFooterTipText" contenteditable="false"></div>
+            <div class="welcome-action-btn" id="welcomeFooterButtonText" onclick="toggleSidePanel()" contenteditable="false"></div>
           </div>
         `;
         gallery.appendChild(welcomeDiv);
+        applyWelcomeSettings(window._rawServerData || []);
         return;
       }
 
@@ -5068,6 +5975,8 @@ function setupCartPreferences() {
           return matchesKeyword(item);
         }
 
+        if(currentCategory==='pot_new') return item.category==='pot_new' || item.category==='pot';
+        if(currentCategory==='gift_new') return item.category==='gift_new' || item.category==='gift';
         return item.category === currentCategory;
       });
       
@@ -5175,7 +6084,7 @@ function setupCartPreferences() {
                   <option value="general_consumable">🧪 消耗品</option>
                   <option value="memes">🧸 熊熊</option>
                   <option value="animal_other">📦 其他 (小動物)</option>
-                  <option value="pot">🪴 花盆</option>
+                  <option value="pot_new">🪴 花盆（第一分頁）</option>
                   <option value="ring_male">💍 戒指 (限男)</option>
                   <option value="ring_female">💍 戒指 (限女)</option>
                   <option value="crop_male">🌱 作物 (限男)</option>
@@ -5565,7 +6474,9 @@ function setupCartPreferences() {
 
     async function updateItem(id, field, value) {
       try {
-        const response = await fetch(`${SCRIPT_URL}?action=updateItem&id=${id}&field=${field}&value=${encodeURIComponent(value)}`);
+        const url=apiUrl('updateItem',`id=${encodeURIComponent(id)}&field=${encodeURIComponent(field)}&value=${encodeURIComponent(value)}`);
+        if(!url) throw new Error('此分店尚未設定 Web App');
+        const response = await fetch(url);
         const result = await response.json();
         return result.status === 'success';
       } catch (err) {
@@ -5575,7 +6486,9 @@ function setupCartPreferences() {
     }
 
     async function deleteItem(id) {
-      await fetch(`${SCRIPT_URL}?action=deleteItem&id=${id}`);
+      const url=apiUrl('deleteItem',`id=${encodeURIComponent(id)}`);
+      if(!url){alert('此分店尚未設定 Web App');return;}
+      await fetch(url);
       allData = allData.filter(item => String(item.id) !== String(id));
       cartItems.delete(String(id));
       saveCartToStorage();
@@ -5746,7 +6659,7 @@ function setupCartPreferences() {
           formData.append('mimeType', 'image/jpeg');
           formData.append('imageBase64', base64Data);
 
-          const response = await fetch(SCRIPT_URL, {
+          const uploadUrl=getActiveApiUrl(); if(!uploadUrl) throw new Error('此分店尚未設定 Web App'); const response = await fetch(uploadUrl, {
             method: 'POST',
             body: formData
           });
@@ -5831,7 +6744,7 @@ function setupCartPreferences() {
           formData.append('mimeType', 'image/jpeg');
           formData.append('imageBase64', base64Data);
 
-          const response = await fetch(SCRIPT_URL, {
+          const uploadUrl=getActiveApiUrl(); if(!uploadUrl) throw new Error('此分店尚未設定 Web App'); const response = await fetch(uploadUrl, {
             method: 'POST',
             body: formData
           });
