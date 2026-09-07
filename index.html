@@ -4203,7 +4203,7 @@ body::after
       settings_crop: '',
       settings_schedule_config: JSON.stringify({
         mode: 'cycle', offWeekdays: [0], workDays: 2, offDays: 2,
-        cycleStart: '2026-08-08', cycleEnd: '2026-08-09', custom: {}
+        cycleStart: '2026-09-07', cycleEnd: '2026-09-08', custom: {}
       }),
       // ===== 子分頁：名稱／顯示（名稱使用預設文字；說明欄一律預設空白並與主分頁共用） =====
     };
@@ -4611,12 +4611,8 @@ function setupCartPreferences() {
               setTimeout(()=>alert('🔔 您的分店審核中，可聯繫版主詢問進度'),250);
             }
           }else if(activeBranchId==='main'){
-            // 沒有核准分店、也沒有審核中的申請：提示並自動開啟申請表。
-            try{ localStorage.removeItem('mimiOwnerBranchCode_'+user.uid); }catch(e){}
-            setTimeout(()=>{
-              alert('⚠️ 您尚未申請分店或您的分店已刪除，請直接申請分店');
-              openDeletedBranchReapplyForm(user);
-            },250);
+            // 沒有核准分店、也沒有審核中的申請：提示一次並自動開啟申請表。
+            showDeletedBranchNoticeOnce(user,250);
           }
         }else{
           activeBranchId=branchParam||'main';
@@ -4647,8 +4643,7 @@ function setupCartPreferences() {
                 }catch(e){ alert('🔔 您的分店審核中，可聯繫版主詢問進度'); }
                 return;
               }
-              alert('⚠️ 您尚未申請分店或您的分店已刪除，請直接申請分店');
-              openDeletedBranchReapplyForm(user);
+              showDeletedBranchNoticeOnce(user,0);
             },100);
           }else{
             alert('此分店不存在，將返回主店。');
@@ -4826,6 +4821,23 @@ function setupCartPreferences() {
       dd.style.maxHeight='min(46vh,330px)';
       dd.style.zIndex='5100';
     }
+    function showDeletedBranchNoticeOnce(user,delay){
+      if(!user)return;
+      const noticeKey='mimiDeletedBranchNotice_'+user.uid;
+      try{
+        if(sessionStorage.getItem(noticeKey)==='1')return;
+        sessionStorage.setItem(noticeKey,'1');
+      }catch(e){
+        if(window._deletedBranchNoticeShown)return;
+        window._deletedBranchNoticeShown=true;
+      }
+      try{ localStorage.removeItem('mimiOwnerBranchCode_'+user.uid); }catch(e){}
+      setTimeout(()=>{
+        alert('⚠️ 您尚未申請分店或您的分店已刪除，請直接申請分店');
+        openDeletedBranchReapplyForm(user);
+      },Math.max(0,Number(delay)||0));
+    }
+
     function openDeletedBranchReapplyForm(user){
       if(!user)return;
       const form=document.getElementById('branchApplyForm');
@@ -5609,7 +5621,11 @@ function setupCartPreferences() {
             <button class="auth-btn" id="logoutBtn" style="background:#333; color:var(--text-color);">登出</button>
           `;
           document.getElementById('logoutBtn').addEventListener('click', () => {
-            try{ sessionStorage.removeItem('mimiPendingBranchNotice_'+branchAuthUser.uid); }catch(e){}
+            try{
+              sessionStorage.removeItem('mimiPendingBranchNotice_'+branchAuthUser.uid);
+              sessionStorage.removeItem('mimiDeletedBranchNotice_'+branchAuthUser.uid);
+            }catch(e){}
+            try{ window._deletedBranchNoticeShown=false; }catch(e){}
             auth.signOut().then(() => { location.reload(); });
           });
         } else {
@@ -5753,8 +5769,8 @@ function setupCartPreferences() {
           offWeekdays:Array.isArray(parsed.offWeekdays)?parsed.offWeekdays.map(Number).filter(n=>n>=0&&n<=6):[],
           workDays:Math.max(1,parseInt(parsed.workDays,10)||2),
           offDays:Math.max(1,parseInt(parsed.offDays,10)||2),
-          cycleStart:normalizeScheduleDateInput(parsed.cycleStart)||'2026-08-08',
-          cycleEnd:normalizeScheduleDateInput(parsed.cycleEnd)||'2026-08-09',
+          cycleStart:normalizeScheduleDateInput(parsed.cycleStart)||'2026-09-07',
+          cycleEnd:normalizeScheduleDateInput(parsed.cycleEnd)||'2026-09-08',
           custom:parsed.custom&&typeof parsed.custom==='object'?parsed.custom:{}
         };
       }catch(e){return JSON.parse(SETTINGS_DEFAULTS.settings_schedule_config);}
@@ -5823,7 +5839,14 @@ function setupCartPreferences() {
       const applyBtn=document.getElementById('scheduleApplyBtn');
       if(applyBtn){applyBtn.disabled=true;applyBtn.dataset.originalText=applyBtn.innerText;applyBtn.innerText='生成班表中，請稍後...';}
       const payload=JSON.stringify(config);
-      const success=await updateItemById('settings_schedule_config','caption',payload);
+      let success=false;
+      try {
+        // 前端生成完成後，直接把完整設定寫入雲端 settings_schedule_config。
+        success=await updateItemById('settings_schedule_config','caption',payload);
+      } catch(err) {
+        console.error('班表雲端儲存失敗:', err);
+        if(status) status.innerText='班表雲端儲存失敗：'+(err.message||'請檢查 Google Sheet / Apps Script 權限');
+      }
       if(success){
         if(!window._rawServerData) window._rawServerData=[];
         const row=window._rawServerData.find(i=>String(i.id)==='settings_schedule_config');
@@ -5831,7 +5854,9 @@ function setupCartPreferences() {
         syncScheduleAdminUI();
         renderSchedule();
         if(status)status.innerText='班表生成並儲存成功！';
-      }else if(status)status.innerText='班表儲存失敗：請確認 Google Sheet 已建立 settings_schedule_config 這個 ID';
+      }else if(status && !status.innerText.includes('班表雲端儲存失敗')){
+        status.innerText='班表儲存失敗：請確認 Google Sheet 已建立 settings_schedule_config 這個 ID';
+      }
       if(applyBtn){applyBtn.disabled=false;applyBtn.innerText=applyBtn.dataset.originalText||'套用並儲存班表';}
       setTimeout(()=>{if(status)status.innerText='';},1800);
       return success;
@@ -6240,14 +6265,29 @@ function setupCartPreferences() {
     }
     async function updateItemById(id, field, value) {
       try {
-        const url=apiUrl('updateItem',`id=${encodeURIComponent(id)}&field=${encodeURIComponent(field)}&value=${encodeURIComponent(value)}`);
+        const url=apiUrl('updateItem');
         if(!url) throw new Error('此分店尚未綁定中央資料庫');
-        const response = await fetch(url);
+
+        // 使用 POST 傳送更新資料，避免把班表 JSON 塞進 URL。
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+          body: new URLSearchParams({
+            action: 'updateItem',
+            id: String(id),
+            field: String(field),
+            value: String(value ?? '')
+          }).toString()
+        });
+
         const result = await response.json();
-        return result.status === 'success';
+        if(result.status !== 'success'){
+          throw new Error(result.message || '雲端儲存失敗');
+        }
+        return true;
       } catch (err) {
-        console.error(err);
-        return false;
+        console.error('雲端儲存失敗:', err);
+        throw err;
       }
     }
 
