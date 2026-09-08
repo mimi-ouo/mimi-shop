@@ -896,11 +896,38 @@ html.site-data-ready #initialLoadingScreen{opacity:0;}
   border-radius:12px;
   border:1px solid rgba(255,255,255,0.06)
 }
+/* ===== 歡迎頁空白欄位：訪客隱藏，管理端顯示提示 ===== */
 .welcome-item
 {
   display:flex;
   flex-direction:column;
   gap:4px
+}
+.welcome-item.welcome-item-empty-visitor
+{
+  display:none!important;
+}
+.editable-site-setting[data-welcome-empty="1"]
+{
+  display:block;
+}
+.is-admin .editable-site-setting[data-welcome-empty="1"]
+{
+  color:#888!important;
+  font-style:italic;
+}
+.is-admin .editable-site-setting[data-welcome-empty="1"]::before
+{
+  content:'目前此欄位隱藏中';
+  display:inline-block;
+  color:#ffd700!important;
+  background:rgba(255,215,0,.10);
+  border:1px dashed rgba(255,215,0,.45);
+  border-radius:4px;
+  padding:2px 6px;
+  margin-right:6px;
+  font-size:11px;
+  font-style:normal;
 }
 .welcome-label
 {
@@ -3834,6 +3861,7 @@ body::after
   <button id="backToTopBtn" title="回到頂部">↑ 頂部</button>
   <div class="side-tabs-panel" id="sideTabsPanel">
     <button class="collapse-toggle-btn" id="collapseToggleBtn">📂 收合 ▾</button>
+    <button type="button" class="tab-btn" id="homeWelcomeBtn" title="回到目前分店歡迎頁">🏠 首頁</button>
     <button class="tab-btn" id="cartTabBtn" data-category="cart">
       <span>🛒 購物車</span>
     </button>
@@ -4707,6 +4735,7 @@ function setupCartPreferences() {
       setupClearCartBtn();
       setupCartPreferences();
       setupCartCapture();
+      setupHomeWelcomeButton();
       syncScheduleToCurrentMonth();
       setupScheduleEvents();
       setupDropZone();
@@ -5565,6 +5594,42 @@ function setupCartPreferences() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    // 回到「目前所在店鋪」自己的歡迎頁，不切換到主站。
+    // 分店網址與 activeBranchId 都保持不變，只清除目前商品分頁／搜尋狀態。
+    function goToCurrentStoreWelcome() {
+      currentCategory = '';
+      currentCategoryDisplayName = '尚未選擇分頁';
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) searchInput.value = '';
+      const currentTabName = document.getElementById('currentTabName');
+      if (currentTabName) currentTabName.innerText = currentCategoryDisplayName;
+      const currentTabLabel = currentTabName ? currentTabName.parentElement : null;
+      if (currentTabLabel) currentTabLabel.style.display = '';
+      const cartSummary = document.getElementById('cartSummary');
+      if (cartSummary) cartSummary.style.display = 'none';
+      const sectionSort = document.getElementById('sectionSortContainer');
+      if (sectionSort) sectionSort.style.display = 'none';
+      const tabDescription = document.getElementById('tabDescriptionContainer');
+      if (tabDescription) tabDescription.style.display = 'none';
+      const dropZone = document.getElementById('dropZone');
+      if (dropZone) dropZone.style.display = isAdmin ? 'none' : 'none';
+      document.querySelectorAll('.tab-btn.active').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
+      renderGallery();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function setupHomeWelcomeButton() {
+      const btn = document.getElementById('homeWelcomeBtn');
+      if (!btn || btn.dataset.bound === '1') return;
+      btn.dataset.bound = '1';
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        goToCurrentStoreWelcome();
+      });
+    }
+
     function updateCartButtonBadge() {
       const cartBtn = document.getElementById('cartTabBtn');
       if (cartItems.size > 0) {
@@ -5714,6 +5779,9 @@ function setupCartPreferences() {
           originalText=newText;
           const row=(window._rawServerData||[]).find(i=>String(i.id)===String(saveId));
           if(row) row.caption=newText;
+          if(saveId.startsWith('settings_welcome_') && !saveId.includes('footer')){
+            updateWelcomeFieldVisibility(elem,newText);
+          }
           if(saveId.startsWith('settings_tab_desc_')){
             const cat=Object.keys(TAB_SETTING_BY_CATEGORY).find(k=>TAB_SETTING_BY_CATEGORY[k]===saveId);
             if(cat) applyTabDescription(window._rawServerData||[],currentCategory || cat);
@@ -5731,6 +5799,22 @@ function setupCartPreferences() {
       });
     }
 
+    function updateWelcomeFieldVisibility(elem, value) {
+      if (!elem) return;
+      const blank = normalizeEditableText(value).trim() === '';
+      elem.dataset.welcomeEmpty = blank ? '1' : '0';
+
+      // 訪客：空白欄位完全不顯示；管理端：保留欄位並顯示「目前此欄位隱藏中」提示。
+      elem.style.display = (!isAdmin && blank) ? 'none' : '';
+
+      const item = elem.closest('.welcome-item');
+      if (item) {
+        const fields = Array.from(item.querySelectorAll('[data-welcome-field="1"]'));
+        const allBlank = fields.length > 0 && fields.every(field => field.dataset.welcomeEmpty === '1');
+        item.classList.toggle('welcome-item-empty-visitor', !isAdmin && allBlank);
+      }
+    }
+
     function applyWelcomeSettings(serverData){
       const mappings=[
         ['settings_welcome_title','welcomeTitleText'],
@@ -5745,9 +5829,13 @@ function setupCartPreferences() {
       mappings.forEach(([id,elemId])=>{
         const elem=document.getElementById(elemId);
         if(!elem)return;
-        setEditableTextElement(elem,getSettingValue(serverData,id));
+        const value=getSettingValue(serverData,id);
+        setEditableTextElement(elem,value);
+        elem.dataset.welcomeField = (id.startsWith('settings_welcome_') && !id.includes('footer')) ? '1' : '0';
         setupSettingEditable(elem,id);
         elem.contentEditable=isAdmin?'true':'false';
+        if(elem.dataset.welcomeField==='1') updateWelcomeFieldVisibility(elem,value);
+        else elem.style.display='';
       });
     }
 
@@ -6415,11 +6503,11 @@ function setupCartPreferences() {
         welcomeDiv.innerHTML = `
           <div class="welcome-title"><span id="welcomeTitleText" class="editable-site-setting" contenteditable="false">載入中...</span></div>
           <div class="welcome-content-box">
-            <div class="welcome-item"><div class="welcome-label"><span id="welcomeText1" class="editable-site-setting" contenteditable="false"></span></div><div class="welcome-desc"><span id="welcomeText2" class="editable-site-setting" contenteditable="false"></span></div></div>
-            <div class="welcome-item"><div class="welcome-label"><span id="welcomeText3" class="editable-site-setting" contenteditable="false"></span></div><div class="welcome-desc"><span id="welcomeText4" class="editable-site-setting" contenteditable="false"></span></div></div>
-            <div class="welcome-item"><div class="welcome-label"><span id="welcomeText5" class="editable-site-setting" contenteditable="false"></span></div><div class="welcome-desc"><span id="welcomeText6" class="editable-site-setting" contenteditable="false"></span></div></div>
-            <div class="welcome-item"><div class="welcome-label"><span id="welcomeText7" class="editable-site-setting" contenteditable="false"></span></div><div class="welcome-desc"><span id="welcomeText8" class="editable-site-setting" contenteditable="false"></span></div></div>
-            <div class="welcome-item"><div class="welcome-label"><span id="welcomeText9" class="editable-site-setting" contenteditable="false"></span></div><div class="welcome-desc"><span id="welcomeText10" class="editable-site-setting" contenteditable="false"></span></div></div>
+            <div class="welcome-item"><div class="welcome-label"><span id="welcomeText1" data-welcome-field="1" class="editable-site-setting" contenteditable="false"></span></div><div class="welcome-desc"><span id="welcomeText2" data-welcome-field="1" class="editable-site-setting" contenteditable="false"></span></div></div>
+            <div class="welcome-item"><div class="welcome-label"><span id="welcomeText3" data-welcome-field="1" class="editable-site-setting" contenteditable="false"></span></div><div class="welcome-desc"><span id="welcomeText4" data-welcome-field="1" class="editable-site-setting" contenteditable="false"></span></div></div>
+            <div class="welcome-item"><div class="welcome-label"><span id="welcomeText5" data-welcome-field="1" class="editable-site-setting" contenteditable="false"></span></div><div class="welcome-desc"><span id="welcomeText6" data-welcome-field="1" class="editable-site-setting" contenteditable="false"></span></div></div>
+            <div class="welcome-item"><div class="welcome-label"><span id="welcomeText7" data-welcome-field="1" class="editable-site-setting" contenteditable="false"></span></div><div class="welcome-desc"><span id="welcomeText8" data-welcome-field="1" class="editable-site-setting" contenteditable="false"></span></div></div>
+            <div class="welcome-item"><div class="welcome-label"><span id="welcomeText9" data-welcome-field="1" class="editable-site-setting" contenteditable="false"></span></div><div class="welcome-desc"><span id="welcomeText10" data-welcome-field="1" class="editable-site-setting" contenteditable="false"></span></div></div>
           </div>
           <div class="welcome-footer-action">
             <div class="welcome-sweet-tip editable-site-setting" id="welcomeFooterTipText" contenteditable="false"></div>
