@@ -39,6 +39,42 @@ body
   margin-left:auto;
   margin-right:auto
 }
+/* ===== 首次載入：版面先畫，但雲端資料完成前不顯示舊文字／舊圖片 ===== */
+html:not(.site-data-ready) body *{
+  color:transparent !important;
+  text-shadow:none !important;
+}
+html:not(.site-data-ready) body input::placeholder,
+html:not(.site-data-ready) body textarea::placeholder{
+  color:transparent !important;
+}
+html:not(.site-data-ready) body img{
+  opacity:0 !important;
+}
+#initialLoadingScreen{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:10px;
+  background:rgba(18,18,18,.72);
+  color:var(--text-color) !important;
+  z-index:999999;
+  pointer-events:none;
+  transition:opacity .18s ease;
+}
+#initialLoadingScreen .initial-loading-dot{
+  width:9px;height:9px;border-radius:50%;background:#888;
+  animation:initialLoadingPulse 1s infinite ease-in-out;
+}
+@keyframes initialLoadingPulse{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
+html:not(.site-data-ready) #initialLoadingScreen,
+html:not(.site-data-ready) #initialLoadingScreen *{
+  color:var(--text-color) !important;
+}
+html.site-data-ready #initialLoadingScreen{opacity:0;}
 .online-counter-wrapper
 {
   position:fixed;
@@ -3787,6 +3823,10 @@ body::after
 </style>
 </head>
 <body>
+  <div id="initialLoadingScreen" aria-hidden="true">
+    <div>正在載入網站資料…</div>
+    <div class="initial-loading-dot"></div>
+  </div>
   <div class="update-banner" id="updateBanner">
     ✨ 偵測到管理端有新的更新內容！
     <button onclick="location.reload()">立即重新整理</button>
@@ -6191,6 +6231,17 @@ function setupCartPreferences() {
       }
     }
 
+    // ===== 首次載入與分批繪製 =====
+    let galleryRenderToken = 0;
+    function markSiteDataReady(){
+      document.documentElement.classList.add('site-data-ready');
+      const loader=document.getElementById('initialLoadingScreen');
+      if(loader) setTimeout(()=>loader.remove(),220);
+    }
+    function waitNextFrame(){
+      return new Promise(resolve=>requestAnimationFrame(resolve));
+    }
+
     async function fetchData(isInitial = false) {
       try {
         const dataUrl=apiUrl('getData'); if(!dataUrl) throw new Error('此分店尚未綁定中央資料庫'); const response = await fetch(dataUrl);
@@ -6217,6 +6268,8 @@ function setupCartPreferences() {
           });
 
           applyAllSiteSettings(result.data);
+          // 設定已從雲端套用完成；現在才解除舊文字遮罩。商品圖片會另外分批加入。
+          if(isInitial) markSiteDataReady();
           if(activeBranch && branchAdminApproved && activeBranch.discordUrl){
             const d=String(getSettingValue(result.data,'settings_contact_discord_url')||'');
             const t=String(getSettingValue(result.data,'settings_contact_tally_url')||'');
@@ -6342,8 +6395,9 @@ function setupCartPreferences() {
       return optionsHTML;
     }
 
-    function renderGallery() {
+    async function renderGallery() {
       const gallery = document.getElementById('gallery');
+      const thisRenderToken = ++galleryRenderToken;
       const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
 
       // 搜尋時為「全區搜尋」模式，不顯示目前所在分頁名稱。
@@ -6407,8 +6461,14 @@ function setupCartPreferences() {
         return q.includes('暫售') || q.includes('已售出');
       };
 
-      const renderItemCards = (itemsToRender) => {
-        itemsToRender.forEach((item) => {
+      const renderItemCards = async (itemsToRender) => {
+        const BATCH_SIZE = 12;
+        for(let batchStart=0; batchStart<itemsToRender.length; batchStart+=BATCH_SIZE){
+          if(thisRenderToken !== galleryRenderToken) return;
+          const batchEnd=Math.min(batchStart+BATCH_SIZE,itemsToRender.length);
+          for(let batchIndex=batchStart; batchIndex<batchEnd; batchIndex++){
+            if(thisRenderToken !== galleryRenderToken) return;
+            const item=itemsToRender[batchIndex];
           const card = document.createElement('div');
           const isHotItem = (item.real_img === 'HOT');
           card.className = `img-card ${isHotItem ? 'is-hot' : ''}`;
@@ -6730,7 +6790,9 @@ function setupCartPreferences() {
             bindEditable(item.id, 'price', `price-${item.id}`);
             bindEditable(item.id, 'note', `note-${item.id}`);
           }
-        });
+          }
+          if(batchEnd < itemsToRender.length) await waitNextFrame();
+        }
       };
 
       if (currentCategory === 'cart') {
@@ -6765,7 +6827,7 @@ function setupCartPreferences() {
 
         let cartSectionCount = 0;
 
-        categoryOrder.forEach(category => {
+        for(const category of categoryOrder){
           const categoryItems = filtered.filter(item => String(item.category || '') === category);
           if (!categoryItems.length) return;
 
@@ -6785,11 +6847,11 @@ function setupCartPreferences() {
           const normalList = categoryItems.filter(item => item.real_img !== 'HOT' && !isTransaction(item.quantity));
           const transactionList = categoryItems.filter(item => isTransaction(item.quantity));
 
-          renderItemCards(hotList);
-          renderItemCards(normalList);
-          renderItemCards(transactionList);
+          await renderItemCards(hotList);
+          await renderItemCards(normalList);
+          await renderItemCards(transactionList);
           cartSectionCount++;
-        });
+        }
       } else {
         // 非購物車分頁完全維持原本的 HOT / 一般 / 交易三段式邏輯。
         const hotList = filtered.filter(item => item.real_img === 'HOT' && !isTransaction(item.quantity));
@@ -6806,7 +6868,7 @@ function setupCartPreferences() {
           titleDiv.className = 'section-block-title hot-title';
           titleDiv.innerHTML = '🔥 HOT 熱門';
           gallery.appendChild(titleDiv);
-          renderItemCards(hotList);
+          await renderItemCards(hotList);
           sectionCount++;
         }
 
@@ -6824,7 +6886,7 @@ function setupCartPreferences() {
             normalTitle.innerHTML = currentCategoryDisplayName;
             gallery.appendChild(normalTitle);
           }
-          renderItemCards(normalList);
+          await renderItemCards(normalList);
           sectionCount++;
         }
 
@@ -6838,7 +6900,7 @@ function setupCartPreferences() {
           transactionTitle.className = 'section-block-title transaction-title';
           transactionTitle.innerHTML = '🚚.. 已進入交易流程';
           gallery.appendChild(transactionTitle);
-          renderItemCards(transactionList);
+          await renderItemCards(transactionList);
           sectionCount++;
         }
       }
