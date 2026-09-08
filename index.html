@@ -3862,13 +3862,13 @@ body::after
   <div class="side-tabs-panel" id="sideTabsPanel">
     <button class="collapse-toggle-btn" id="collapseToggleBtn">📂 收合 ▾</button>
     <button type="button" class="tab-btn" id="homeWelcomeBtn" title="回到目前分店歡迎頁">🏠 首頁</button>
-    <button class="tab-btn" id="cartTabBtn" data-category="cart">
-      <span>🛒 購物車</span>
-    </button>
     <div class="branch-store-menu" id="branchStoreMenu">
       <button type="button" class="branch-store-toggle" id="branchStoreToggle">🏪 逛逛分店 ▾</button>
       <div class="branch-store-dropdown" id="branchStoreDropdown"></div>
     </div>
+    <button class="tab-btn" id="cartTabBtn" data-category="cart">
+      <span>🛒 購物車</span>
+    </button>
     <!-- branch navigation buttons are placed after schedule below -->
     <div class="branch-store-form" id="branchApplyForm" role="dialog" aria-modal="true">
       <div class="tab-settings-title">🏪 申請建立分店</div>
@@ -3892,7 +3892,7 @@ body::after
       <div class="branch-store-actions"><button type="button" class="cancel-btn" id="branchManagementCloseBtn">關閉</button></div>
     </div>
     <div class="branch-store-form" id="branchOwnerForm" role="dialog" aria-modal="true">
-      <div class="tab-settings-title">🏪 我的分店</div><div id="branchOwnerInfo" class="branch-store-hint"></div>
+      <div class="tab-settings-title">🏪 我的商店</div><div id="branchOwnerInfo" class="branch-store-hint"></div>
       <div class="branch-store-actions"><button type="button" class="schedule-btn" id="branchOwnerToggleBtn"></button><button type="button" class="cancel-btn" id="branchOwnerCloseBtn">關閉</button></div>
     </div>
     <div class="collapse-content" id="collapseContent">
@@ -3948,7 +3948,7 @@ body::after
       <button type="button" id="branchApplyBtn" class="tab-settings-btn auth-btn branch-nav-btn" style="display:none">🏪 申請分店</button>
       <button type="button" id="branchManageBtn" class="tab-settings-btn auth-btn branch-nav-btn" style="display:none">🏪 分店管理</button>
     </div>
-    <button type="button" id="tabSettingsBtn" class="tab-settings-btn auth-btn branch-nav-btn">⚙️ 修改分頁</button>
+    <button type="button" id="tabSettingsBtn" class="tab-settings-btn auth-btn branch-nav-btn">⚙️ 分頁管理</button>
     <div class="tab-settings-form" id="tabSettingsForm" role="dialog" aria-modal="true">
       <div class="tab-settings-title">⚙️ 分頁設定</div>
       <div id="tabSettingsRows" class="tab-settings-scroll"></div>
@@ -3998,7 +3998,7 @@ body::after
                   <a class="tally-badge" id="tallyContactBtn" href="https://tally.so/r/q48xO2" target="_blank" rel="noopener noreferrer">
                     <span id="tallyContactText">載入中...</span>
                   </a>
-                  <button type="button" id="contactSettingsBtn" class="contact-settings-btn">⚙️ 修改聯絡按鈕</button>
+                  <button type="button" id="contactSettingsBtn" class="contact-settings-btn">⚙️ 聯絡按鈕管理</button>
                 </div>
                 <div class="contact-settings-form" id="contactSettingsForm" role="dialog" aria-modal="true">
                   <label for="contactDiscordTextInput">DC 按鈕文字</label>
@@ -4849,13 +4849,14 @@ function setupCartPreferences() {
         }
       }
       if(manage){
-        manage.classList.remove('mobile-role-visible');
-        manage.innerHTML='<span>🏪 分店管理</span>';
-        if(isMainOwner) manage.style.justifyContent='space-between';
-        manage.style.display=isMainOwner?'flex':'none';
-        if(isMainOwner)manage.classList.add('mobile-role-visible');
-        // syncBranchUI 會重建按鈕內容，因此在這裡重新從 Firebase 讀取待審核數量。
+        manage.classList.remove('mobile-role-visible','branch-owner-status-open','branch-owner-status-closed','branch-owner-status-locked');
+        manage.style.justifyContent='flex-start';
         if(isMainOwner){
+          manage.innerHTML='<span>🏪 分店管理</span>';
+          manage.style.justifyContent='space-between';
+          manage.style.display='flex';
+          manage.classList.add('mobile-role-visible');
+          // 版主按鈕保留待審核數量。
           try{
             db.ref('branchApplications').once('value')
               .then(snap=>updateBranchPendingBadge(snap.val()||{}))
@@ -4863,6 +4864,18 @@ function setupCartPreferences() {
           }catch(e){
             console.error('同步待審核分店數量失敗',e);
           }
+        }else if(isOwner){
+          const ownerState=ownerBranch.adminClosed===true?'鎖定中':(ownerBranch.enabled===true?'營業中':'休店中');
+          const ownerStateClass=ownerBranch.adminClosed===true?'branch-owner-status-locked':(ownerBranch.enabled===true?'branch-owner-status-open':'branch-owner-status-closed');
+          manage.innerHTML='<span>🏪 我的商店</span><span class="branch-owner-state-label">'+ownerState+'</span>';
+          manage.style.display='flex';
+          manage.style.justifyContent='space-between';
+          manage.classList.add('mobile-role-visible',ownerStateClass);
+          const oldBadge=manage.querySelector('.branch-pending-badge');
+          if(oldBadge)oldBadge.remove();
+        }else{
+          manage.innerHTML='<span>🏪 分店管理</span>';
+          manage.style.display='none';
         }
       }
       if(settings){
@@ -4902,7 +4915,7 @@ function setupCartPreferences() {
       }
       try{ localStorage.removeItem('mimiOwnerBranchCode_'+user.uid); }catch(e){}
       setTimeout(()=>{
-        alert('⚠️ 您尚未申請分店或您的分店已刪除，請直接申請分店');
+        alert('您目前的分店正在審核中或已被刪除，請聯繫版主或重新申請(請勿重複申請)，或登出後繼續瀏覽網站');
         openDeletedBranchReapplyForm(user);
       },Math.max(0,Number(delay)||0));
     }
@@ -4913,7 +4926,7 @@ function setupCartPreferences() {
       const emailInput=document.getElementById('branchFirebaseEmailInput');
       const status=document.getElementById('branchApplyStatus');
       if(emailInput){ emailInput.value=user.email||''; emailInput.readOnly=true; }
-      if(status)status.textContent='⚠️ 您尚未申請分店或您的分店已刪除，請直接申請分店。Firebase 帳號已自動帶入目前登入帳號，請重新填寫其他申請資料。';
+      if(status)status.textContent='您目前的分店正在審核中或已被刪除，請聯繫版主或重新申請(請勿重複申請)，或登出後繼續瀏覽網站。Firebase 帳號已自動帶入目前登入帳號，請重新填寫其他申請資料。';
       try{ localStorage.removeItem('mimiOwnerBranchCode_'+user.uid); }catch(e){}
       if(form){ form.classList.add('open'); setTimeout(()=>{ const name=document.getElementById('branchNameInput'); if(name)name.focus(); },80); }
     }
@@ -4926,7 +4939,7 @@ function setupCartPreferences() {
           if(b){switchStore(b.code||b.id);return;}
         }
         if(window.innerWidth<=768&&a.dataset.role==='visitor'){
-          alert('📱 手機端無法申請分店，請使用電腦登入本網站後再申請分店。');return;
+          alert('手機無法申請分店，請使用電腦申請');return;
         }
         document.getElementById('branchApplyForm').classList.add('open');
       };}
@@ -5071,7 +5084,7 @@ function setupCartPreferences() {
         const b=snap.val()||ownerBranch;
         if(b.approvalNoticeShown!==false)return;
         await ref.update({approvalNoticeShown:true,updatedAt:firebase.database.ServerValue.TIMESTAMP});
-        setTimeout(()=>alert('恭喜你~你的分店已經可以上傳與修改囉！！\n目前商店尚未對外開放，請在你準備好的時候從「我的分店」裡面開幕💖'),500);
+        setTimeout(()=>alert('恭喜你~你的分店已經可以上傳與修改囉！！\n目前商店尚未對外開放，請在你準備好的時候從「我的商店」裡面開幕💖'),500);
       }catch(e){
         console.error('首次登入審核通過通知失敗',e);
       }
@@ -5080,13 +5093,18 @@ function setupCartPreferences() {
       const b=Object.values(branchRegistry).find(x=>x.ownerUid===branchAuthUser?.uid);
       if(!b)return;
       const f=document.getElementById('branchOwnerForm'),i=document.getElementById('branchOwnerInfo'),btn=document.getElementById('branchOwnerToggleBtn');
-      let status='';
-      if(b.adminClosed===true) status='🔴 已被版主關閉，無法自行開啟。<br><b>如需重新開啟，請與版主聯絡。</b>';
-      else if(b.enabled===true) status='🟢 目前開啟中';
-      else status='⚪ 目前由分店主自行關閉，可自行重新開啟';
-      i.innerHTML=`分店：<b>${escBranch(b.name)}</b><br>狀態：${status}<br>審核通過時間／收費基準日：<b>${formatBranchApprovedAt(b.approvedAt)}</b><br><br>此日期時間為版主審核通過時間，並作為分店收費基準日；資料會保存於 Firebase，不會因重新整理頁面消失。<br><br>分店經版主核准後，預設為關閉；請先完成所有提示詞與內容設定，準備好後再自行開店。 `;
+      let status='',statusClass='';
+      if(b.adminClosed===true){ status='鎖定中'; statusClass='locked'; }
+      else if(b.enabled===true){ status='營業中'; statusClass='open'; }
+      else{ status='休店中'; statusClass='closed'; }
+      const statusExplain=b.adminClosed===true
+        ? '<div class="branch-owner-status-note">此分店已被版主關閉，分店主無法自行重新開啟；如需恢復請聯繫版主。</div>'
+        : (b.enabled===true
+          ? '<div class="branch-owner-status-note">目前分店已對訪客開放。</div>'
+          : '<div class="branch-owner-status-note">目前由分店主自行休店，可隨時重新開啟。</div>');
+      i.innerHTML=`分店：<b>${escBranch(b.name)}</b><br>狀態：<span class="branch-owner-info-status ${statusClass}">${status}</span>${statusExplain}<br>審核通過時間／收費基準日：<b>${formatBranchApprovedAt(b.approvedAt)}</b><br><br>此日期時間為版主審核通過時間，並作為分店收費基準日；資料會保存於 Firebase，不會因重新整理頁面消失。<br><br>分店經版主核准後，預設為休店；請先完成所有提示詞與內容設定，準備好後再自行開店。`;
       btn.disabled=b.adminClosed===true;
-      btn.textContent=b.enabled===true?'關閉我的分店':'開啟我的分店';
+      btn.textContent=b.adminClosed===true?'分店已被鎖定':(b.enabled===true?'關閉我的分店':'開啟我的分店');
       f.classList.add('open');
     }
     async function toggleOwnBranch(){
@@ -8017,5 +8035,160 @@ function setupCartPreferences() {
   #sideTabsPanel .branch-store-menu.open .branch-store-dropdown{display:block!important}
 }
 </style>
+
+<style id="mobile-branch-tabs-v5">
+/* ===== 手機分頁列與分店狀態優化 ===== */
+.branch-owner-state-label{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:2px 6px;border-radius:999px;font-size:10px;font-weight:900;line-height:1.2;
+  margin-left:6px;white-space:nowrap;
+}
+.branch-owner-status-open{border-color:#43c77a!important;color:#baf3cf!important;background:rgba(24,104,59,.34)!important}
+.branch-owner-status-open .branch-owner-state-label{background:#2f9d5d;color:#fff}
+.branch-owner-status-closed{border-color:#e0a642!important;color:#ffe1a3!important;background:rgba(125,82,13,.30)!important}
+.branch-owner-status-closed .branch-owner-state-label{background:#b67b19;color:#fff}
+.branch-owner-status-locked{border-color:#e25d6f!important;color:#ffc0c9!important;background:rgba(127,33,48,.34)!important}
+.branch-owner-status-locked .branch-owner-state-label{background:#b73549;color:#fff}
+.branch-owner-info-status{display:inline-flex;padding:3px 9px;border-radius:999px;font-weight:900;margin-left:4px}
+.branch-owner-info-status.open{background:rgba(47,157,93,.20);color:#68df97;border:1px solid rgba(104,223,151,.55)}
+.branch-owner-info-status.closed{background:rgba(182,123,25,.18);color:#f0bd64;border:1px solid rgba(240,189,100,.55)}
+.branch-owner-info-status.locked{background:rgba(183,53,73,.20);color:#ff8798;border:1px solid rgba(255,135,152,.55)}
+.branch-owner-status-note{margin:7px 0 2px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.045);line-height:1.55}
+
+@media(max-width:768px){
+  /* 首頁 → 逛逛分店 → 購物車，三者固定在水平列最前段。 */
+  #sideTabsPanel>#homeWelcomeBtn,
+  #sideTabsPanel>.branch-store-menu,
+  #sideTabsPanel>#cartTabBtn{
+    flex:0 0 auto!important;
+    width:auto!important;
+    min-width:max-content!important;
+    max-width:none!important;
+  }
+  #sideTabsPanel>.branch-store-menu{order:2!important;position:static!important;display:block!important}
+  #sideTabsPanel>#homeWelcomeBtn{order:1!important}
+  #sideTabsPanel>#cartTabBtn{
+    order:3!important;
+    position:static!important;
+    left:auto!important;
+    z-index:auto!important;
+    /* 比照桌面購物車：一般狀態透明底＋購物車色外框／文字。 */
+    background:var(--bg-color)!important;
+    border-color:var(--cart-color)!important;
+    color:#7289da!important;
+    box-shadow:none!important;
+  }
+  #sideTabsPanel>#cartTabBtn.active{
+    background:var(--cart-color)!important;
+    border-color:var(--cart-color)!important;
+    color:#fff!important;
+  }
+  #sideTabsPanel .branch-store-toggle{
+    width:auto!important;min-width:max-content!important;max-width:none!important;
+    min-height:42px!important;padding:8px 10px!important;border-radius:11px!important;
+    font-size:12px!important;justify-content:center!important;
+    background:var(--bg-color)!important;color:var(--text-color)!important;
+    border:1px solid var(--border-color)!important;
+  }
+  /* 申請分店：手機版做成清楚但不搶主分頁的次要操作。 */
+  #branchApplyBtn.mobile-role-visible[data-role="visitor"],
+  #branchApplyBtn.mobile-role-visible[data-role="admin"]{
+    min-height:42px!important;padding:8px 12px!important;border-radius:12px!important;
+    border:1px dashed rgba(226,190,255,.66)!important;
+    background:linear-gradient(145deg,rgba(84,48,111,.72),rgba(55,28,78,.78))!important;
+    color:#f2ddff!important;font-weight:800!important;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.035)!important;
+  }
+  #branchApplyBtn.mobile-role-visible[data-role="owner"]{
+    min-height:42px!important;padding:8px 12px!important;border-radius:12px!important;
+  }
+  /* 子分頁與逛逛分店選單：寬度依內容，比照主分頁，不再使用固定 120/240px。 */
+  #sideTabsPanel .dropdown-menu.mobile-floating-menu,
+  #branchStoreDropdown.mobile-branch-floating{
+    width:max-content!important;min-width:0!important;max-width:calc(100vw - 12px)!important;
+  }
+  #sideTabsPanel .dropdown-menu.mobile-floating-menu .dropdown-item,
+  #branchStoreDropdown.mobile-branch-floating .branch-store-option{
+    width:auto!important;min-width:100%!important;max-width:none!important;
+    box-sizing:border-box!important;white-space:nowrap!important;
+  }
+  #branchStoreDropdown.mobile-branch-floating{
+    position:fixed!important;display:block!important;visibility:hidden;
+    z-index:2147483647!important;padding:6px!important;box-sizing:border-box!important;
+    max-height:min(55vh,360px)!important;overflow-y:auto!important;overflow-x:hidden!important;
+    border-radius:14px!important;
+    background:linear-gradient(145deg,rgba(29,14,54,.995),rgba(54,24,77,.99))!important;
+    border:1px solid rgba(226,190,255,.34)!important;
+    box-shadow:0 14px 36px rgba(4,1,14,.72),0 0 22px rgba(171,99,255,.16)!important;
+    transform:none!important;
+  }
+}
+</style>
+<script id="mobile-branch-dropdown-v5">
+(function(){
+  function mobile(){return window.innerWidth<=768;}
+  function menu(){return document.getElementById('branchStoreMenu');}
+  function toggle(){return document.getElementById('branchStoreToggle');}
+  function dropdown(){return document.getElementById('branchStoreDropdown');}
+  function panel(){return document.getElementById('sideTabsPanel');}
+
+  window.restoreBranchStoreDropdown=function(){
+    const m=menu(),dd=dropdown();
+    if(!m||!dd)return;
+    if(dd.parentElement!==m)m.appendChild(dd);
+    dd.classList.remove('mobile-branch-floating');
+    ['position','display','visibility','top','right','bottom','left','width','maxWidth','maxHeight','zIndex','overflowY','overflowX','transform','boxSizing'].forEach(k=>dd.style[k]='');
+  };
+
+  window.positionBranchStoreDropdown=function(){
+    const t=toggle(),dd=dropdown(),m=menu(),p=panel();
+    if(!t||!dd||!m)return;
+    if(!mobile()){ restoreBranchStoreDropdown(); return; }
+    if(!m.classList.contains('open')){ restoreBranchStoreDropdown(); return; }
+    if(dd.parentElement!==document.body)document.body.appendChild(dd);
+    dd.classList.add('mobile-branch-floating');
+    dd.style.position='fixed';dd.style.display='block';dd.style.visibility='hidden';
+    dd.style.top='auto';dd.style.right='auto';dd.style.transform='none';dd.style.zIndex='2147483647';dd.style.boxSizing='border-box';
+    dd.style.maxWidth='calc(100vw - 12px)';dd.style.maxHeight='min(55vh,360px)';dd.style.overflowY='auto';dd.style.overflowX='hidden';
+    const tr=t.getBoundingClientRect(),pr=(p||t).getBoundingClientRect(),gap=8,pad=6;
+    dd.style.left=Math.max(pad,tr.left)+'px';
+    dd.style.bottom=Math.max(0,window.innerHeight-pr.top+gap)+'px';
+    dd.style.width='max-content';
+    const r=dd.getBoundingClientRect();
+    const w=Math.min(r.width||tr.width||150,window.innerWidth-pad*2);
+    let left=tr.left;if(left+w>window.innerWidth-pad)left=window.innerWidth-w-pad;left=Math.max(pad,left);
+    dd.style.left=left+'px';dd.style.width=w+'px';dd.style.visibility='visible';
+    if((r.height||0)>pr.top-gap-pad)dd.style.maxHeight=Math.max(120,pr.top-gap-pad)+'px';
+  };
+
+  function close(){
+    const m=menu();if(m)m.classList.remove('open');
+    restoreBranchStoreDropdown();
+  }
+
+  function bind(){
+    const t=toggle(),m=menu(),dd=dropdown();if(!t||!m||!dd||t.dataset.mobileBranchV5==='1')return;
+    t.dataset.mobileBranchV5='1';
+    /* 取代舊 onclick，讓逛逛分店與一般子分頁一致：只向主分頁列上方浮出。 */
+    t.onclick=function(e){
+      e.preventDefault();e.stopPropagation();
+      const opening=!m.classList.contains('open');
+      document.querySelectorAll('#sideTabsPanel .dropdown.open').forEach(x=>x.classList.remove('open'));
+      if(opening){m.classList.add('open');requestAnimationFrame(positionBranchStoreDropdown);}else close();
+    };
+    document.addEventListener('click',function(e){
+      if(!m.classList.contains('open'))return;
+      if(e.target===t||t.contains(e.target)||dd.contains(e.target))return;
+      close();
+    },true);
+    dd.addEventListener('click',function(e){if(e.target.closest('.branch-store-option'))close();});
+    window.addEventListener('resize',function(){if(!mobile())close();else if(m.classList.contains('open'))requestAnimationFrame(positionBranchStoreDropdown);},{passive:true});
+    window.addEventListener('orientationchange',function(){setTimeout(function(){if(m.classList.contains('open'))positionBranchStoreDropdown();},80);},{passive:true});
+    window.addEventListener('scroll',function(){if(m.classList.contains('open')&&mobile())positionBranchStoreDropdown();},{passive:true});
+  }
+  document.addEventListener('DOMContentLoaded',bind);
+})();
+</script>
+
 </body>
 </html>
