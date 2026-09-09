@@ -3895,12 +3895,12 @@ body::after
   <button id="backToTopBtn" title="回到頂部">↑ 頂部</button>
   <div class="side-tabs-panel" id="sideTabsPanel">
     <button class="collapse-toggle-btn" id="collapseToggleBtn">📂 收合 ▾</button>
-    <button type="button" class="tab-btn" id="homeWelcomeBtn" title="回到本店說明頁">🏠 本店首頁</button>
+    <button type="button" class="tab-btn" id="homeWelcomeBtn" title="回到本店說明頁">🛖 本店首頁</button>
     <button class="tab-btn" id="cartTabBtn" data-category="cart">
       <span>🛒 購物車</span>
     </button>
     <div class="branch-store-menu" id="branchStoreMenu">
-      <button type="button" class="branch-store-toggle" id="branchStoreToggle">🏬 商店街 ▾</button>
+      <button type="button" class="branch-store-toggle" id="branchStoreToggle">🏪 商店街 ▾</button>
       <div class="branch-store-dropdown" id="branchStoreDropdown"></div>
     </div>
     <!-- branch navigation buttons are placed after schedule below -->
@@ -4876,8 +4876,17 @@ function setupCartPreferences() {
       if(!menu||!dd)return;
       menu.classList.add('visible');dd.innerHTML='';
       const add=(id,label)=>{const b=document.createElement('button');b.type='button';b.className='branch-store-option'+(activeBranchId===id?' active':'');b.textContent=label+(activeBranchId===id?'（目前）':'');b.onclick=()=>switchStore(id);dd.appendChild(b);};
-      add('main','🏠 '+(getSettingValue(window._rawServerData||[],'settings_title')||'主店'));
-      Object.values(branchRegistry).filter(branchIsOpen).sort((a,b)=>String(a.name).localeCompare(String(b.name),'zh-TW')).forEach(b=>add(b.code||b.id,'🏪 '+b.name));
+      // 總店永遠固定第一項；分店維持「核准日」排序，不因目前選取店鋪而重新排序。
+      add('main','❤️ '+(getSettingValue(window._rawServerData||[],'settings_title')||'主店'));
+      const branchEmojis=['🩷','🧡','💛','💚','💙','🩵','💜'];
+      Object.values(branchRegistry)
+        .filter(branchIsOpen)
+        .sort((a,b)=>{
+          const at=Number(a.approvedAt||a.createdAt||0),bt=Number(b.approvedAt||b.createdAt||0);
+          if(bt!==at)return bt-at;
+          return String(a.code||a.id||'').localeCompare(String(b.code||b.id||''));
+        })
+        .forEach((b,i)=>add(b.code||b.id,branchEmojis[i%branchEmojis.length]+' '+b.name));
 
       const apply=document.getElementById('branchApplyBtn'),manage=document.getElementById('branchManageBtn'),settings=document.getElementById('tabSettingsBtn');
       const ownerBranch=branchAuthUser?Object.values(branchRegistry).find(b=>b.ownerUid===branchAuthUser.uid&&b.status==='approved'):null;
