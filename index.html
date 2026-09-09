@@ -4877,17 +4877,37 @@ function setupCartPreferences() {
     function positionBranchStoreDropdown(){
       const t=document.getElementById('branchStoreToggle'),dd=document.getElementById('branchStoreDropdown');
       if(!t||!dd||window.innerWidth>768)return;
-      const r=t.getBoundingClientRect(),gap=8,pad=8;
+      const r=t.getBoundingClientRect(),gap=8,pad=6;
+
+      // 手機端商店街與商品子分頁使用同一套「向上彈出」邏輯：
+      // 以被點擊的按鈕為基準，底部貼齊主分頁列上方，並依內容決定寬度。
       dd.style.position='fixed';
       dd.style.display='block';
+      dd.style.visibility='hidden';
       dd.style.top='auto';
-      dd.style.bottom=Math.max(pad,window.innerHeight-r.top+gap)+'px';
-      dd.style.left=Math.max(pad,Math.min(r.left,window.innerWidth-260-pad))+'px';
       dd.style.right='auto';
-      dd.style.width=Math.min(240,window.innerWidth-2*pad)+'px';
-      dd.style.maxWidth='calc(100vw - 16px)';
+      dd.style.left=`${Math.max(pad,Math.min(r.left,window.innerWidth-pad))}px`;
+      dd.style.bottom=`${Math.max(pad,window.innerHeight-r.top+gap)}px`;
+      dd.style.width='max-content';
+      dd.style.minWidth='0';
+      dd.style.maxWidth='calc(100vw - 12px)';
       dd.style.maxHeight='min(46vh,330px)';
-      dd.style.zIndex='5100';
+      dd.style.overflowY='auto';
+      dd.style.overflowX='hidden';
+      dd.style.zIndex='2147483647';
+
+      // 依內容實際寬度修正，避免超出螢幕。
+      const naturalWidth=Math.min(dd.scrollWidth||180,window.innerWidth-pad*2);
+      let left=r.left;
+      if(left+naturalWidth>window.innerWidth-pad) left=window.innerWidth-naturalWidth-pad;
+      left=Math.max(pad,left);
+      dd.style.left=`${left}px`;
+      dd.style.width=`${naturalWidth}px`;
+
+      // 與商品子分頁相同：若上方空間不足，自動縮短並保留內部滾動。
+      const maxHeight=Math.max(120,r.top-gap-pad);
+      if(dd.scrollHeight>maxHeight) dd.style.maxHeight=`${maxHeight}px`;
+      dd.style.visibility='visible';
     }
     function showDeletedBranchNoticeOnce(user,delay){
       if(!user)return;
@@ -4923,9 +4943,6 @@ function setupCartPreferences() {
         if(a.dataset.role==='owner'){
           const b=Object.values(branchRegistry).find(x=>x.ownerUid===branchAuthUser?.uid&&x.status==='approved');
           if(b){switchStore(b.code||b.id);return;}
-        }
-        if(window.innerWidth<=768&&a.dataset.role==='visitor'){
-          alert('📱 手機端無法申請店鋪，請使用電腦申請。');return;
         }
         document.getElementById('branchApplyForm').classList.add('open');
       };}
@@ -8016,5 +8033,140 @@ function setupCartPreferences() {
   #sideTabsPanel .branch-store-menu.open .branch-store-dropdown{display:block!important}
 }
 </style>
+
+<style id="mobile-storefront-final-v5">
+@media (max-width:768px){
+  /* 1) 商店街放在「本店首頁」右邊；購物車仍固定在最左側。 */
+  #sideTabsPanel{
+    display:flex!important;
+    align-items:center!important;
+  }
+  #sideTabsPanel>#cartTabBtn{
+    order:0!important;
+  }
+  #sideTabsPanel>#homeWelcomeBtn{
+    order:1!important;
+  }
+  #sideTabsPanel>.branch-store-menu{
+    order:2!important;
+  }
+  #sideTabsPanel>#collapseContent{
+    order:3!important;
+  }
+  #sideTabsPanel>.auth-section-wrapper{
+    order:4!important;
+  }
+
+  /* 2) 手機購物車顏色完全跟電腦端一致，不再使用手機紫色覆蓋。 */
+  #sideTabsPanel>#cartTabBtn{
+    background:var(--bg-color)!important;
+    border:1px solid var(--cart-color)!important;
+    color:#7289da!important;
+    box-shadow:8px 0 14px rgba(8,2,22,.38)!important;
+  }
+  #sideTabsPanel>#cartTabBtn.active{
+    background:var(--cart-color)!important;
+    border-color:var(--cart-color)!important;
+    color:#fff!important;
+  }
+
+  /* 3) 商店街本體與主分頁按鈕同尺寸語言；它位於本店首頁右側。 */
+  #sideTabsPanel>.branch-store-menu{
+    flex:0 0 auto!important;
+    width:max-content!important;
+    min-width:max-content!important;
+    max-width:none!important;
+    height:42px!important;
+  }
+  #sideTabsPanel>.branch-store-toggle{
+    width:max-content!important;
+    min-width:max-content!important;
+    max-width:none!important;
+    min-height:42px!important;
+    padding:9px 13px!important;
+    border-radius:10px!important;
+    font-size:14px!important;
+    white-space:nowrap!important;
+    justify-content:center!important;
+    touch-action:manipulation!important;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  /* 商店街彈窗：跟商品子分頁一樣，從底部主分頁列「向上」彈出。 */
+  #sideTabsPanel>.branch-store-menu .branch-store-dropdown{
+    top:auto!important;
+    right:auto!important;
+    left:auto!important;
+    bottom:auto!important;
+    min-width:0!important;
+    width:max-content!important;
+    max-width:calc(100vw - 12px)!important;
+    max-height:min(46vh,330px)!important;
+    padding:6px!important;
+    border-radius:12px!important;
+    box-shadow:0 10px 30px rgba(0,0,0,.65)!important;
+    z-index:2147483647!important;
+    box-sizing:border-box!important;
+  }
+  #sideTabsPanel>.branch-store-menu .branch-store-option{
+    width:max-content!important;
+    min-width:100%!important;
+    max-width:none!important;
+    min-height:42px!important;
+    padding:9px 12px!important;
+    border-radius:8px!important;
+    font-size:14px!important;
+    white-space:nowrap!important;
+    touch-action:manipulation!important;
+    box-sizing:border-box!important;
+  }
+
+  /* 4) 手機「申請店鋪」按鈕：更像正式 CTA，但不影響桌機。 */
+  #sideTabsPanel>#branchApplyBtn.mobile-role-visible{
+    display:flex!important;
+    width:max-content!important;
+    min-width:max-content!important;
+    max-width:none!important;
+    min-height:42px!important;
+    padding:9px 14px!important;
+    border:1px solid rgba(255,153,51,.7)!important;
+    border-radius:10px!important;
+    background:linear-gradient(135deg,#ff3366,#ff9933)!important;
+    color:#fff!important;
+    font-size:14px!important;
+    font-weight:800!important;
+    box-shadow:0 4px 12px rgba(255,85,85,.25)!important;
+    justify-content:center!important;
+    white-space:nowrap!important;
+    touch-action:manipulation!important;
+  }
+  #sideTabsPanel>#branchApplyBtn.mobile-role-visible:active{
+    transform:translateY(1px)!important;
+    box-shadow:0 2px 7px rgba(255,85,85,.2)!important;
+  }
+  #sideTabsPanel>#branchManageBtn.mobile-role-visible{
+    width:max-content!important;
+    min-width:max-content!important;
+    max-width:none!important;
+  }
+
+  /* 5) 子分頁直接顯示在分頁列時，寬度與主分頁一樣由文字內容決定。 */
+  #sideTabsPanel #collapseContent>.tab-btn[data-category^="general_"],
+  #sideTabsPanel #collapseContent>.tab-btn[data-category^="animal_"],
+  #sideTabsPanel #collapseContent>.tab-btn[data-category^="pot_"],
+  #sideTabsPanel #collapseContent>.tab-btn[data-category^="ring_"],
+  #sideTabsPanel #collapseContent>.tab-btn[data-category^="crop_"],
+  #sideTabsPanel #collapseContent>.tab-btn[data-category^="gift_"],
+  #sideTabsPanel #collapseContent>.tab-btn[data-category="memes"]{
+    flex:0 0 max-content!important;
+    width:max-content!important;
+    min-width:max-content!important;
+    max-width:none!important;
+    box-sizing:border-box!important;
+    white-space:nowrap!important;
+  }
+}
+</style>
+
 </body>
 </html>
