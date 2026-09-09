@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>載入中...</title>
+  <title></title>
   <!-- 引入 Firebase Compat 版本 SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
@@ -3832,9 +3832,9 @@ body::after
   box-sizing:border-box!important;
 }
 </style><style id="branch-navigation-layout-v2">
-.side-tabs-panel .collapse-content{align-items:stretch;min-width:120px}
-.side-tabs-panel .tab-btn,.side-tabs-panel .dropdown,.side-tabs-panel .dropdown-toggle,.side-tabs-panel .branch-store-menu,.side-tabs-panel .branch-store-toggle,.side-tabs-panel .tab-settings-btn{width:120px;min-width:120px;max-width:120px;box-sizing:border-box}
-.side-tabs-panel .tab-btn,.side-tabs-panel .dropdown-toggle,.side-tabs-panel .branch-store-toggle,.side-tabs-panel .tab-settings-btn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.side-tabs-panel .collapse-content{align-items:stretch;min-width:0}
+.side-tabs-panel .tab-btn,.side-tabs-panel .dropdown,.side-tabs-panel .dropdown-toggle,.side-tabs-panel .branch-store-menu,.side-tabs-panel .branch-store-toggle,.side-tabs-panel .tab-settings-btn{width:auto;min-width:0;max-width:none;box-sizing:border-box}
+.side-tabs-panel .tab-btn,.side-tabs-panel .dropdown-toggle,.side-tabs-panel .branch-store-toggle,.side-tabs-panel .tab-settings-btn{overflow:visible;text-overflow:clip;white-space:nowrap}
 .side-tabs-panel .dropdown-toggle,.side-tabs-panel .branch-store-toggle{justify-content:flex-start}
 .side-tabs-panel .branch-store-toggle{border-radius:6px}
 .side-tabs-panel .branch-store-dropdown{top:0;left:auto;right:calc(100% + 8px);min-width:120px;width:240px;max-width:240px}
@@ -3897,51 +3897,51 @@ body::after
     </div>
     <div class="collapse-content" id="collapseContent">
       <div class="dropdown" id="dropdown-furniture">
-        <button class="dropdown-toggle" data-dropdown="dropdown-furniture" id="furnitureToggleBtn">載入中...</button>
+        <button class="dropdown-toggle" data-dropdown="dropdown-furniture" id="furnitureToggleBtn">🏠 家具</button>
         <div class="dropdown-menu">
-          <button class="dropdown-item tab-btn" data-category="general_new">載入中...</button>
-          <button class="dropdown-item tab-btn" data-category="general_misc">載入中...</button>
-          <button class="dropdown-item tab-btn" data-category="general_consumable">載入中...</button>
+          <button class="dropdown-item tab-btn" data-category="general_new">✨ 本周信封</button>
+          <button class="dropdown-item tab-btn" data-category="general_misc">🖼️ 家具擺設</button>
+          <button class="dropdown-item tab-btn" data-category="general_consumable">🧪 消耗品</button>
         </div>
       </div>
       <div class="dropdown" id="dropdown-animal">
-        <button class="dropdown-toggle" data-dropdown="dropdown-animal">載入中...</button>
+        <button class="dropdown-toggle" data-dropdown="dropdown-animal">🐾 小動物</button>
         <div class="dropdown-menu">
-          <button class="dropdown-item tab-btn" data-category="memes">載入中...</button>
-          <button class="dropdown-item tab-btn" data-category="animal_other">載入中...</button>
-          <button class="dropdown-item tab-btn" data-category="animal_special">載入中...</button>
+          <button class="dropdown-item tab-btn" data-category="memes">🧸 熊熊</button>
+          <button class="dropdown-item tab-btn" data-category="animal_other">🐧 其他</button>
+          <button class="dropdown-item tab-btn" data-category="animal_special">🦊 特別</button>
         </div>
       </div>
       <div class="dropdown" id="dropdown-pot">
-        <button class="dropdown-toggle" data-dropdown="dropdown-pot">載入中...</button>
+        <button class="dropdown-toggle" data-dropdown="dropdown-pot">🪴 花盆</button>
         <div class="dropdown-menu">
-          <button class="dropdown-item tab-btn" data-category="pot_new">載入中...</button>
-          <button class="dropdown-item tab-btn" data-category="pot_other">載入中...</button>
-          <button class="dropdown-item tab-btn" data-category="pot_special">載入中...</button>
+          <button class="dropdown-item tab-btn" data-category="pot_new">🪴 新花盆</button>
+          <button class="dropdown-item tab-btn" data-category="pot_other">🌿 其他花盆</button>
+          <button class="dropdown-item tab-btn" data-category="pot_special">🌱 特別花盆</button>
         </div>
       </div>
       <div class="dropdown" id="dropdown-ring">
-        <button class="dropdown-toggle" data-dropdown="dropdown-ring">載入中...</button>
+        <button class="dropdown-toggle" data-dropdown="dropdown-ring">💍 戒指</button>
         <div class="dropdown-menu">
-          <button class="dropdown-item tab-btn" data-category="ring_male">載入中...</button>
-          <button class="dropdown-item tab-btn" data-category="ring_female">載入中...</button>
-          <button class="dropdown-item tab-btn" data-category="ring_other">載入中...</button>
+          <button class="dropdown-item tab-btn" data-category="ring_male">👦 限男</button>
+          <button class="dropdown-item tab-btn" data-category="ring_female">👧 限女</button>
+          <button class="dropdown-item tab-btn" data-category="ring_other">💎 其他</button>
         </div>
       </div>
       <div class="dropdown" id="dropdown-crop">
-        <button class="dropdown-toggle" data-dropdown="dropdown-crop">載入中...</button>
+        <button class="dropdown-toggle" data-dropdown="dropdown-crop">🌱 作物</button>
         <div class="dropdown-menu">
-          <button class="dropdown-item tab-btn" data-category="crop_male">載入中...</button>
-          <button class="dropdown-item tab-btn" data-category="crop_female">載入中...</button>
-          <button class="dropdown-item tab-btn" data-category="crop_other">載入中...</button>
+          <button class="dropdown-item tab-btn" data-category="crop_male">👦 限男</button>
+          <button class="dropdown-item tab-btn" data-category="crop_female">👧 限女</button>
+          <button class="dropdown-item tab-btn" data-category="crop_other">🌾 其他</button>
         </div>
       </div>
       <div class="dropdown" id="dropdown-gift">
-        <button class="dropdown-toggle" data-dropdown="dropdown-gift">載入中...</button>
+        <button class="dropdown-toggle" data-dropdown="dropdown-gift">🎁 甩賣區</button>
         <div class="dropdown-menu">
-          <button class="dropdown-item tab-btn" data-category="gift_new">載入中...</button>
-          <button class="dropdown-item tab-btn" data-category="gift_other">載入中...</button>
-          <button class="dropdown-item tab-btn" data-category="gift_special">載入中...</button>
+          <button class="dropdown-item tab-btn" data-category="gift_new">🎁 新商品</button>
+          <button class="dropdown-item tab-btn" data-category="gift_other">🛍️ 其他</button>
+          <button class="dropdown-item tab-btn" data-category="gift_special">🎀 特別</button>
         </div>
       </div>
       <button class="tab-btn" data-category="schedule">📅 米米班表</button>
@@ -3983,7 +3983,7 @@ body::after
               <div class="title-area">
                 <h1 class="mimi-title">
                   <span class="title-decoration">୨୧</span>
-                  <span id="mimiTitleText" class="editable-site-setting" contenteditable="false">載入中...</span>
+                  <span id="mimiTitleText" class="editable-site-setting" contenteditable="false"></span>
                   <span class="title-decoration right">୨୧</span>
                 </h1>
               </div>
@@ -3993,10 +3993,10 @@ body::after
                     <svg class="discord-icon" viewBox="0 0 127.14 96.36">
                       <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0 -3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c2.64-27.38-4.51-51.11-20.14-72.13ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74c6.51,0,11.66,5.77,11.44,12.74C53.89,60,48.81,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74c6.41,0,11.62,5.77,11.43,12.74C96.12,60,91,65.69,84.69,65.69Z"/>
                     </svg>
-                    <span id="discordContactText">載入中...</span>
+                    <span id="discordContactText"></span>
                   </a>
                   <a class="tally-badge" id="tallyContactBtn" href="https://tally.so/r/q48xO2" target="_blank" rel="noopener noreferrer">
-                    <span id="tallyContactText">載入中...</span>
+                    <span id="tallyContactText"></span>
                   </a>
                   <button type="button" id="contactSettingsBtn" class="contact-settings-btn">⚙️ 聯絡按鈕管理</button>
                 </div>
@@ -4028,7 +4028,7 @@ body::after
   </div>
   <div id="cartSummary" class="cart-summary">
     <div class="cart-summary-main-row">
-      <div class="cart-total-text"><span id="cartTotalLabel" class="editable-site-setting" contenteditable="false">載入中...</span> <span id="totalAmount">0</span></div>
+      <div class="cart-total-text"><span id="cartTotalLabel" class="editable-site-setting" contenteditable="false"></span> <span id="totalAmount">0</span></div>
       <div class="cart-summary-right">
         <div class="cart-preference-row" aria-label="購物車交易設定">
           <div class="cart-preference-group">
@@ -4081,7 +4081,7 @@ body::after
   <div class="online-counter-wrapper">
     <div class="counter-box">
       <span>🔥 目前即時在線人數：</span>
-      <span id="count">載入中...</span>
+      <span id="count"></span>
     </div>
   </div>
   <div class="schedule-container" id="scheduleContainer">
@@ -5880,7 +5880,7 @@ function setupCartPreferences() {
       const titleElem=document.getElementById('mimiTitleText');
       if(titleElem){
         // 分店頁面的主標題固定使用 Firebase 分店名稱，
-        // 不讓分店自己的 Google Sheet「settings_title」或雲端設定載入狀態覆蓋成「載入中...」。
+        // 不讓分店自己的 Google Sheet「settings_title」或雲端設定載入狀態覆蓋成「」。
         const isBranchPage=activeBranchId!=='main' && !!activeBranch;
         const title=isBranchPage
           ? String(activeBranch.name||'').trim()
@@ -6538,7 +6538,7 @@ function setupCartPreferences() {
         const welcomeDiv = document.createElement('div');
         welcomeDiv.className = 'welcome-message';
         welcomeDiv.innerHTML = `
-          <div class="welcome-title"><span id="welcomeTitleText" class="editable-site-setting" contenteditable="false">載入中...</span></div>
+          <div class="welcome-title"><span id="welcomeTitleText" class="editable-site-setting" contenteditable="false"></span></div>
           <div class="welcome-content-box">
             <div class="welcome-item"><div class="welcome-label"><span id="welcomeText1" data-welcome-field="1" class="editable-site-setting" contenteditable="false"></span></div><div class="welcome-desc"><span id="welcomeText2" data-welcome-field="1" class="editable-site-setting" contenteditable="false"></span></div></div>
             <div class="welcome-item"><div class="welcome-label"><span id="welcomeText3" data-welcome-field="1" class="editable-site-setting" contenteditable="false"></span></div><div class="welcome-desc"><span id="welcomeText4" data-welcome-field="1" class="editable-site-setting" contenteditable="false"></span></div></div>
@@ -8141,7 +8141,7 @@ function setupCartPreferences() {
     margin:0!important;
     border:1px solid rgba(255,255,255,.22)!important;
     border-radius:12px!important;
-    background:linear-gradient(135deg,#ff7a45,#ff4d6d)!important;
+    background:linear-gradient(135deg,#d8b4fe,#b779e8)!important;
     color:#fff!important;
     font-size:13px!important;
     font-weight:800!important;
@@ -8207,6 +8207,187 @@ function setupCartPreferences() {
     font-synthesis:none;
   }
 }
+
+/* ===== 本次版面修正：桌機分頁列／申請店鋪顏色 ===== */
+@media (min-width:769px){
+  /* 桌機：不固定 100/120px，統一依目前最長的可見文字寬度調整。 */
+  #sideTabsPanel{
+    width:max-content!important;
+    max-width:none!important;
+  }
+  #sideTabsPanel>.collapse-content{
+    width:max-content!important;
+    min-width:0!important;
+  }
+  #sideTabsPanel>.collapse-content>.tab-btn,
+  #sideTabsPanel>.collapse-content>.dropdown,
+  #sideTabsPanel>.collapse-content>.branch-store-menu,
+  #sideTabsPanel>.collapse-content>.tab-settings-btn{
+    flex:0 0 auto!important;
+  }
+  /* 商店街文字靠左。 */
+  #sideTabsPanel .branch-store-toggle{
+    justify-content:flex-start!important;
+    text-align:left!important;
+  }
+  /* 申請店鋪：只改顏色，其餘尺寸、圓角、字體、位置沿用原本設定。 */
+  #sideTabsPanel>#branchApplyBtn{
+    background:linear-gradient(135deg,#c084fc,#a855f7)!important;
+    color:#fff!important;
+  }
+}
+
+@media (max-width:768px){
+  /* 手機端申請店鋪保留原本「隨文字寬度」要求，只改成粉紫色。 */
+  #sideTabsPanel>#branchApplyBtn.mobile-role-visible{
+    width:max-content!important;
+    min-width:max-content!important;
+    max-width:none!important;
+    flex:0 0 auto!important;
+    background:linear-gradient(135deg,#c084fc,#a855f7)!important;
+    color:#fff!important;
+  }
+}
+
+/* 桌機所有可見分頁按鈕統一使用「目前最長文字」寬度。 */
+@media (min-width:769px){
+  #sideTabsPanel>.collapse-content>.tab-btn,
+  #sideTabsPanel>.collapse-content>.dropdown>.dropdown-toggle,
+  #sideTabsPanel>.collapse-content>.branch-store-toggle,
+  #sideTabsPanel>#tabSettingsBtn,
+  #sideTabsPanel>#branchApplyBtn,
+  #sideTabsPanel>#branchManageBtn{
+    box-sizing:border-box!important;
+  }
+}
 </style>
+
+<style id="stable-nav-common-width-v3">
+/* 電腦版：所有指定導覽按鈕統一使用「目前最長文字」所需寬度。
+   不寫死 120px，也不讓已經放大的按鈕再次成為下一次測量基準。 */
+@media (min-width:769px){
+  #sideTabsPanel{width:max-content!important;max-width:none!important;}
+  #sideTabsPanel>.collapse-content{
+    width:max-content!important;
+    min-width:0!important;
+    max-width:none!important;
+    align-items:stretch!important;
+  }
+  #sideTabsPanel>.collapse-content>.dropdown,
+  #sideTabsPanel>.collapse-content>.tab-btn,
+  #sideTabsPanel>.collapse-content>.tab-settings-btn,
+  #sideTabsPanel>.collapse-content>.branch-nav-btn,
+  #sideTabsPanel>.branch-store-menu,
+  #sideTabsPanel>#homeWelcomeBtn,
+  #sideTabsPanel>#cartTabBtn,
+  #sideTabsPanel>#tabSettingsBtn,
+  #sideTabsPanel>#branchApplyBtn,
+  #sideTabsPanel>#branchManageBtn{
+    flex:0 0 auto!important;
+    max-width:none!important;
+    box-sizing:border-box!important;
+  }
+  #sideTabsPanel>.collapse-content>.dropdown>.dropdown-toggle,
+  #sideTabsPanel>.branch-store-menu>.branch-store-toggle{
+    max-width:none!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    white-space:nowrap!important;
+    justify-content:flex-start!important;
+  }
+  /* 只改寬度，不改申請店鋪的其他外觀/邏輯。 */
+  #sideTabsPanel>#branchApplyBtn{
+    background:linear-gradient(135deg,#d8b4fe,#b779e8)!important;
+    color:#fff!important;
+  }
+}
+@media (max-width:768px){
+  #sideTabsPanel .branch-store-toggle{
+    justify-content:flex-start!important;
+    text-align:left!important;
+  }
+  #sideTabsPanel>#branchApplyBtn.mobile-role-visible{
+    background:linear-gradient(135deg,#d8b4fe,#b779e8)!important;
+    color:#fff!important;
+  }
+}
+</style>
+<script id="stable-nav-common-width-v3-js">
+(function(){
+  let timer=0;
+  function getTargets(){
+    const panel=document.getElementById('sideTabsPanel');
+    const content=document.getElementById('collapseContent');
+    if(!panel||!content)return [];
+    const out=[];
+    const add=(outer,button)=>{
+      if(!outer||!button)return;
+      const cs=getComputedStyle(outer), bs=getComputedStyle(button);
+      if(cs.display==='none'||cs.visibility==='hidden'||bs.display==='none'||bs.visibility==='hidden')return;
+      out.push({outer,button});
+    };
+    [...content.children].forEach(el=>{
+      if(el.classList.contains('dropdown')) add(el,el.querySelector('.dropdown-toggle'));
+      else if(el.classList.contains('branch-store-menu')) add(el,el.querySelector('.branch-store-toggle'));
+      else if(el.matches('.tab-btn,.tab-settings-btn,.branch-nav-btn')) add(el,el);
+    });
+    add(panel.querySelector('.branch-store-menu'),panel.querySelector('.branch-store-menu .branch-store-toggle'));
+    ['branchApplyBtn','branchManageBtn','tabSettingsBtn','homeWelcomeBtn','cartTabBtn'].forEach(id=>{
+      const el=document.getElementById(id); if(el) add(el,el);
+    });
+    // 去除重複節點（例如 branch-store-menu 可能已在 panel 內但不在 collapseContent）。
+    return out.filter((x,i,a)=>a.findIndex(y=>y.button===x.button)===i);
+  }
+  function sync(){
+    timer=0;
+    if(window.innerWidth<769)return;
+    const panel=document.getElementById('sideTabsPanel');
+    if(!panel)return;
+    const targets=getTargets();
+    if(!targets.length)return;
+
+    // 第一階段：清掉本腳本上一次寫入的寬度，重新取得「真正自然寬度」。
+    targets.forEach(x=>{
+      x.outer.style.setProperty('width','max-content','important');
+      x.outer.style.setProperty('min-width','0','important');
+      x.button.style.setProperty('width','max-content','important');
+      x.button.style.setProperty('min-width','0','important');
+      x.button.style.setProperty('max-width','none','important');
+    });
+
+    let max=0;
+    targets.forEach(x=>{
+      // scrollWidth 是按鈕在目前字型、padding 下的自然內容寬度；不採用先前統一寬度。
+      max=Math.max(max,x.button.scrollWidth,Math.ceil(x.button.getBoundingClientRect().width));
+    });
+    max=Math.max(1,Math.ceil(max));
+
+    // 第二階段：一次性統一，之後不再用這個結果當作測量值。
+    targets.forEach(x=>{
+      x.outer.style.setProperty('width',max+'px','important');
+      x.outer.style.setProperty('min-width',max+'px','important');
+      x.button.style.setProperty('width',max+'px','important');
+      x.button.style.setProperty('min-width',max+'px','important');
+    });
+    panel.style.setProperty('width','max-content','important');
+    panel.style.setProperty('max-width','none','important');
+  }
+  function schedule(){
+    clearTimeout(timer);
+    timer=setTimeout(sync,50);
+  }
+  window.addEventListener('load',()=>setTimeout(sync,100),{once:true});
+  window.addEventListener('resize',schedule,{passive:true});
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(sync,100),{once:true});
+  // 分頁名稱/顯示狀態改變時重新算一次；不監看 style，避免自己觸發自己。
+  const observer=new MutationObserver(schedule);
+  function observe(){
+    const panel=document.getElementById('sideTabsPanel');
+    if(panel)observer.observe(panel,{subtree:true,childList:true,characterData:true});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',observe,{once:true});
+  else observe();
+})();
+</script>
 </body>
 </html>
