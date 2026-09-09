@@ -3839,6 +3839,45 @@ body::after
   .branch-store-form,.branch-management-form,.branch-owner-form{width:min(94vw,620px)!important;max-height:calc(100vh - 24px)!important;padding:16px!important}
 }
 </style>
+
+<style id="branch-apply-polish-final">
+/* 申請店鋪：最終視覺優化（不改 JS / 邏輯） */
+#sideTabsPanel #branchApplyBtn{
+  background:linear-gradient(135deg,#e9c6ff 0%,#c99bea 48%,#b77adf 100%) !important;
+  color:#ffffff !important;
+  border:1px solid rgba(255,255,255,.42) !important;
+  box-shadow:0 3px 10px rgba(177,117,220,.28), inset 0 1px 0 rgba(255,255,255,.24) !important;
+  text-shadow:0 1px 2px rgba(92,48,112,.18);
+  transition:transform .18s ease, box-shadow .18s ease, filter .18s ease !important;
+}
+#sideTabsPanel #branchApplyBtn:hover{
+  filter:brightness(1.04) saturate(1.03);
+  box-shadow:0 5px 14px rgba(177,117,220,.36), inset 0 1px 0 rgba(255,255,255,.28) !important;
+}
+#sideTabsPanel #branchApplyBtn:active{
+  transform:translateY(1px);
+}
+
+@media (max-width:768px){
+  /* 與其他手機分頁按鈕統一：高度、圓角、字級、內距完全一致；僅保留隨文字寬度。 */
+  #sideTabsPanel #branchApplyBtn.mobile-role-visible{
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    min-height:42px !important;
+    height:42px !important;
+    padding:9px 13px !important;
+    border-radius:10px !important;
+    font-size:14px !important;
+    line-height:1.2 !important;
+    width:max-content !important;
+    min-width:max-content !important;
+    max-width:none !important;
+    flex:0 0 auto !important;
+    box-sizing:border-box !important;
+  }
+}
+</style>
 </head>
 <body>
   <div id="initialLoadingScreen" aria-hidden="true">
@@ -3857,12 +3896,12 @@ body::after
       <span>🛒 購物車</span>
     </button>
     <div class="branch-store-menu" id="branchStoreMenu">
-      <button type="button" class="branch-store-toggle" id="branchStoreToggle">🏪 商店街 ▾</button>
+      <button type="button" class="branch-store-toggle" id="branchStoreToggle">🏬 商店街 ▾</button>
       <div class="branch-store-dropdown" id="branchStoreDropdown"></div>
     </div>
     <!-- branch navigation buttons are placed after schedule below -->
     <div class="branch-store-form" id="branchApplyForm" role="dialog" aria-modal="true">
-      <div class="tab-settings-title">🏪 申請建立店鋪</div>
+      <div class="tab-settings-title">🈸 申請建立店鋪</div>
       <div class="branch-store-hint">審核通過前不能新增商品。Firebase 密碼只用於建立／登入帳號，不會提供給版主。<br><b>重要：Google 試算表與雲端資料夾必須由店主自己的 Google 帳號建立，並分享給版主。</b></div>
       <label>店名</label><input id="branchNameInput" maxlength="60" placeholder="例如：米米的店，店名後續仍可修改">
       <label>Firebase 帳號 Email</label><input id="branchFirebaseEmailInput" type="email" autocomplete="email">
@@ -3877,18 +3916,18 @@ body::after
       <div class="branch-store-actions"><button type="button" class="schedule-btn" id="branchApplySubmitBtn">送出申請</button><button type="button" class="cancel-btn" id="branchApplyCancelBtn">取消</button></div>
     </div>
     <div class="branch-management-form" id="branchManagementForm" role="dialog" aria-modal="true">
-      <div class="tab-settings-title">🏪 店鋪管理</div>
+      <div class="tab-settings-title">🛠️ 店鋪管理</div>
       <div class="branch-store-hint">版主可核准、關閉、重新開啟及刪除店鋪。被版主關閉的店舖，店主無法自行恢復。</div>
       <div id="branchManagementList"></div><div id="branchManagementStatus" class="branch-store-status"></div>
       <div class="branch-store-actions"><button type="button" class="cancel-btn" id="branchManagementCloseBtn">關閉</button></div>
     </div>
     <div class="branch-store-form" id="branchOwnerForm" role="dialog" aria-modal="true">
-      <div class="tab-settings-title">🏪 本店狀態</div><div id="branchOwnerInfo" class="branch-store-hint"></div>
+      <div class="tab-settings-title">🔑 本店狀態</div><div id="branchOwnerInfo" class="branch-store-hint"></div>
       <div class="branch-store-actions"><button type="button" class="schedule-btn" id="branchOwnerToggleBtn"></button><button type="button" class="cancel-btn" id="branchOwnerCloseBtn">關閉</button></div>
     </div>
     <div class="collapse-content" id="collapseContent">
       <div class="dropdown" id="dropdown-furniture">
-        <button class="dropdown-toggle" data-dropdown="dropdown-furniture" id="furnitureToggleBtn">🏠 家具</button>
+        <button class="dropdown-toggle" data-dropdown="dropdown-furniture" id="furnitureToggleBtn">🛋️ 家具</button>
         <div class="dropdown-menu">
           <button class="dropdown-item tab-btn" data-category="general_new">✨ 本周信封</button>
           <button class="dropdown-item tab-btn" data-category="general_misc">🖼️ 家具擺設</button>
@@ -3936,8 +3975,8 @@ body::after
         </div>
       </div>
       <button class="tab-btn" data-category="schedule">📅 米米班表</button>
-      <button type="button" id="branchApplyBtn" class="tab-settings-btn auth-btn branch-nav-btn" style="display:none">🏪 申請店鋪</button>
-      <button type="button" id="branchManageBtn" class="tab-settings-btn auth-btn branch-nav-btn" style="display:none">🏪 店鋪管理</button>
+      <button type="button" id="branchApplyBtn" class="tab-settings-btn auth-btn branch-nav-btn" style="display:none">🈸 申請店鋪</button>
+      <button type="button" id="branchManageBtn" class="tab-settings-btn auth-btn branch-nav-btn" style="display:none">🛠️ 店鋪管理</button>
     </div>
     <button type="button" id="tabSettingsBtn" class="tab-settings-btn auth-btn branch-nav-btn">⚙️ 分頁管理</button>
     <div class="tab-settings-form" id="tabSettingsForm" role="dialog" aria-modal="true">
@@ -8119,7 +8158,7 @@ function setupCartPreferences() {
     margin:0!important;
     border:1px solid rgba(255,255,255,.22)!important;
     border-radius:12px!important;
-    background:linear-gradient(135deg,#d8b4fe,#b779e8)!important;
+    background:linear-gradient(135deg,#c99bea,#9b5fc7)!important;
     color:#fff!important;
     font-size:13px!important;
     font-weight:800!important;
@@ -8240,7 +8279,7 @@ function setupCartPreferences() {
   }
   /* 只改寬度，不改申請店鋪的其他外觀/邏輯。 */
   #sideTabsPanel>#branchApplyBtn{
-    background:linear-gradient(135deg,#d8b4fe,#b779e8)!important;
+    background:linear-gradient(135deg,#c99bea,#9b5fc7)!important;
     color:#fff!important;
   }
 }
@@ -8250,7 +8289,7 @@ function setupCartPreferences() {
     text-align:left!important;
   }
   #sideTabsPanel>#branchApplyBtn.mobile-role-visible{
-    background:linear-gradient(135deg,#d8b4fe,#b779e8)!important;
+    background:linear-gradient(135deg,#c99bea,#9b5fc7)!important;
     color:#fff!important;
   }
 }
@@ -8258,7 +8297,7 @@ function setupCartPreferences() {
 <script id="stable-nav-common-width-v4-js">
 (function(){
   let timer=0;
-  const PURPLE='linear-gradient(135deg,#d8b4fe,#b779e8)';
+  const PURPLE='linear-gradient(135deg,#c99bea,#9b5fc7)';
 
   function forceApplyColor(){
     const b=document.getElementById('branchApplyBtn');
