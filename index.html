@@ -3838,7 +3838,6 @@ body::after
 .branch-store-form.open,.branch-management-form.open,.branch-owner-form.open{left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important}
 @media(max-width:768px){
   .side-tabs-panel{max-width:calc(100vw - 20px);box-sizing:border-box}
-  .side-tabs-panel .branch-store-dropdown{top:0;right:calc(100% + 8px);left:auto;width:min(240px,calc(100vw - 160px));min-width:180px;max-width:240px;max-height:60vh}
   .side-tabs-panel .branch-nav-btn{display:none!important}
   .side-tabs-panel .branch-nav-btn.mobile-role-visible{display:flex!important}
   .branch-store-form,.branch-management-form,.branch-owner-form{width:min(94vw,620px)!important;max-height:calc(100vh - 24px)!important;padding:16px!important}
@@ -4941,14 +4940,31 @@ function setupCartPreferences() {
       if(activeBranchId!=='main'&&activeBranch){const t=document.getElementById('mimiTitleText');if(t)t.textContent=activeBranch.name;}
     }
     
+    function syncBranchStoreDropdownHost(){
+      const m=document.getElementById('branchStoreMenu'),dd=document.getElementById('branchStoreDropdown');
+      if(!m||!dd)return;
+      if(window.innerWidth<=768){
+        // 手機端：選單脫離底部分頁列，避免受到水平捲動／overflow 影響。
+        if(dd.parentElement!==document.body)document.body.appendChild(dd);
+      }else{
+        // 回到桌面版時恢復原本 DOM 結構與 CSS 定位。
+        if(dd.parentElement!==m)m.appendChild(dd);
+        ['position','display','visibility','top','right','bottom','left','width','minWidth','maxWidth','maxHeight','overflowY','overflowX','zIndex','transform'].forEach(k=>dd.style.removeProperty(k.replace(/[A-Z]/g,m=>'-'+m.toLowerCase())));
+      }
+    }
+
+    function closeBranchStoreDropdown(){
+      const m=document.getElementById('branchStoreMenu'),dd=document.getElementById('branchStoreDropdown');
+      if(m)m.classList.remove('open');
+      if(dd&&window.innerWidth<=768)dd.style.display='none';
+    }
+
     function positionBranchStoreDropdown(){
       const t=document.getElementById('branchStoreToggle'),dd=document.getElementById('branchStoreDropdown');
       if(!t||!dd||window.innerWidth>768)return;
+      syncBranchStoreDropdownHost();
 
-      const r=t.getBoundingClientRect(), panel=document.getElementById('sideTabsPanel'), gap=8,pad=8;
-      const wasHidden=getComputedStyle(dd).display==='none';
-
-      // 與商品子分頁下拉選單一致：從按鈕上方彈出、左側對齊按鈕。
+      const r=t.getBoundingClientRect(),panel=document.getElementById('sideTabsPanel'),gap=8,pad=8;
       dd.style.position='fixed';
       dd.style.display='block';
       dd.style.visibility='hidden';
@@ -4964,32 +4980,17 @@ function setupCartPreferences() {
       dd.style.overflowX='hidden';
       dd.style.zIndex='2147483000';
 
-      // 先取得實際尺寸，再把選單定位到按鈕正上方。
-      const w=Math.min(dd.scrollWidth || 145, Math.min(window.innerWidth-2*pad, 260));
-      const h=dd.offsetHeight;
+      const w=Math.min(Math.max(dd.scrollWidth||145,145),Math.min(window.innerWidth-2*pad,260));
       const maxLeft=Math.max(pad,window.innerWidth-w-pad);
       const left=Math.max(pad,Math.min(r.left,maxLeft));
-      // 固定在整個手機分頁列「上方」彈出，不再跟著單一按鈕位置左右/上下漂移。
-      // 分頁列是固定底部列，因此直接以分頁列的 top 作為選單底部基準。
-      const panelTop=panel ? panel.getBoundingClientRect().top : r.top;
-      let bottom=Math.max(pad,window.innerHeight-panelTop+gap);
-
-      // 若內容高度受限，仍保持向上彈出；超出畫面時再縮短高度。
-      if(h>window.innerHeight-pad*2){
-        dd.style.maxHeight=(window.innerHeight-pad*2)+'px';
-      }
+      const panelTop=panel?panel.getBoundingClientRect().top:r.top;
+      const bottom=Math.max(pad,window.innerHeight-panelTop+gap);
 
       dd.style.width=w+'px';
       dd.style.left=left+'px';
       dd.style.bottom=bottom+'px';
       dd.style.top='auto';
       dd.style.visibility='visible';
-
-      if(wasHidden){
-        requestAnimationFrame(()=>{
-          if(maybeBranchStoreDropdownOpen()) positionBranchStoreDropdown();
-        });
-      }
     }
 
     function maybeBranchStoreDropdownOpen(){
@@ -5026,7 +5027,27 @@ function setupCartPreferences() {
     }
 
     function bindBranchUI(){
-      const t=document.getElementById('branchStoreToggle'),m=document.getElementById('branchStoreMenu');if(t&&t.dataset.bound!=='1'){t.dataset.bound='1';t.onclick=e=>{e.stopPropagation();const opening=!m.classList.contains('open');m.classList.toggle('open');if(opening)positionBranchStoreDropdown();};document.addEventListener('click',e=>{if(!m.contains(e.target))m.classList.remove('open');});window.addEventListener('resize',()=>{if(m.classList.contains('open'))positionBranchStoreDropdown();},{passive:true});window.addEventListener('scroll',()=>{if(m.classList.contains('open'))positionBranchStoreDropdown();},{passive:true});}
+      const t=document.getElementById('branchStoreToggle'),m=document.getElementById('branchStoreMenu'),dd=document.getElementById('branchStoreDropdown');
+      syncBranchStoreDropdownHost();
+      if(t&&m&&dd&&t.dataset.bound!=='1'){
+        t.dataset.bound='1';
+        t.onclick=e=>{
+          e.stopPropagation();
+          const opening=!m.classList.contains('open');
+          if(opening){
+            m.classList.add('open');
+            positionBranchStoreDropdown();
+          }else{
+            closeBranchStoreDropdown();
+          }
+        };
+        document.addEventListener('click',e=>{if(!m.contains(e.target)&&!dd.contains(e.target))closeBranchStoreDropdown();});
+        window.addEventListener('resize',()=>{
+          syncBranchStoreDropdownHost();
+          if(m.classList.contains('open')&&window.innerWidth<=768)positionBranchStoreDropdown();
+        },{passive:true});
+        window.addEventListener('scroll',()=>{if(m.classList.contains('open')&&window.innerWidth<=768)positionBranchStoreDropdown();},{passive:true});
+      }
       const a=document.getElementById('branchApplyBtn');if(a&&a.dataset.bound!=='1'){a.dataset.bound='1';a.onclick=()=>{
         const b=Object.values(branchRegistry).find(x=>x.ownerUid===branchAuthUser?.uid&&x.status==='approved');
         if(a.dataset.role==='owner-status'){
@@ -8169,28 +8190,6 @@ function setupCartPreferences() {
     justify-content:center!important;
   }
 
-  /* 商店街選單：位置完全比照商品子分頁，從按鈕正上方彈出並左側對齊。 */
-  #sideTabsPanel .branch-store-dropdown{
-    position:fixed!important;
-    display:none!important;
-    top:auto!important;
-    right:auto!important;
-    bottom:auto!important;
-    width:max-content!important;
-    min-width:145px!important;
-    max-width:min(78vw,260px)!important;
-    max-height:min(46vh,330px)!important;
-    overflow-y:auto!important;
-    overflow-x:hidden!important;
-    padding:6px!important;
-    border-radius:12px!important;
-    box-shadow:0 10px 30px rgba(0,0,0,.65)!important;
-    z-index:2147483000!important;
-    transform:none!important;
-  }
-  #sideTabsPanel .branch-store-menu.open .branch-store-dropdown{
-    display:block!important;
-  }
   #sideTabsPanel .branch-store-option{
     width:max-content!important;
     min-width:100%!important;
@@ -8349,22 +8348,6 @@ function setupCartPreferences() {
   #sideTabsPanel>#branchApplyBtn.mobile-role-visible{
     background:linear-gradient(135deg,#c99bea,#9b5fc7)!important;
     color:#fff!important;
-  }
-}
-</style>
-<style id="mobile-branch-store-popup-final">
-/* 手機端商店街：固定從整個分頁列上方彈出，避免選單跑到分頁列側邊。 */
-@media (max-width:768px){
-  #sideTabsPanel .branch-store-dropdown{
-    position:fixed!important;
-    top:auto!important;
-    right:auto!important;
-    bottom:auto!important;
-    transform:none!important;
-    z-index:2147483000!important;
-    max-height:min(60vh,420px)!important;
-    overflow-y:auto!important;
-    overflow-x:hidden!important;
   }
 }
 </style>
