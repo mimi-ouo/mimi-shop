@@ -4887,7 +4887,7 @@ function setupCartPreferences() {
       if(apply){
         apply.classList.remove('mobile-role-visible','branch-status-open','branch-status-ready','branch-status-locked');
         if(isMainOwner){
-          apply.style.display='flex';apply.textContent='🏪 申請店鋪';apply.dataset.role='admin';
+          apply.style.display='flex';apply.textContent='📝 申請店鋪';apply.dataset.role='admin';
         }else if(isOwner){
           const ownerBranchCode=''+(ownerBranch.code||ownerBranch.id);
           if((''+activeBranchId)===ownerBranchCode){
@@ -4904,12 +4904,12 @@ function setupCartPreferences() {
           }
           apply.classList.add('mobile-role-visible');
         }else{
-          apply.style.display='flex';apply.textContent='🏪 申請店鋪';apply.dataset.role='visitor';apply.classList.add('mobile-role-visible');
+          apply.style.display='flex';apply.textContent='📝 申請店鋪';apply.dataset.role='visitor';apply.classList.add('mobile-role-visible');
         }
       }
       if(manage){
         manage.classList.remove('mobile-role-visible');
-        manage.innerHTML='<span>🏪 店鋪管理</span>';
+        manage.innerHTML='<span>🛠️ 店鋪管理</span>';
         if(isMainOwner) manage.style.justifyContent='space-between';
         manage.style.display=isMainOwner?'flex':'none';
         if(isMainOwner)manage.classList.add('mobile-role-visible');
