@@ -3861,38 +3861,38 @@ body::after
   <button id="backToTopBtn" title="回到頂部">↑ 頂部</button>
   <div class="side-tabs-panel" id="sideTabsPanel">
     <button class="collapse-toggle-btn" id="collapseToggleBtn">📂 收合 ▾</button>
-    <button type="button" class="tab-btn" id="homeWelcomeBtn" title="回到目前分店歡迎頁">🏠 首頁</button>
+    <button type="button" class="tab-btn" id="homeWelcomeBtn" title="回到本店說明頁">🏠 本店首頁</button>
     <button class="tab-btn" id="cartTabBtn" data-category="cart">
       <span>🛒 購物車</span>
     </button>
     <div class="branch-store-menu" id="branchStoreMenu">
-      <button type="button" class="branch-store-toggle" id="branchStoreToggle">🏪 逛逛分店 ▾</button>
+      <button type="button" class="branch-store-toggle" id="branchStoreToggle">🏪 商店街 ▾</button>
       <div class="branch-store-dropdown" id="branchStoreDropdown"></div>
     </div>
     <!-- branch navigation buttons are placed after schedule below -->
     <div class="branch-store-form" id="branchApplyForm" role="dialog" aria-modal="true">
-      <div class="tab-settings-title">🏪 申請建立分店</div>
-      <div class="branch-store-hint">審核通過前不能新增商品。Firebase 密碼只用於建立／登入帳號，不會寫入 Google Sheet。<br><b>重要：Google Sheet 與圖片資料夾必須由分店主自己的 Google 帳號建立，並分享給中央執行帳號。</b></div>
-      <label>分店名稱</label><input id="branchNameInput" maxlength="60" placeholder="例如：米米小舖－小可愛分店">
+      <div class="tab-settings-title">🏪 申請建立店鋪</div>
+      <div class="branch-store-hint">審核通過前不能新增商品。Firebase 密碼只用於建立／登入帳號，不會提供給版主。<br><b>重要：Google 試算表與雲端資料夾必須由店主自己的 Google 帳號建立，並分享給版主。</b></div>
+      <label>店名</label><input id="branchNameInput" maxlength="60" placeholder="例如：米米的店，店名後續仍可修改">
       <label>Firebase 帳號 Email</label><input id="branchFirebaseEmailInput" type="email" autocomplete="email">
       <label>Firebase 密碼</label><input id="branchFirebasePasswordInput" type="password" autocomplete="new-password" placeholder="至少 6 碼">
-      <label>settings_contact_discord_url（聯絡網址）</label><input id="branchDiscordUrlInput" placeholder="https://discord.com/users/... 或「無」">
-      <label>settings_contact_tally_url（留言網址）</label><input id="branchTallyUrlInput" placeholder="https://tally.so/r/... 或「無」">
+      <label>settings_contact_discord_url（聯絡網址）</label><input id="branchDiscordUrlInput" placeholder="https://discord.com/users/... 或「無」，聯絡資訊後續仍可新增">
+      <label>settings_contact_tally_url（留言網址）</label><input id="branchTallyUrlInput" placeholder="https://tally.so/r/... 或「無」，聯絡資訊後續仍可新增">
       <label>Google Drive／Sheet 擁有者 Email</label><input id="branchGoogleOwnerEmailInput" type="email" autocomplete="email" placeholder="例如：yourname@gmail.com">
-      <label>Google 試算表網址／Spreadsheet ID</label><input id="branchSpreadsheetInput" placeholder="請先複製模板試算表">
-      <label>分店圖片資料夾網址／Folder ID</label><input id="branchFolderInput" placeholder="請在你自己的 Google Drive 建立資料夾後貼上網址">
-      <div class="branch-store-hint">請先複製模板：<a href="https://docs.google.com/spreadsheets/d/1HVsEhQ7CxgoFUrO1__KbuO8PNGfeBVDrdkhJ7qdw5O0/edit?usp=sharing" target="_blank" rel="noopener noreferrer">開啟分店模板</a>。請提供「你自己的試算表網址／Spreadsheet ID」及「你自己的圖片資料夾網址／Folder ID」。<br>建立後，請把 <b>中央執行帳號：comtw919@gmail.com</b> 加入該 Sheet 與圖片資料夾的「編輯者」。<br>送出申請後，由中央 Web App 自動處理資料路由；<b>分店不需要部署 Apps Script，也不需要輸入 Web App 網址。</b></div>
+      <label>Google 試算表網址／Spreadsheet ID</label><input id="branchSpreadsheetInput" placeholder="請先點下面連結建立資料庫副本">
+      <label>店鋪圖片資料夾網址／Folder ID</label><input id="branchFolderInput" placeholder="請在你自己的雲端硬碟建立資料夾後貼上網址">
+      <div class="branch-store-hint">請先建立資料庫副本：<a href="https://docs.google.com/spreadsheets/d/1bsU3zHOhWWsYfjPfBGCaeXaF7YVCHxMN2R_tsn_Tm1Q/edit?usp=sharing" target="_blank" rel="noopener noreferrer">開啟資料庫模板</a>。請提供「你自己的試算表網址」及「你自己的圖片資料夾網址」，請勿填寫模板網址。<br>建立副本與資料夾後，請點選共享，把 <b>版主帳號：comtw919@gmail.com</b> 加入該試算表與圖片資料夾的「編輯者」。<br>請放心版主不會去編輯你的資料<b>只是修改文字或上傳商品網站必須有編輯權</b></div>
       <div id="branchApplyStatus" class="branch-store-status"></div>
       <div class="branch-store-actions"><button type="button" class="schedule-btn" id="branchApplySubmitBtn">送出申請</button><button type="button" class="cancel-btn" id="branchApplyCancelBtn">取消</button></div>
     </div>
     <div class="branch-management-form" id="branchManagementForm" role="dialog" aria-modal="true">
-      <div class="tab-settings-title">🏪 分店管理</div>
-      <div class="branch-store-hint">版主可核准、關閉、重新開啟及刪除分店。被版主關閉的分店，分店主無法自行恢復。</div>
+      <div class="tab-settings-title">🏪 店鋪管理</div>
+      <div class="branch-store-hint">版主可核准、關閉、重新開啟及刪除店鋪。被版主關閉的店舖，店主無法自行恢復。</div>
       <div id="branchManagementList"></div><div id="branchManagementStatus" class="branch-store-status"></div>
       <div class="branch-store-actions"><button type="button" class="cancel-btn" id="branchManagementCloseBtn">關閉</button></div>
     </div>
     <div class="branch-store-form" id="branchOwnerForm" role="dialog" aria-modal="true">
-      <div class="tab-settings-title">🏪 我的分店</div><div id="branchOwnerInfo" class="branch-store-hint"></div>
+      <div class="tab-settings-title">🏪 本店狀態</div><div id="branchOwnerInfo" class="branch-store-hint"></div>
       <div class="branch-store-actions"><button type="button" class="schedule-btn" id="branchOwnerToggleBtn"></button><button type="button" class="cancel-btn" id="branchOwnerCloseBtn">關閉</button></div>
     </div>
     <div class="collapse-content" id="collapseContent">
@@ -3945,21 +3945,21 @@ body::after
         </div>
       </div>
       <button class="tab-btn" data-category="schedule">📅 米米班表</button>
-      <button type="button" id="branchApplyBtn" class="tab-settings-btn auth-btn branch-nav-btn" style="display:none">🏪 申請分店</button>
-      <button type="button" id="branchManageBtn" class="tab-settings-btn auth-btn branch-nav-btn" style="display:none">🏪 分店管理</button>
+      <button type="button" id="branchApplyBtn" class="tab-settings-btn auth-btn branch-nav-btn" style="display:none">🏪 申請店鋪</button>
+      <button type="button" id="branchManageBtn" class="tab-settings-btn auth-btn branch-nav-btn" style="display:none">🏪 店鋪管理</button>
     </div>
-    <button type="button" id="tabSettingsBtn" class="tab-settings-btn auth-btn branch-nav-btn">⚙️ 修改分頁</button>
+    <button type="button" id="tabSettingsBtn" class="tab-settings-btn auth-btn branch-nav-btn">⚙️ 分頁管理</button>
     <div class="tab-settings-form" id="tabSettingsForm" role="dialog" aria-modal="true">
-      <div class="tab-settings-title">⚙️ 分頁設定</div>
+      <div class="tab-settings-title">⚙️ 分頁管理</div>
       <div id="tabSettingsRows" class="tab-settings-scroll"></div>
       <div class="tab-settings-footer"><div class="tab-settings-actions"><button type="button" class="auth-btn" id="tabSettingsSaveBtn">儲存並立即套用</button><button type="button" class="cancel-btn" id="tabSettingsCancelBtn">取消</button></div>
-      <div id="tabSettingsSaving" class="schedule-admin-hint" style="display:none;text-align:center;font-weight:bold;">正在儲存，請稍後...</div></div>
+      <div id="tabSettingsSaving" class="schedule-admin-hint" style="display:none;text-align:center;font-weight:bold;">正在儲存，請稍候...</div></div>
     </div>
     <div class="auth-section-wrapper">
       <div class="auth-box" id="authBox">
         <button class="auth-btn" id="showLoginBtn">登入</button>
         <div class="auth-inputs" id="authInputs">
-          <input type="email" id="emailInput" placeholder="管理員 Email">
+          <input type="email" id="emailInput" placeholder="版主/店主 Email">
           <input type="password" id="passwordInput" placeholder="Firebase 密碼">
           <button class="auth-btn" id="loginBtn">確認</button>
           <button class="cancel-btn" id="cancelBtn">✕</button>
@@ -4005,7 +4005,7 @@ body::after
                   <input id="contactDiscordTextInput" type="text">
                   <label for="contactDiscordUrlInput">DC 聯絡網址</label>
                   <input id="contactDiscordUrlInput" type="text" placeholder="https://discord.com/users/你的ID 或填「無」">
-                  <div id="contactSettingsSaving" class="schedule-admin-hint" style="display:none;text-align:center;font-weight:bold;">正在儲存，請稍後...</div>
+                  <div id="contactSettingsSaving" class="schedule-admin-hint" style="display:none;text-align:center;font-weight:bold;">正在儲存，請稍候...</div>
                    <div class="schedule-admin-hint">如果不使用此聯絡按鈕，網址請填「無」，儲存後按鈕會隱藏。<br>DC 網址取得：Discord 開啟「開發者模式」→ 你的頭像／名稱右鍵 →「複製使用者 ID」，再組成 https://discord.com/users/使用者ID</div>
                   <label for="contactTallyTextInput">Tally 按鈕文字</label>
                   <input id="contactTallyTextInput" type="text">
@@ -4086,7 +4086,6 @@ body::after
   </div>
   <div class="schedule-container" id="scheduleContainer">
     <div class="schedule-admin-panel" id="scheduleAdminPanel">
-      <div class="schedule-admin-hint">班表雲端設定欄位 ID：<b>settings_schedule_config</b>（Google Sheet 請建立此 ID；整份班表設定會儲存在此欄位的 caption）</div>
       <div class="schedule-admin-row">
         <label>班表方式：</label>
         <label><input type="radio" name="scheduleMode" value="weekday_off" class="schedule-mode-radio"> 固定放假星期幾</label>
@@ -4127,7 +4126,7 @@ body::after
         <button type="button" class="schedule-btn" id="scheduleApplyBtn">套用並儲存班表</button>
         <button type="button" class="schedule-btn" id="scheduleResetBtn">恢復預設</button>
       </div>
-      <div class="schedule-admin-hint">管理端修改後會儲存到 Google Sheet；訪客重新整理或切換月份即可看到修改後班表，如果你是自訂班表，訪客只會看到當月班表。</div>
+      <div class="schedule-admin-hint">管理端修改後會儲存到雲端，訪客重新整理或切換月份即可看到修改後班表，如果你是自訂班表，訪客只會看到當月班表。</div>
     </div>
     <div class="schedule-header">
       <h3 id="scheduleMonthTitle">班表</h3>
@@ -4461,7 +4460,7 @@ body::after
           if(next!==old) changed.push([id,next]);
         });
         if(!changed.length){saving.style.display='block';saving.innerText='沒有修改，不需儲存。';setTimeout(()=>saving.style.display='none',900);return;}
-        saving.style.display='block'; saving.innerText=`正在儲存 ${changed.length} 項修改，請稍後...`; save.disabled=true;
+        saving.style.display='block'; saving.innerText=`正在儲存 ${changed.length} 項修改，請稍候...`; save.disabled=true;
         try{
           for(const [id,val] of changed){
             const ok=await updateItemById(id,'caption',val);
@@ -4638,7 +4637,7 @@ function setupCartPreferences() {
             const pendingSnap=await db.ref('branchApplications/'+user.uid).once('value');
             const pendingData=pendingSnap.val();
             if(pendingData && pendingData.status==='pending') ownerPendingApplication=pendingData;
-          }catch(e){console.error('讀取分店申請狀態失敗',e);}
+          }catch(e){console.error('讀取店鋪申請狀態失敗',e);}
         }
 
         // 分店主登入後：只要 Firebase 帳號目前存在核准分店，就優先進入自己的店。
@@ -4673,10 +4672,10 @@ function setupCartPreferences() {
               const noticeKey='mimiPendingBranchNotice_'+user.uid;
               if(sessionStorage.getItem(noticeKey)!=='1'){
                 sessionStorage.setItem(noticeKey,'1');
-                setTimeout(()=>alert('🔔 您的分店審核中，可聯繫版主詢問進度'),250);
+                setTimeout(()=>alert('🔔 您的店鋪審核中，可聯繫版主詢問進度'),250);
               }
             }catch(e){
-              setTimeout(()=>alert('🔔 您的分店審核中，可聯繫版主詢問進度'),250);
+              setTimeout(()=>alert('🔔 您的店鋪審核中，可聯繫版主詢問進度'),250);
             }
           }else if(activeBranchId==='main'){
             // 沒有核准分店、也沒有審核中的申請：提示一次並自動開啟申請表。
@@ -4706,19 +4705,19 @@ function setupCartPreferences() {
                   const noticeKey='mimiPendingBranchNotice_'+user.uid;
                   if(sessionStorage.getItem(noticeKey)!=='1'){
                     sessionStorage.setItem(noticeKey,'1');
-                    alert('🔔 您的分店審核中，可聯繫版主詢問進度');
+                    alert('🔔 您的店鋪審核中，可聯繫版主詢問進度');
                   }
-                }catch(e){ alert('🔔 您的分店審核中，可聯繫版主詢問進度'); }
+                }catch(e){ alert('🔔 您的店鋪審核中，可聯繫版主詢問進度'); }
                 return;
               }
               showDeletedBranchNoticeOnce(user,0);
             },100);
           }else{
-            alert('此分店不存在，將返回主店。');
+            alert('此店鋪不存在，將返回主店。');
           }
         }
         if(activeBranchId!=='main' && activeBranch && activeBranch.status!=='approved'){
-          alert('此分店尚未核准，將返回主店。');
+          alert('此店鋪尚未核准，將返回主店。');
           const u=new URL(location.href);u.searchParams.delete('branch');location.href=u.toString();return;
         }
 
@@ -4757,13 +4756,13 @@ function setupCartPreferences() {
       try{
         const snap=await db.ref('branchStores').once('value');
         branchRegistry=snap.val()||{};
-      }catch(e){console.error('讀取分店資料失敗',e);branchRegistry={};}
+      }catch(e){console.error('讀取店鋪資料失敗',e);branchRegistry={};}
     }
     async function loadBranchApplications(){
       try{
         const snap=await db.ref('branchApplications').once('value');
         return snap.val()||{};
-      }catch(e){console.error('讀取分店申請失敗',e);return {};}
+      }catch(e){console.error('讀取店鋪申請失敗',e);return {};}
     }
     function escBranch(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
     function formatBranchApprovedAt(value){
@@ -4818,11 +4817,11 @@ function setupCartPreferences() {
         branchApplicationsListenerRef.on('value',snap=>{
           updateBranchPendingBadge(snap.val()||{});
         },err=>{
-          console.error('讀取待審核分店數量失敗',err);
+          console.error('讀取待審核店鋪數量失敗',err);
           updateBranchPendingBadge({});
         });
       }catch(e){
-        console.error('建立待審核分店即時監聽失敗',e);
+        console.error('建立待審核店鋪即時監聽失敗',e);
         updateBranchPendingBadge({});
       }
     }
@@ -4841,16 +4840,16 @@ function setupCartPreferences() {
       if(apply){
         apply.classList.remove('mobile-role-visible');
         if(isMainOwner){
-          apply.style.display='flex';apply.textContent='🏪 申請分店';apply.dataset.role='admin';
+          apply.style.display='flex';apply.textContent='🏪 申請店鋪';apply.dataset.role='admin';
         }else if(isOwner){
           apply.style.display='flex';apply.textContent='↩️ 回我的店';apply.dataset.role='owner';apply.classList.add('mobile-role-visible');
         }else{
-          apply.style.display='flex';apply.textContent='🏪 申請分店';apply.dataset.role='visitor';apply.classList.add('mobile-role-visible');
+          apply.style.display='flex';apply.textContent='🏪 申請店鋪';apply.dataset.role='visitor';apply.classList.add('mobile-role-visible');
         }
       }
       if(manage){
         manage.classList.remove('mobile-role-visible');
-        manage.innerHTML='<span>🏪 分店管理</span>';
+        manage.innerHTML='<span>🏪 店鋪管理</span>';
         if(isMainOwner) manage.style.justifyContent='space-between';
         manage.style.display=isMainOwner?'flex':'none';
         if(isMainOwner)manage.classList.add('mobile-role-visible');
@@ -4859,9 +4858,9 @@ function setupCartPreferences() {
           try{
             db.ref('branchApplications').once('value')
               .then(snap=>updateBranchPendingBadge(snap.val()||{}))
-              .catch(e=>console.error('同步待審核分店數量失敗',e));
+              .catch(e=>console.error('同步待審核店鋪數量失敗',e));
           }catch(e){
-            console.error('同步待審核分店數量失敗',e);
+            console.error('同步待審核店鋪數量失敗',e);
           }
         }
       }
@@ -4902,7 +4901,7 @@ function setupCartPreferences() {
       }
       try{ localStorage.removeItem('mimiOwnerBranchCode_'+user.uid); }catch(e){}
       setTimeout(()=>{
-        alert('⚠️ 您尚未申請分店或您的分店已刪除，請直接申請分店');
+        alert('⚠️ 您的店鋪已刪除，請重新申請，可使用原店鋪的資料庫與圖片資料夾網址');
         openDeletedBranchReapplyForm(user);
       },Math.max(0,Number(delay)||0));
     }
@@ -4913,7 +4912,7 @@ function setupCartPreferences() {
       const emailInput=document.getElementById('branchFirebaseEmailInput');
       const status=document.getElementById('branchApplyStatus');
       if(emailInput){ emailInput.value=user.email||''; emailInput.readOnly=true; }
-      if(status)status.textContent='⚠️ 您尚未申請分店或您的分店已刪除，請直接申請分店。Firebase 帳號已自動帶入目前登入帳號，請重新填寫其他申請資料。';
+      if(status)status.textContent='⚠️ 您的店鋪已刪除，請重新申請。Firebase 帳號已自動帶入目前登入帳號，請重新填寫其他申請資料，可使用原店鋪的資料庫與圖片資料夾網址。';
       try{ localStorage.removeItem('mimiOwnerBranchCode_'+user.uid); }catch(e){}
       if(form){ form.classList.add('open'); setTimeout(()=>{ const name=document.getElementById('branchNameInput'); if(name)name.focus(); },80); }
     }
@@ -4926,7 +4925,7 @@ function setupCartPreferences() {
           if(b){switchStore(b.code||b.id);return;}
         }
         if(window.innerWidth<=768&&a.dataset.role==='visitor'){
-          alert('📱 手機端無法申請分店，請使用電腦登入本網站後再申請分店。');return;
+          alert('📱 手機端無法申請店鋪，請使用電腦申請。');return;
         }
         document.getElementById('branchApplyForm').classList.add('open');
       };}
@@ -4952,7 +4951,7 @@ function setupCartPreferences() {
         if(verify.status!=='success') throw new Error(verify.message||'Google 資源驗證失敗');
       }catch(e){
         console.error(e);
-        st.textContent='❌ Google 資源驗證失敗：'+(e.message||'請確認 Sheet／圖片資料夾都是你的帳號所有，且已分享給中央執行帳號 comtw919@gmail.com。');
+        st.textContent='❌ Google 資源驗證失敗：'+(e.message||'請確認 Sheet／圖片資料夾都是你的帳號所有，且已分享給版主 comtw919@gmail.com。');
         return;
       }
       st.textContent='正在建立／登入 Firebase 帳號並送出申請...';
@@ -4964,12 +4963,12 @@ function setupCartPreferences() {
         const code='branch_'+uid.replace(/[^A-Za-z0-9_-]/g,'').slice(0,32);
         const existingSnap=await db.ref('branchApplications/'+uid).once('value');
         const existing=existingSnap.val();
-        if(existing?.status==='approved' && branchRegistry[existing.code]) throw new Error('此 Firebase 帳號已經有已核准的分店。');
-        if(existing?.status==='pending') throw new Error('您的分店審核中，可聯繫版主詢問進度');
+        if(existing?.status==='approved' && branchRegistry[existing.code]) throw new Error('此 Firebase 帳號已經有已核准的店舖。');
+        if(existing?.status==='pending') throw new Error('您的店舖審核中，可聯繫版主詢問進度');
         const application={uid,email,displayName:name,name,code,status:'pending',createdAt:existing?.createdAt||firebase.database.ServerValue.TIMESTAMP,updatedAt:firebase.database.ServerValue.TIMESTAMP,spreadsheetId:sheet,folderId,googleOwnerEmail,apiUrl:SCRIPT_URL,discordUrl:discord,tallyUrl:tally};
         await db.ref('branchApplications/'+uid).set(application);
         await auth.signOut();
-        st.textContent='✅ 已送出，等待版主審核；審核通過前無法新增商品。';
+        st.textContent='✅ 已送出，等待版主審核；審核通過前無法新增商品，但是可以先到資料庫副本修改文字部分。';
         setTimeout(()=>document.getElementById('branchApplyForm').classList.remove('open'),1300);
         await loadBranchRegistry();syncBranchUI();
       }catch(e){console.error(e);st.textContent='❌ 申請失敗：'+(e.message||'請檢查 Firebase 與 Web App 設定。');}
@@ -4980,25 +4979,25 @@ function setupCartPreferences() {
       const f=document.getElementById('branchManagementForm'),l=document.getElementById('branchManagementList');l.innerHTML='';
       const pending=Object.values(apps).filter(x=>x.status==='pending').sort((a,b)=>Number(b.createdAt||0)-Number(a.createdAt||0));
       const stores=Object.values(branchRegistry).sort((a,b)=>Number(b.approvedAt||b.createdAt||0)-Number(a.approvedAt||a.createdAt||0));
-      if(!pending.length&&!stores.length)l.innerHTML='<div class="branch-store-hint">目前沒有分店申請或分店資料。</div>';
+      if(!pending.length&&!stores.length)l.innerHTML='<div class="branch-store-hint">目前沒有店鋪申請或店舖資料。</div>';
       if(pending.length){
         const h=document.createElement('div');h.className='branch-store-card';h.innerHTML='<div class="branch-store-card-title">⏳ 待審核申請</div>';l.appendChild(h);
         pending.forEach(x=>{
           const c=document.createElement('div');c.className='branch-store-card';
-          c.innerHTML=`<div class="branch-store-card-title">${escBranch(x.name)}</div><div class="branch-store-card-meta">Firebase：${escBranch(x.email)}<br>Spreadsheet：${escBranch(x.spreadsheetId)}<br>圖片資料夾：${escBranch(x.folderId)}<br>Google 擁有者：${escBranch(x.googleOwnerEmail||'未填')}<br>中央 Web App：系統自動綁定</div>`;
+          c.innerHTML=`<div class="branch-store-card-title">${escBranch(x.name)}</div><div class="branch-store-card-meta">Firebase：${escBranch(x.email)}<br>Spreadsheet：${escBranch(x.spreadsheetId)}<br>圖片資料夾：${escBranch(x.folderId)}<br>Google 擁有者：${escBranch(x.googleOwnerEmail||'未填')}<br>Web App：系統自動綁定</div>`;
           const approve=document.createElement('button');approve.className='schedule-btn';approve.textContent='核准開店';approve.onclick=()=>approveBranchApplication(x.uid);c.appendChild(approve);
           const reject=document.createElement('button');reject.className='schedule-btn branch-store-danger';reject.textContent='拒絕申請';reject.onclick=()=>rejectBranchApplication(x.uid);c.appendChild(reject);
           l.appendChild(c);
         });
       }
       if(stores.length){
-        const h=document.createElement('div');h.className='branch-store-card';h.innerHTML='<div class="branch-store-card-title">🏪 已建立分店</div>';l.appendChild(h);
+        const h=document.createElement('div');h.className='branch-store-card';h.innerHTML='<div class="branch-store-card-title">🏪 已建立店鋪</div>';l.appendChild(h);
         stores.forEach(x=>{
           const c=document.createElement('div');c.className='branch-store-card';
-          const state=x.enabled===true?'🟢 開啟中':(x.adminClosed===true?'🔴 版主關閉':'⚪ 分店主關閉');
-          c.innerHTML=`<div class="branch-store-card-title">${escBranch(x.name)}</div><div class="branch-store-card-meta">狀態：${state}<br>審核通過時間／收費基準日：<b>${formatBranchApprovedAt(x.approvedAt)}</b><br>Firebase：${escBranch(x.ownerEmail||x.ownerUid)}<br>Google 擁有者：${escBranch(x.googleOwnerEmail||'未填')}<br>Spreadsheet：${escBranch(x.spreadsheetId)}<br>圖片資料夾：${escBranch(x.folderId)}</div>`;
+          const state=x.enabled===true?'🟢 開啟中':(x.adminClosed===true?'🔴 版主關閉':'⚪ 店主關閉');
+          c.innerHTML=`<div class="branch-store-card-title">${escBranch(x.name)}</div><div class="branch-store-card-meta">狀態：${state}<br>審核通過時間(+3天即為收費基準日)：<b>${formatBranchApprovedAt(x.approvedAt)}</b><br>Firebase：${escBranch(x.ownerEmail||x.ownerUid)}<br>Google 擁有者：${escBranch(x.googleOwnerEmail||'未填')}<br>Spreadsheet：${escBranch(x.spreadsheetId)}<br>圖片資料夾：${escBranch(x.folderId)}</div>`;
           const btn=document.createElement('button');btn.className='schedule-btn'+(x.enabled===true?' branch-store-danger':'');btn.textContent=x.enabled===true?'版主關閉':'版主重新開啟';btn.onclick=()=>setBranchAdminClosed(x.code||x.id,x.enabled===true);c.appendChild(btn);
-          const del=document.createElement('button');del.className='schedule-btn branch-store-danger';del.textContent='🗑️ 刪除分店';del.onclick=()=>deleteBranchStore(x.code||x.id);c.appendChild(del);
+          const del=document.createElement('button');del.className='schedule-btn branch-store-danger';del.textContent='🗑️ 刪除店鋪';del.onclick=()=>deleteBranchStore(x.code||x.id);c.appendChild(del);
           l.appendChild(c);
         });
       }
@@ -5037,12 +5036,12 @@ function setupCartPreferences() {
       try{
         await db.ref('branchStores/'+code).update({enabled:!closeIt,adminClosed:!!closeIt,updatedAt:firebase.database.ServerValue.TIMESTAMP});
         await loadBranchRegistry();syncBranchUI();await openBranchManagement();
-      }catch(e){alert('分店狀態更新失敗：'+(e.message||'請確認 Firebase Rules 與 admin 權限。'));}
+      }catch(e){alert('店鋪狀態更新失敗：'+(e.message||'請確認 Firebase Rules 與 admin 權限。'));}
     }
     async function deleteBranchStore(code){
       if(!isMainOwner||!code)return;
       const b=branchRegistry[code];if(!b)return;
-      if(!confirm(`確定要刪除分店「${b.name||code}」嗎？\n\n這會移除網站中的分店資料與分店主的分店綁定紀錄，無法復原。`))return;
+      if(!confirm(`確定要刪除店鋪「${b.name||code}」嗎？\n\n這會移除網站中的店鋪資料與店主的店鋪綁定紀錄，無法復原。`))return;
       try{
         const updates={};updates['branchStores/'+code]=null;
         if(b.ownerUid){
@@ -5059,7 +5058,7 @@ function setupCartPreferences() {
         await db.ref().update(updates);
         if(activeBranchId===code){const u=new URL(location.href);u.searchParams.delete('branch');location.href=u.toString();return;}
         await loadBranchRegistry();syncBranchUI();await openBranchManagement();
-      }catch(e){alert('刪除分店失敗：'+(e.message||'請確認 Firebase Rules 與 admin 權限。'));}
+      }catch(e){alert('刪除店鋪失敗：'+(e.message||'請確認 Firebase Rules 與 admin 權限。'));}
     }
     
     async function checkBranchApprovalFirstLogin(user, ownerBranch){
@@ -5071,7 +5070,7 @@ function setupCartPreferences() {
         const b=snap.val()||ownerBranch;
         if(b.approvalNoticeShown!==false)return;
         await ref.update({approvalNoticeShown:true,updatedAt:firebase.database.ServerValue.TIMESTAMP});
-        setTimeout(()=>alert('恭喜你~你的分店已經可以上傳與修改囉！！\n目前商店尚未對外開放，請在你準備好的時候從「我的分店」裡面開幕💖'),500);
+        setTimeout(()=>alert('恭喜你~你的店鋪已經可以上傳商品與修改囉！！\n目前商店尚未對外開放，請在你準備好的時候從「店鋪狀態」裡面開幕💖'),500);
       }catch(e){
         console.error('首次登入審核通過通知失敗',e);
       }
@@ -5083,20 +5082,20 @@ function setupCartPreferences() {
       let status='';
       if(b.adminClosed===true) status='🔴 已被版主關閉，無法自行開啟。<br><b>如需重新開啟，請與版主聯絡。</b>';
       else if(b.enabled===true) status='🟢 目前開啟中';
-      else status='⚪ 目前由分店主自行關閉，可自行重新開啟';
-      i.innerHTML=`分店：<b>${escBranch(b.name)}</b><br>狀態：${status}<br>審核通過時間／收費基準日：<b>${formatBranchApprovedAt(b.approvedAt)}</b><br><br>此日期時間為版主審核通過時間，並作為分店收費基準日；資料會保存於 Firebase，不會因重新整理頁面消失。<br><br>分店經版主核准後，預設為關閉；請先完成所有提示詞與內容設定，準備好後再自行開店。 `;
+      else status='⚪ 目前由店主自行關閉，可自行重新開啟';
+      i.innerHTML=`店鋪：<b>${escBranch(b.name)}</b><br>狀態：${status}<br>審核通過時間(+3天即為收費基準日)：<b>${formatBranchApprovedAt(b.approvedAt)}</b><br><br>此日期時間為版主審核通過時間，+3天即為店鋪收費基準日；資料會保存於 Firebase，不會因重新整理頁面消失。<br><br>店鋪經版主核准後，預設為關閉；請先完成所有提示詞與內容設定，準備好後再自行開店。 `;
       btn.disabled=b.adminClosed===true;
-      btn.textContent=b.enabled===true?'關閉我的分店':'開啟我的分店';
+      btn.textContent=b.enabled===true?'關閉我的店舖':'開啟我的店鋪';
       f.classList.add('open');
     }
     async function toggleOwnBranch(){
       const b=Object.values(branchRegistry).find(x=>x.ownerUid===branchAuthUser?.uid);
       if(!b||b.status!=='approved')return;
-      if(b.adminClosed===true){alert('此分店已由版主關閉，無法自行開啟。\n如需重新開啟，請與版主聯絡。');return;}
+      if(b.adminClosed===true){alert('此店鋪已由版主關閉，無法自行開啟。\n如需重新開啟，請與版主聯絡。');return;}
       try{
         await db.ref('branchStores/'+(b.code||b.id)).update({enabled:!(b.enabled===true),adminClosed:false,updatedAt:firebase.database.ServerValue.TIMESTAMP});
         await loadBranchRegistry();syncBranchUI();openBranchOwner();
-      }catch(e){alert('分店狀態更新失敗：'+(e.message||'請確認 Firebase Rules。'));}
+      }catch(e){alert('店鋪狀態更新失敗：'+(e.message||'請確認 Firebase Rules。'));}
     }
     function computeDataHash(data) {
       return JSON.stringify(data.map(i => i.id).sort());
@@ -5106,7 +5105,7 @@ function setupCartPreferences() {
       if (isAdmin) return;
 
       try {
-        const dataUrl=apiUrl('getData'); if(!dataUrl) throw new Error('此分店尚未綁定中央資料庫'); const response = await fetch(dataUrl);
+        const dataUrl=apiUrl('getData'); if(!dataUrl) throw new Error('此店鋪尚未共享資料庫'); const response = await fetch(dataUrl);
         const result = await response.json();
         if (result.status === 'success') {
           const settingsIds = SETTINGS_IDS;
@@ -5679,10 +5678,10 @@ function setupCartPreferences() {
         const changed=Object.entries(values).filter(([id,val])=>val!==getSettingValue(window._rawServerData||[],id));
         const status=document.getElementById('status'); const saving=document.getElementById('contactSettingsSaving');
         if(!changed.length){if(saving){saving.style.display='block';saving.innerText='沒有修改，不需儲存。';}setTimeout(()=>{if(saving)saving.style.display='none';},900);return;}
-        if(status)status.innerText=`正在儲存 ${changed.length} 項聯絡設定...`; if(saving){saving.style.display='block';saving.innerText='正在儲存，請稍後...';}
+        if(status)status.innerText=`正在儲存 ${changed.length} 項聯絡設定...`; if(saving){saving.style.display='block';saving.innerText='正在儲存，請稍候...';}
         for(const [id,val] of changed){
           const ok=await updateItemById(id,'caption',val);
-          if(!ok){if(status)status.innerText='❌ 聯絡設定儲存失敗，請檢查 Google Sheet ID 是否存在。'; if(saving)saving.innerText='❌ 儲存失敗，請重試'; return;}
+          if(!ok){if(status)status.innerText='❌ 聯絡設定儲存失敗，請檢查試算表網址是否正確。'; if(saving)saving.innerText='❌ 儲存失敗，請重試'; return;}
           const row=(window._rawServerData||[]).find(i=>String(i.id)===id); if(row)row.caption=val; else if(window._rawServerData)window._rawServerData.push({id,caption:val});
         }
         applyContactSettings(window._rawServerData||[]);
@@ -5772,7 +5771,7 @@ function setupCartPreferences() {
         const newText=getEditableTextElement(elem);
         if(newText===originalText) return;
         const status=document.getElementById('siteSettingsStatus') || document.getElementById('status');
-        if(status) status.innerText='正在儲存至雲端，請稍後...';
+        if(status) status.innerText='正在儲存至雲端，請稍候...';
         const saveId=elem.dataset.settingId||id;
         const success=await updateItemById(saveId,'caption',newText);
         if(success){
@@ -5963,9 +5962,9 @@ function setupCartPreferences() {
     }
     async function saveScheduleConfig(config){
       const status=document.getElementById('status');
-      if(status)status.innerText='生成班表中，請稍後...';
+      if(status)status.innerText='生成班表中，請稍候...';
       const applyBtn=document.getElementById('scheduleApplyBtn');
-      if(applyBtn){applyBtn.disabled=true;applyBtn.dataset.originalText=applyBtn.innerText;applyBtn.innerText='生成班表中，請稍後...';}
+      if(applyBtn){applyBtn.disabled=true;applyBtn.dataset.originalText=applyBtn.innerText;applyBtn.innerText='生成班表中，請稍候...';}
       const payload=JSON.stringify(config);
       let success=false;
       try {
@@ -6296,7 +6295,7 @@ function setupCartPreferences() {
             const nextState = getScheduleWorkState(d,cfg) ? 'off' : 'work';
             cfg.custom[dateKey] = nextState;
             const editor=cell.querySelector('.schedule-day-editor');
-            if(editor){editor.disabled=true;editor.innerText='生成班表中，請稍後...';}
+            if(editor){editor.disabled=true;editor.innerText='生成班表中，請稍候...';}
             const ok=await saveScheduleConfig(cfg);
             if(!ok && editor){editor.disabled=false;editor.innerText=`${nextState==='work'?'🫠 上班':'😍 休假'}（點擊切換）`;}
             cell.dataset.saving='';
@@ -6332,7 +6331,7 @@ function setupCartPreferences() {
 
     async function fetchData(isInitial = false) {
       try {
-        const dataUrl=apiUrl('getData'); if(!dataUrl) throw new Error('此分店尚未綁定中央資料庫'); const response = await fetch(dataUrl);
+        const dataUrl=apiUrl('getData'); if(!dataUrl) throw new Error('此店鋪尚未與網站共享資料庫'); const response = await fetch(dataUrl);
         const result = await response.json();
         if (result.status === 'success') {
           const settingsIds = SETTINGS_IDS;
@@ -6407,7 +6406,7 @@ function setupCartPreferences() {
     async function updateItemById(id, field, value) {
       try {
         const url=apiUrl('updateItem');
-        if(!url) throw new Error('此分店尚未綁定中央資料庫');
+        if(!url) throw new Error('此店鋪尚未與網站共享資料庫');
 
         // 使用 POST 傳送更新資料，避免把班表 JSON 塞進 URL。
         const response = await fetch(url, {
@@ -7045,7 +7044,7 @@ function setupCartPreferences() {
     async function updateItem(id, field, value) {
       try {
         const url=apiUrl('updateItem',`id=${encodeURIComponent(id)}&field=${encodeURIComponent(field)}&value=${encodeURIComponent(value)}`);
-        if(!url) throw new Error('此分店尚未綁定中央資料庫');
+        if(!url) throw new Error('此店鋪尚未與網站共享資料庫');
         const response = await fetch(url);
         const result = await response.json();
         return result.status === 'success';
@@ -7057,7 +7056,7 @@ function setupCartPreferences() {
 
     async function deleteItem(id) {
       const url=apiUrl('deleteItem',`id=${encodeURIComponent(id)}`);
-      if(!url){alert('此分店尚未綁定中央資料庫');return;}
+      if(!url){alert('此店鋪尚未與網站共享資料庫');return;}
       await fetch(url);
       allData = allData.filter(item => String(item.id) !== String(id));
       cartItems.delete(String(id));
@@ -7229,10 +7228,10 @@ function setupCartPreferences() {
           formData.append('mimeType', 'image/jpeg');
           formData.append('imageBase64', base64Data);
 
-          const uploadUrl=apiUrl('addItem'); if(!uploadUrl) throw new Error('此分店尚未綁定資料庫');
+          const uploadUrl=apiUrl('addItem'); if(!uploadUrl) throw new Error('此店鋪尚未與網站共享資料庫');
           const result = await submitUploadRequest(uploadUrl, formData);
           if (result.status === 'success' || result.status === 'submitted') {
-            status.innerText = result.status === 'submitted' ? "圖片已送出，正在寫入分店資料夾..." : "相簿上傳成功！";
+            status.innerText = result.status === 'submitted' ? "圖片已送出，正在寫入店鋪資料夾..." : "相簿上傳成功！";
             if (result.status === 'success') {
               await fetchData();
               if (window._rawServerData) {
@@ -7345,10 +7344,10 @@ function setupCartPreferences() {
           formData.append('mimeType', 'image/jpeg');
           formData.append('imageBase64', base64Data);
 
-          const uploadUrl=apiUrl('addItem'); if(!uploadUrl) throw new Error('此分店尚未綁定資料庫');
+          const uploadUrl=apiUrl('addItem'); if(!uploadUrl) throw new Error('此店鋪尚未與網站共享資料庫');
           const result = await submitUploadRequest(uploadUrl, formData);
           if (result.status === 'success' || result.status === 'submitted') {
-            status.innerText = result.status === 'submitted' ? "圖片已送出，正在寫入分店資料夾..." : "上傳成功！";
+            status.innerText = result.status === 'submitted' ? "圖片已送出，正在寫入店鋪資料夾..." : "上傳成功！";
             if (result.status === 'success') await fetchData();
             setTimeout(() => status.innerText = "", 2200);
           } else {
