@@ -903,13 +903,18 @@ html.site-data-ready #initialLoadingScreen{opacity:0;}
   flex-direction:column;
   gap:4px
 }
-.welcome-item.welcome-item-empty-visitor
+.welcome-item.welcome-item-empty-visitor,
+.welcome-empty-visitor
 {
   display:none!important;
 }
 .editable-site-setting[data-welcome-empty="1"]
 {
   display:block;
+}
+.is-admin .editable-site-setting[data-welcome-empty="1"]
+{
+  display:block!important;
 }
 .is-admin .editable-site-setting[data-welcome-empty="1"]
 {
@@ -3896,12 +3901,12 @@ body::after
       <span>🛒 購物車</span>
     </button>
     <div class="branch-store-menu" id="branchStoreMenu">
-      <button type="button" class="branch-store-toggle" id="branchStoreToggle">🏪 商店街 ▾</button>
+      <button type="button" class="branch-store-toggle" id="branchStoreToggle">🏬 商店街 ▾</button>
       <div class="branch-store-dropdown" id="branchStoreDropdown"></div>
     </div>
     <!-- branch navigation buttons are placed after schedule below -->
     <div class="branch-store-form" id="branchApplyForm" role="dialog" aria-modal="true">
-      <div class="tab-settings-title">🏪 申請建立店鋪</div>
+      <div class="tab-settings-title">📝 申請建立店鋪</div>
       <div class="branch-store-hint">審核通過前不能新增商品。Firebase 密碼只用於建立／登入帳號，不會提供給版主。<br><b>重要：Google 試算表與雲端資料夾必須由店主自己的 Google 帳號建立，並分享給版主。</b></div>
       <label>店名</label><input id="branchNameInput" maxlength="60" placeholder="例如：米米的店，店名後續仍可修改">
       <label>Firebase 帳號 Email</label><input id="branchFirebaseEmailInput" type="email" autocomplete="email">
@@ -3916,18 +3921,18 @@ body::after
       <div class="branch-store-actions"><button type="button" class="schedule-btn" id="branchApplySubmitBtn">送出申請</button><button type="button" class="cancel-btn" id="branchApplyCancelBtn">取消</button></div>
     </div>
     <div class="branch-management-form" id="branchManagementForm" role="dialog" aria-modal="true">
-      <div class="tab-settings-title">🏪 店鋪管理</div>
+      <div class="tab-settings-title">🛠️ 店鋪管理</div>
       <div class="branch-store-hint">版主可核准、關閉、重新開啟及刪除店鋪。被版主關閉的店舖，店主無法自行恢復。</div>
       <div id="branchManagementList"></div><div id="branchManagementStatus" class="branch-store-status"></div>
       <div class="branch-store-actions"><button type="button" class="cancel-btn" id="branchManagementCloseBtn">關閉</button></div>
     </div>
     <div class="branch-store-form" id="branchOwnerForm" role="dialog" aria-modal="true">
-      <div class="tab-settings-title">🏪 本店狀態</div><div id="branchOwnerInfo" class="branch-store-hint"></div>
+      <div class="tab-settings-title">🔑 本店狀態</div><div id="branchOwnerInfo" class="branch-store-hint"></div>
       <div class="branch-store-actions"><button type="button" class="schedule-btn" id="branchOwnerToggleBtn"></button><button type="button" class="cancel-btn" id="branchOwnerCloseBtn">關閉</button></div>
     </div>
     <div class="collapse-content" id="collapseContent">
       <div class="dropdown" id="dropdown-furniture">
-        <button class="dropdown-toggle" data-dropdown="dropdown-furniture" id="furnitureToggleBtn">🏠 家具</button>
+        <button class="dropdown-toggle" data-dropdown="dropdown-furniture" id="furnitureToggleBtn">🛋️ 家具</button>
         <div class="dropdown-menu">
           <button class="dropdown-item tab-btn" data-category="general_new">✨ 本周信封</button>
           <button class="dropdown-item tab-btn" data-category="general_misc">🖼️ 家具擺設</button>
@@ -3974,9 +3979,9 @@ body::after
           <button class="dropdown-item tab-btn" data-category="gift_special">🎀 特別</button>
         </div>
       </div>
-      <button class="tab-btn" data-category="schedule">📅 米米班表</button>
-      <button type="button" id="branchApplyBtn" class="tab-settings-btn auth-btn branch-nav-btn" style="display:none">🏪 申請店鋪</button>
-      <button type="button" id="branchManageBtn" class="tab-settings-btn auth-btn branch-nav-btn" style="display:none">🏪 店鋪管理</button>
+      <button class="tab-btn" data-category="schedule">📆 米米班表</button>
+      <button type="button" id="branchApplyBtn" class="tab-settings-btn auth-btn branch-nav-btn" style="display:none">📝 申請店鋪</button>
+      <button type="button" id="branchManageBtn" class="tab-settings-btn auth-btn branch-nav-btn" style="display:none">🛠️ 店鋪管理</button>
     </div>
     <button type="button" id="tabSettingsBtn" class="tab-settings-btn auth-btn branch-nav-btn">⚙️ 分頁管理</button>
     <div class="tab-settings-form" id="tabSettingsForm" role="dialog" aria-modal="true">
@@ -4028,7 +4033,7 @@ body::after
                   <a class="tally-badge" id="tallyContactBtn" href="https://tally.so/r/q48xO2" target="_blank" rel="noopener noreferrer">
                     <span id="tallyContactText"></span>
                   </a>
-                  <button type="button" id="contactSettingsBtn" class="contact-settings-btn">⚙️ 聯絡按鈕管理</button>
+                  <button type="button" id="contactSettingsBtn" class="contact-settings-btn">📞 聯絡按鈕管理</button>
                 </div>
                 <div class="contact-settings-form" id="contactSettingsForm" role="dialog" aria-modal="true">
                   <label for="contactDiscordTextInput">DC 按鈕文字</label>
@@ -4919,11 +4924,18 @@ function setupCartPreferences() {
           }
         }
       }
+      // 管理按鈕只在「自己管理的店」顯示：
+      // 版主只在主店顯示；店主只在自己的店顯示。
+      const ownerBranchCode=isOwner?String(ownerBranch.code||ownerBranch.id):'';
+      const isManagingOwnStore=isMainOwner ? String(activeBranchId)==='main' : (isOwner && String(activeBranchId)===ownerBranchCode);
       if(settings){
         settings.classList.remove('mobile-role-visible');
-        const showSettings=isMainOwner||isOwner;
-        settings.style.display=showSettings?'flex':'none';
-        if(showSettings)settings.classList.add('mobile-role-visible');
+        settings.style.display=isManagingOwnStore?'flex':'none';
+        if(isManagingOwnStore)settings.classList.add('mobile-role-visible');
+      }
+      const contactSettings=document.getElementById('contactSettingsBtn');
+      if(contactSettings){
+        contactSettings.style.display=isManagingOwnStore?'inline-flex':'none';
       }
       document.title=`⭐ ${activeBranch?.name||getSettingValue(window._rawServerData||[],'settings_title')||'米米小舖'}-Club MStar ⭐`;
       if(activeBranchId!=='main'&&activeBranch){const t=document.getElementById('mimiTitleText');if(t)t.textContent=activeBranch.name;}
@@ -5912,7 +5924,7 @@ function setupCartPreferences() {
       const blank = normalizeEditableText(value).trim() === '';
       elem.dataset.welcomeEmpty = blank ? '1' : '0';
 
-      // 訪客：空白欄位完全不顯示；管理端：保留欄位並顯示「目前此欄位隱藏中」提示。
+      // 訪客：刪除文字後隱藏；管理端：永遠保留並顯示「目前此欄位隱藏中」提示，方便重新編輯。
       elem.style.display = (!isAdmin && blank) ? 'none' : '';
 
       const item = elem.closest('.welcome-item');
@@ -5920,6 +5932,11 @@ function setupCartPreferences() {
         const fields = Array.from(item.querySelectorAll('[data-welcome-field="1"]'));
         const allBlank = fields.length > 0 && fields.every(field => field.dataset.welcomeEmpty === '1');
         item.classList.toggle('welcome-item-empty-visitor', !isAdmin && allBlank);
+      }
+
+      // 歡迎頁標題／底部提示／「開始選購」按鈕沒有 welcome-item，單獨控制訪客隱藏。
+      if (!item) {
+        elem.classList.toggle('welcome-empty-visitor', !isAdmin && blank);
       }
     }
 
@@ -5939,7 +5956,7 @@ function setupCartPreferences() {
         if(!elem)return;
         const value=getSettingValue(serverData,id);
         setEditableTextElement(elem,value);
-        elem.dataset.welcomeField = (id.startsWith('settings_welcome_') && !id.includes('footer')) ? '1' : '0';
+        elem.dataset.welcomeField = id.startsWith('settings_welcome_') ? '1' : '0';
         setupSettingEditable(elem,id);
         elem.contentEditable=isAdmin?'true':'false';
         if(elem.dataset.welcomeField==='1') updateWelcomeFieldVisibility(elem,value);
