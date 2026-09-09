@@ -4152,7 +4152,7 @@ body::after
       <div class="schedule-admin-row schedule-custom-editor" id="scheduleCustomRow">
         <label>自訂日期：</label>
         <input id="scheduleCustomDate" type="date" style="width:150px;">
-        <select id="scheduleCustomState" style="width:110px;"><option value="work">🫠 上班</option><option value="off">😍 休假</option></select>
+        <select id="scheduleCustomState" style="width:110px;"><option value="work">🫠<br>上班</option><option value="off">😍<br>休假</option></select>
         <button type="button" class="schedule-btn" id="scheduleCustomAddBtn">加入日期</button>
         <textarea id="scheduleCustomText" placeholder="每行一筆，例如：&#10;2026-09-07=上班&#10;2026-09-08=休假"></textarea>
         <div class="schedule-admin-hint">請先新增一個日期以開啟自訂班表，開啟後直接點選下方班表日期的「上班／休假」選單即可完成修改及儲存。文字區可用來批次檢查／編輯。未填寫的日期會沿用目前預設規則。</div>
@@ -6379,7 +6379,7 @@ function setupCartPreferences() {
         const work = isWorkDay(d);
         cell.innerHTML = `
           <div class="calendar-date-num">${dayNum}</div>
-          <div class="calendar-badge ${work ? 'badge-work' : 'badge-off'}">${work ? '🫠 上班' : '😍 休假'}</div>
+          <div class="calendar-badge ${work ? 'badge-work' : 'badge-off'}">${work ? '🫠<br>上班' : '😍<br>休假'}</div>
         `;
         gridElem.appendChild(cell);
       }
@@ -6399,11 +6399,11 @@ function setupCartPreferences() {
         const scheduleConfig = getScheduleConfig(window._rawServerData || []);
         const dateKey = formatDateKey(d);
         const customEditorHTML = isAdmin && scheduleConfig.mode === 'custom'
-          ? `<button type="button" class="schedule-day-editor" data-date="${dateKey}" data-state="${work?'work':'off'}" style="width:100%;margin-top:4px;background:var(--card-bg);color:var(--text-color);border:1px solid var(--border-color);border-radius:4px;padding:3px;font-size:11px;cursor:pointer;">${work?'🫠 上班':'😍 休假'}（點擊切換）</button>`
+          ? `<button type="button" class="schedule-day-editor" data-date="${dateKey}" data-state="${work?'work':'off'}" style="width:100%;margin-top:4px;background:var(--card-bg);color:var(--text-color);border:1px solid var(--border-color);border-radius:4px;padding:3px;font-size:11px;cursor:pointer;">${work?'🫠<br>上班':'😍<br>休假'}（點擊切換）</button>`
           : '';
         cell.innerHTML = `
           <div class="calendar-date-num" ${isToday ? 'style="color:var(--warning-color);"' : ''}>${i}${isToday ? ' <span class="rotating-star">⭐</span> 今天' : ''}</div>
-          <div class="calendar-badge ${work ? 'badge-work' : 'badge-off'}">${work ? '🫠 上班' : '😍 休假'}</div>
+          <div class="calendar-badge ${work ? 'badge-work' : 'badge-off'}">${work ? '🫠<br>上班' : '😍<br>休假'}</div>
           ${customEditorHTML}
         `;
         gridElem.appendChild(cell);
@@ -6423,7 +6423,7 @@ function setupCartPreferences() {
             const editor=cell.querySelector('.schedule-day-editor');
             if(editor){editor.disabled=true;editor.innerText='生成班表中，請稍候...';}
             const ok=await saveScheduleConfig(cfg);
-            if(!ok && editor){editor.disabled=false;editor.innerText=`${nextState==='work'?'🫠 上班':'😍 休假'}（點擊切換）`;}
+            if(!ok && editor){editor.disabled=false;editor.innerText=`${nextState==='work'?'🫠<br>上班':'😍<br>休假'}（點擊切換）`;}
             cell.dataset.saving='';
           });
         }
@@ -6438,7 +6438,7 @@ function setupCartPreferences() {
         const work = isWorkDay(d);
         cell.innerHTML = `
           <div class="calendar-date-num">${i}</div>
-          <div class="calendar-badge ${work ? 'badge-work' : 'badge-off'}">${work ? '🫠 上班' : '😍 休假'}</div>
+          <div class="calendar-badge ${work ? 'badge-work' : 'badge-off'}">${work ? '🫠<br>上班' : '😍<br>休假'}</div>
         `;
         gridElem.appendChild(cell);
       }
