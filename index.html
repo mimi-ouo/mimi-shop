@@ -2429,10 +2429,7 @@ body::after
   {
     padding:7px
   }
-  .side-tabs-panel.collapsed .collapse-content
-  {
-    display:none
-  }
+
   .side-tabs-panel .auth-section-wrapper
   {
     width:auto;
@@ -2616,10 +2613,7 @@ body::after
   {
     right:1px
   }
-  .discord-container
-  {
-    gap:4px
-  }
+
   .discord-badge,.tally-badge
   {
     min-height:28px;
@@ -2962,10 +2956,7 @@ body::after
   {
     display:flex!important
   }
-  #collapseToggleBtn
-  {
-    display:none!important
-  }
+
   #sideTabsPanel>#cartTabBtn
   {
     flex:0 0 auto!important;
@@ -7981,19 +7972,6 @@ function setupCartPreferences() {
   });
 })();
 </script>
-
-
-<style id="mobile-back-to-top-bottom-position">
-@media (max-width:768px){
-  /* 手機版：頂部按鈕移到下方，水平位置維持不變 */
-  #backToTopBtn{
-    right:12px !important;
-    bottom:55px !important;
-  }
-}
-</style>
-
-
 <style id="cart-capture-quantity-style">
 .cart-capture-stage .cart-capture-quantity{
   display:block!important;
@@ -8208,56 +8186,21 @@ function setupCartPreferences() {
   }
 }
 
-/* ===== 本次版面修正：桌機分頁列／申請店鋪顏色 ===== */
+/* ===== 導覽列保留的最終需求 ===== */
 @media (min-width:769px){
-  /* 桌機：不固定 100/120px，統一依目前最長的可見文字寬度調整。 */
-  #sideTabsPanel{
-    width:max-content!important;
-    max-width:none!important;
-  }
-  #sideTabsPanel>.collapse-content{
-    width:max-content!important;
-    min-width:0!important;
-  }
-  #sideTabsPanel>.collapse-content>.tab-btn,
-  #sideTabsPanel>.collapse-content>.dropdown,
-  #sideTabsPanel>.collapse-content>.branch-store-menu,
-  #sideTabsPanel>.collapse-content>.tab-settings-btn{
-    flex:0 0 auto!important;
-  }
   /* 商店街文字靠左。 */
   #sideTabsPanel .branch-store-toggle{
-    justify-content:flex-start!important;
     text-align:left!important;
-  }
-  /* 申請店鋪：只改顏色，其餘尺寸、圓角、字體、位置沿用原本設定。 */
-  #sideTabsPanel>#branchApplyBtn{
-    background:linear-gradient(135deg,#c084fc,#a855f7)!important;
-    color:#fff!important;
   }
 }
 
 @media (max-width:768px){
-  /* 手機端申請店鋪保留原本「隨文字寬度」要求，只改成粉紫色。 */
+  /* 手機端申請店鋪維持隨文字寬度。 */
   #sideTabsPanel>#branchApplyBtn.mobile-role-visible{
     width:max-content!important;
     min-width:max-content!important;
     max-width:none!important;
     flex:0 0 auto!important;
-    background:linear-gradient(135deg,#c084fc,#a855f7)!important;
-    color:#fff!important;
-  }
-}
-
-/* 桌機所有可見分頁按鈕統一使用「目前最長文字」寬度。 */
-@media (min-width:769px){
-  #sideTabsPanel>.collapse-content>.tab-btn,
-  #sideTabsPanel>.collapse-content>.dropdown>.dropdown-toggle,
-  #sideTabsPanel>.collapse-content>.branch-store-toggle,
-  #sideTabsPanel>#tabSettingsBtn,
-  #sideTabsPanel>#branchApplyBtn,
-  #sideTabsPanel>#branchManageBtn{
-    box-sizing:border-box!important;
   }
 }
 </style>
@@ -8312,9 +8255,20 @@ function setupCartPreferences() {
   }
 }
 </style>
-<script id="stable-nav-common-width-v3-js">
+<script id="stable-nav-common-width-v4-js">
 (function(){
   let timer=0;
+  const PURPLE='linear-gradient(135deg,#d8b4fe,#b779e8)';
+
+  function forceApplyColor(){
+    const b=document.getElementById('branchApplyBtn');
+    if(b){
+      b.style.setProperty('background',PURPLE,'important');
+      b.style.setProperty('background-image',PURPLE,'important');
+      b.style.setProperty('color','#fff','important');
+    }
+  }
+
   function getTargets(){
     const panel=document.getElementById('sideTabsPanel');
     const content=document.getElementById('collapseContent');
@@ -8326,18 +8280,22 @@ function setupCartPreferences() {
       if(cs.display==='none'||cs.visibility==='hidden'||bs.display==='none'||bs.visibility==='hidden')return;
       out.push({outer,button});
     };
+
     [...content.children].forEach(el=>{
       if(el.classList.contains('dropdown')) add(el,el.querySelector('.dropdown-toggle'));
       else if(el.classList.contains('branch-store-menu')) add(el,el.querySelector('.branch-store-toggle'));
       else if(el.matches('.tab-btn,.tab-settings-btn,.branch-nav-btn')) add(el,el);
     });
+
+    // 同步納入使用者指定的五個按鈕/選單，以及管理相關按鈕。
     add(panel.querySelector('.branch-store-menu'),panel.querySelector('.branch-store-menu .branch-store-toggle'));
     ['branchApplyBtn','branchManageBtn','tabSettingsBtn','homeWelcomeBtn','cartTabBtn'].forEach(id=>{
-      const el=document.getElementById(id); if(el) add(el,el);
+      const el=document.getElementById(id);
+      if(el) add(el,el);
     });
-    // 去除重複節點（例如 branch-store-menu 可能已在 panel 內但不在 collapseContent）。
     return out.filter((x,i,a)=>a.findIndex(y=>y.button===x.button)===i);
   }
+
   function sync(){
     timer=0;
     if(window.innerWidth<769)return;
@@ -8346,44 +8304,61 @@ function setupCartPreferences() {
     const targets=getTargets();
     if(!targets.length)return;
 
-    // 第一階段：清掉本腳本上一次寫入的寬度，重新取得「真正自然寬度」。
+    // 永遠先解除本腳本寫入的固定寬度，從「文字自然寬度」重新測量。
     targets.forEach(x=>{
       x.outer.style.setProperty('width','max-content','important');
       x.outer.style.setProperty('min-width','0','important');
+      x.outer.style.setProperty('max-width','none','important');
       x.button.style.setProperty('width','max-content','important');
       x.button.style.setProperty('min-width','0','important');
       x.button.style.setProperty('max-width','none','important');
+      x.button.style.setProperty('white-space','nowrap','important');
     });
 
+    // 強制瀏覽器完成一次排版後，只取「自然寬度」，不再把上一輪統一寬度當基準。
     let max=0;
     targets.forEach(x=>{
-      // scrollWidth 是按鈕在目前字型、padding 下的自然內容寬度；不採用先前統一寬度。
-      max=Math.max(max,x.button.scrollWidth,Math.ceil(x.button.getBoundingClientRect().width));
+      const rect=Math.ceil(x.button.getBoundingClientRect().width);
+      const scroll=Math.ceil(x.button.scrollWidth);
+      max=Math.max(max,rect,scroll);
     });
-    max=Math.max(1,Math.ceil(max));
+    max=Math.max(1,max);
 
-    // 第二階段：一次性統一，之後不再用這個結果當作測量值。
+    // 所有可見分頁及指定管理/店鋪按鈕統一成同一寬度。
     targets.forEach(x=>{
       x.outer.style.setProperty('width',max+'px','important');
       x.outer.style.setProperty('min-width',max+'px','important');
       x.button.style.setProperty('width',max+'px','important');
       x.button.style.setProperty('min-width',max+'px','important');
     });
+
     panel.style.setProperty('width','max-content','important');
     panel.style.setProperty('max-width','none','important');
+    forceApplyColor();
   }
+
   function schedule(){
     clearTimeout(timer);
-    timer=setTimeout(sync,50);
+    timer=setTimeout(sync,60);
   }
-  window.addEventListener('load',()=>setTimeout(sync,100),{once:true});
+
+  window.addEventListener('load',()=>{forceApplyColor();setTimeout(sync,120);},{once:true});
   window.addEventListener('resize',schedule,{passive:true});
-  document.addEventListener('DOMContentLoaded',()=>setTimeout(sync,100),{once:true});
-  // 分頁名稱/顯示狀態改變時重新算一次；不監看 style，避免自己觸發自己。
-  const observer=new MutationObserver(schedule);
+  document.addEventListener('DOMContentLoaded',()=>{forceApplyColor();setTimeout(sync,120);},{once:true});
+
+  // 只監看分頁文字/節點變化，不監看 style，避免產生自我觸發的無限迴圈。
+  const observer=new MutationObserver(muts=>{
+    let needWidth=false;
+    for(const m of muts){
+      if(m.type==='characterData'||m.type==='childList') needWidth=true;
+      if(m.target && (m.target.id==='branchApplyBtn'||m.target.closest?.('#branchApplyBtn'))) forceApplyColor();
+    }
+    if(needWidth)schedule();
+  });
   function observe(){
     const panel=document.getElementById('sideTabsPanel');
     if(panel)observer.observe(panel,{subtree:true,childList:true,characterData:true});
+    forceApplyColor();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',observe,{once:true});
   else observe();
