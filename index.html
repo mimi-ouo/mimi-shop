@@ -4543,6 +4543,7 @@ body::after
     let currentCategoryDisplayName = '尚未選擇分頁';
     let isAdmin = false;
     let allData = [];
+    let currentSortValue = 'time_desc';
     let cartItems = loadCartFromStorage();
     let cartPaymentMethod = loadCartPreference('cartPaymentMethod', '💰 轉帳');
     let cartCharacterGender = loadCartPreference('cartCharacterGender', '男號');
@@ -4790,11 +4791,25 @@ function setupCartPreferences() {
         setInterval(() => { if (!document.hidden) checkForUpdates(); }, 30000);
       }
 
+      const sortSelect = document.getElementById('sortSelect');
+      if (sortSelect) currentSortValue = sortSelect.value || 'time_desc';
+      let searchRenderTimer = null;
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) {
+        searchInput.addEventListener('input', () => {
+          clearTimeout(searchRenderTimer);
+          searchRenderTimer = setTimeout(() => renderGallery(), 120);
+        });
+      }
+      if (sortSelect) {
+        sortSelect.addEventListener('change', () => {
+          currentSortValue = sortSelect.value || 'time_desc';
+          renderGallery();
+        });
+      }
+
       updateCartButtonBadge();
-      renderGallery(); 
-      
-      document.getElementById('searchInput').addEventListener('input', renderGallery);
-      document.getElementById('sortSelect').addEventListener('change', renderGallery);
+      renderGallery();
     });
 
     function branchIsOpen(b){return !!(b&&b.status==='approved'&&b.enabled===true&&b.ownerUid&&b.spreadsheetId&&b.folderId);}
@@ -6664,7 +6679,7 @@ function setupCartPreferences() {
     }
 
     function compareItems(a, b) {
-      const sortVal = document.getElementById('sortSelect').value;
+      const sortVal = currentSortValue || document.getElementById('sortSelect').value;
       const priceA = parseFloat(a.price) || 0;
       const priceB = parseFloat(b.price) || 0;
       
