@@ -1939,23 +1939,37 @@ body.is-admin #sectionSortContainer
 }
 .cart-capture-stage
 {
-  position:fixed;
-  left:-100000px;
-  top:0;
+  position:absolute!important;
+  left:-100000px!important;
+  top:0!important;
   width:1100px;
-  z-index:-1;
+  height:auto!important;
+  min-height:0!important;
+  z-index:-1!important;
   background:#121212;
   padding:24px;
   box-sizing:border-box;
-  pointer-events:none
+  pointer-events:none;
+  overflow:visible!important;
 }
 .cart-capture-stage .cart-summary-capture
 {
+  /* 截圖副本絕對不能沿用網頁版購物車的 sticky 定位，否則會浮在第一排商品上方。 */
+  position:relative!important;
+  top:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  left:auto!important;
+  z-index:auto!important;
   display:flex!important;
   flex-direction:column!important;
-  margin:0 0 20px 0!important;
+  margin:0 0 28px 0!important;
   box-sizing:border-box;
-  width:100%
+  width:100%;
+  height:auto!important;
+  max-height:none!important;
+  overflow:visible!important;
+  transform:none!important;
 }
 .cart-capture-stage .cart-summary-capture .cart-summary-main-row
 {
@@ -4039,7 +4053,7 @@ body::after
 </head>
 <body>
   <div id="initialLoadingScreen" aria-hidden="true">
-    <div>正在載入店鋪資料…</div>
+    <div>正在載入網站資料…</div>
     <div class="initial-loading-dot"></div>
   </div>
   <div class="update-banner" id="updateBanner">
@@ -6799,11 +6813,11 @@ function setupCartPreferences() {
         loader=document.createElement('div');
         loader.id='initialLoadingScreen';
         loader.setAttribute('aria-hidden','true');
-        loader.innerHTML='<div>正在載入店鋪資料…</div><div class="initial-loading-dot"></div>';
+        loader.innerHTML='<div>正在載入分店資料…</div><div class="initial-loading-dot"></div>';
         document.body.prepend(loader);
       }else{
         const text=loader.querySelector('div:first-child');
-        if(text) text.textContent='正在載入店鋪資料…';
+        if(text) text.textContent='正在載入分店資料…';
       }
       document.documentElement.classList.remove('site-data-ready');
       loader.style.display='flex';
@@ -7524,39 +7538,60 @@ function setupCartPreferences() {
       };
 
       if (currentCategory === 'cart') {
-        // 取得左側「實際商品分頁」的順序，作為購物車分區順序。
-        // 這樣之後只要調整左側分頁順序，購物車分區也會跟著調整。
-        const categoryButtons = Array.from(
-          document.querySelectorAll('.tab-btn[data-category]')
-        ).filter(btn => {
-          const category = btn.getAttribute('data-category');
-          return category && category !== 'cart' && category !== 'schedule';
+        // 購物車截圖／畫面分類改成「主分頁 > 子分頁」的階層順序。
+        // 舊資料若仍使用 pot / gift，也自動歸到各自第一個子分頁，
+        // 避免截圖出現原始分類名稱「pot」「gift」。
+        const legacyCategoryMap = {
+          pot: 'pot_new',
+          gift: 'gift_new'
+        };
+
+        const normalizeCartCategory = (category) => {
+          const raw = String(category || '').trim();
+          return legacyCategoryMap[raw] || raw;
+        };
+
+        const getCartCategoryLabel = (category) => {
+          const normalized = normalizeCartCategory(category);
+          const parent = TAB_PARENT_BY_CATEGORY[normalized];
+          if (!parent) return normalized;
+
+          const parentName = getSettingValue(window._rawServerData || [], `settings_tab_${parent}_name`) ||
+            (MAIN_TAB_SETTINGS.find(x => x.category === parent)?.defaultName || parent);
+          const subSetting = SUB_TAB_SETTINGS.find(x => x.category === normalized);
+          const subName = subSetting
+            ? (getSettingValue(window._rawServerData || [], `${subSetting.id}_name`) || subSetting.defaultName)
+            : normalized;
+
+          return `${parentName} > ${subName}`;
+        };
+
+        // 依「家具 > 家具子分頁 > 小動物 > 小動物子分類 ...」固定排列。
+        // MAIN_TAB_SETTINGS 是主分頁順序，SUB_TAB_SETTINGS 是各主分頁內的子分頁順序。
+        const orderedCategories = [];
+        MAIN_TAB_SETTINGS.forEach(main => {
+          if (main.category === 'cart' || main.category === 'schedule') return;
+          (SUB_TAB_SETTINGS.filter(sub => sub.parent === main.category)).forEach(sub => {
+            orderedCategories.push(sub.category);
+          });
         });
 
-        const categoryOrder = [];
-        const categoryNames = new Map();
-
-        categoryButtons.forEach(btn => {
-          const category = btn.getAttribute('data-category');
-          if (!categoryOrder.includes(category)) {
-            categoryOrder.push(category);
-            categoryNames.set(category, btn.innerText.trim());
-          }
-        });
-
-        // 若資料中存在目前左側沒有按鈕的舊分類，仍然顯示，避免購物車商品消失。
+        // 舊資料中的 pot / gift 映射到第一個子分頁，並保留其他未知舊分類避免商品消失。
+        const normalizedDataCategories = [];
         filtered.forEach(item => {
-          const category = String(item.category || '');
-          if (category && !categoryOrder.includes(category)) {
-            categoryOrder.push(category);
-            categoryNames.set(category, category);
+          const normalized = normalizeCartCategory(item.category);
+          if (normalized && !normalizedDataCategories.includes(normalized)) {
+            normalizedDataCategories.push(normalized);
           }
+        });
+        normalizedDataCategories.forEach(category => {
+          if (!orderedCategories.includes(category)) orderedCategories.push(category);
         });
 
         let cartSectionCount = 0;
 
-        for(const category of categoryOrder){
-          const categoryItems = filtered.filter(item => String(item.category || '') === category);
+        for (const category of orderedCategories) {
+          const categoryItems = filtered.filter(item => normalizeCartCategory(item.category) === category);
           if (!categoryItems.length) continue;
 
           if (cartSectionCount > 0) {
@@ -7567,10 +7602,10 @@ function setupCartPreferences() {
 
           const titleDiv = document.createElement('div');
           titleDiv.className = 'section-block-title normal-title';
-          titleDiv.innerHTML = categoryNames.get(category) || category;
+          titleDiv.innerHTML = getCartCategoryLabel(category);
           gallery.appendChild(titleDiv);
 
-          // 每個購物車分區內仍沿用原本的 HOT / 一般 / 交易排序邏輯。
+          // 每個「主分頁 > 子分頁」內仍沿用原本的 HOT / 一般 / 交易排序。
           const hotList = categoryItems.filter(item => item.real_img === 'HOT' && !isTransaction(item.quantity));
           const normalList = categoryItems.filter(item => item.real_img !== 'HOT' && !isTransaction(item.quantity));
           const transactionList = categoryItems.filter(item => isTransaction(item.quantity));
