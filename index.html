@@ -725,10 +725,63 @@ html.site-data-ready #initialLoadingScreen{opacity:0;}
 .section-sort-container
 {
   display:flex;
-  justify-content:flex-end;
+  justify-content:center;
+  align-items:center;
+  position:relative;
   margin-top:15px;
   margin-bottom:5px;
-  width:100%
+  width:100%;
+  min-height:40px;
+  box-sizing:border-box;
+}
+.section-sort-container > .sort-select
+{
+  flex:0 0 auto;
+  position:absolute;
+  right:8px;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:2;
+}
+/* 批量移動靠左；價格排序固定靠右，不互相推動 */
+.section-sort-container > .batch-move-toolbar
+{
+  position:absolute;
+  top:50%;
+  left:8px;
+  transform:translateY(-50%);
+  margin:0;
+  width:max-content;
+  max-width:calc(50% - 16px);
+  justify-content:flex-start;
+  box-sizing:border-box;
+  z-index:20;
+}
+@media (max-width:700px)
+{
+  .section-sort-container
+  {
+    min-height:44px;
+    padding:0 8px;
+    margin-bottom:5px;
+  }
+  .section-sort-container > .sort-select
+  {
+    right:4px;
+    max-width:50%;
+  }
+  .section-sort-container > .batch-move-toolbar
+  {
+    left:4px;
+    max-width:calc(50% - 8px);
+    gap:5px;
+    padding:5px 6px;
+  }
+  .section-sort-container > .batch-move-toolbar span,
+  .section-sort-container > .batch-move-toolbar label
+  {
+    white-space:nowrap;
+  }
 }
 .search-sort-wrapper
 {
@@ -1380,6 +1433,12 @@ html.site-data-ready #initialLoadingScreen{opacity:0;}
   background-color:#9a3412!important;
   color:#fed7aa!important
 }
+.batch-move-toolbar{display:none;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin:0;padding:7px 10px;background:rgba(43,115,223,.10);border:1px solid rgba(43,115,223,.35);border-radius:8px;font-size:12px;z-index:20;box-shadow:0 4px 16px rgba(0,0,0,.25);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.batch-move-toolbar.show{display:flex}
+.batch-move-toolbar select,.batch-move-toolbar button{font-size:12px;padding:5px 8px;border-radius:6px;border:1px solid rgba(43,115,223,.45);background:#1e1e1e;color:inherit}
+.batch-move-toolbar button{cursor:pointer;font-weight:bold}
+.batch-move-checkbox{position:static;flex:0 0 auto;width:18px;height:18px;margin:0;cursor:pointer;accent-color:var(--accent-color);accent-color:#60a5fa;filter:drop-shadow(0 1px 2px rgba(0,0,0,.35));cursor:pointer}.batch-move-checkbox:checked{accent-color:#22c55e}.batch-move-control{display:flex;align-items:center;justify-content:center;gap:5px;width:100%}.batch-move-control .batch-move-checkbox{width:17px;height:17px}
+.batch-move-select-all{width:17px;height:17px;cursor:pointer;accent-color:var(--accent-color)}
 .move-category-select
 {
   background-color:rgba(43,115,223,0.2);
@@ -4110,8 +4169,19 @@ body::after
       <option value="time_desc">⏱️ 上傳時間：新 → 舊</option>
       <option value="time_asc">⏳ 上傳時間：舊 → 新</option>
     </select>
+    <div id="batchMoveToolbar" class="batch-move-toolbar">
+    <label style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+      <input type="checkbox" id="batchMoveSelectAll" class="batch-move-select-all"> 全選本頁
+    </label>
+    <span id="batchMoveCount">已選 0 件</span>
+    <select id="batchMoveTarget" aria-label="批量移動到">
+      <option value="" selected>📦 批量移動到...</option>
+      ${getBatchMoveOptionsHTML().replace('<option value="" selected>📦 批量移動到...</option>','')}
+    </select>
+    <button type="button" id="batchMoveBtn">批量移動</button>
+    <button type="button" id="batchMoveClearBtn">取消選取</button>
+    </div>
   </div>
-  <div id="siteSettingsStatus" aria-live="polite"></div>
   <div class="gallery" id="gallery"></div>
   <div class="online-counter-wrapper">
     <div class="counter-box">
@@ -4270,6 +4340,8 @@ body::after
     const MAIN_OWNER_EMAIL = "comtw919@gmail.com";
     const BRANCH_TEMPLATE_SHEET_URL = "https://docs.google.com/spreadsheets/d/1HVsEhQ7CxgoFUrO1__KbuO8PNGfeBVDrdkhJ7qdw5O0/edit?usp=sharing";
     let activeBranchId='main', activeBranch=null, branchRegistry={}, branchAuthUser=null, isMainOwner=false, branchAdminApproved=false;
+    // 主站名稱獨立保存，避免登入/切換分店後被目前分店 Google Sheet 的 settings_title 覆蓋。
+    let mainStoreTitle='米米小舖';
     let branchApplicationsListenerRef=null;
 
     // ===== 網站可編輯設定：以下全部是「預設文字」；Google Sheet 已存在的內容永遠優先，不會被這些預設值覆蓋 =====
@@ -4560,12 +4632,30 @@ body::after
     let initialDataHash = '';
     let initialSettingsHash = '';
 
+    // 購物車必須以「目前店鋪」分開儲存，避免 A 店商品切到 B 店後仍顯示。
+    function getCartStorageKey() {
+      return `userCartItems__${String(activeBranchId || 'main')}`;
+    }
+
     function loadCartFromStorage() {
       try {
-        const stored = localStorage.getItem('userCartItems');
+        const key = getCartStorageKey();
+        let stored = localStorage.getItem(key);
+
+        // 舊版只有一個 userCartItems；只允許它在主站第一次載入時遷移，
+        // 絕不把舊購物車帶進任何分店。
+        if (stored === null && String(activeBranchId || 'main') === 'main') {
+          const legacy = localStorage.getItem('userCartItems');
+          if (legacy !== null) {
+            stored = legacy;
+            localStorage.setItem(key, legacy);
+            localStorage.removeItem('userCartItems');
+          }
+        }
+
         if (stored) {
           const arr = JSON.parse(stored);
-          return new Map(arr);
+          return new Map(Array.isArray(arr) ? arr : []);
         }
       } catch (e) {
         console.error('讀取購物車失敗:', e);
@@ -4576,7 +4666,7 @@ body::after
     function saveCartToStorage() {
       try {
         const arr = Array.from(cartItems.entries());
-        localStorage.setItem('userCartItems', JSON.stringify(arr));
+        localStorage.setItem(getCartStorageKey(), JSON.stringify(arr));
       } catch (e) {
         console.error('儲存購物車失敗:', e);
       }
@@ -4716,6 +4806,13 @@ function setupCartPreferences() {
         }
 
         activeBranch=activeBranchId==='main'?null:branchRegistry[activeBranchId]||null;
+
+        // 初次載入／登入後也必須依目前網址的店鋪重新載入購物車。
+        // 原本 cartItems 在 Firebase 登入狀態確認前就以 main 建立，
+        // 導致網址是分店時仍沿用主站購物車，形成跨店顯示。
+        cartItems = loadCartFromStorage();
+        updateCartButtonBadge();
+
         if(user && activeBranch && activeBranch.ownerUid===user.uid){
           try{ localStorage.setItem('mimiOwnerBranchCode_'+user.uid,activeBranchId); }catch(e){}
         }
@@ -4843,6 +4940,11 @@ function setupCartPreferences() {
 
       activeBranchId=id;
       activeBranch=nextBranch;
+
+      // 切店時立即換成該店自己的購物車；購物車內容不跨店共用。
+      cartItems = loadCartFromStorage();
+      updateCartButtonBadge();
+
       const ownerBranchForManage = branchAuthUser && !isMainOwner
         ? Object.values(branchRegistry).find(b=>b.ownerUid===branchAuthUser.uid&&b.status==='approved')
         : null;
@@ -4913,7 +5015,7 @@ function setupCartPreferences() {
       menu.classList.add('visible');dd.innerHTML='';
       const add=(id,label)=>{const b=document.createElement('button');b.type='button';b.className='branch-store-option'+(activeBranchId===id?' active':'');b.textContent=label+(activeBranchId===id?'（目前）':'');b.onclick=()=>switchStore(id);dd.appendChild(b);};
       // 總店永遠固定第一項；分店維持「核准日」排序，不因目前選取店鋪而重新排序。
-      add('main','❤️ '+(getSettingValue(window._rawServerData||[],'settings_title')||'主店'));
+      add('main','❤️ '+(mainStoreTitle||'主店'));
       const branchEmojis=['🩷','🧡','💛','💚','💙','🩵','💜'];
       Object.values(branchRegistry)
         .filter(branchIsOpen)
@@ -6024,7 +6126,11 @@ function setupCartPreferences() {
             if(cat) applyTabDescription(window._rawServerData||[],currentCategory || cat);
           }
           if(status) status.innerText='修改成功！';
-          if(saveId==='settings_title') document.title=`⭐ ${newText||'米米小舖'}-Club MStar ⭐`;
+          if(saveId==='settings_title'){
+            if(activeBranchId==='main') mainStoreTitle=newText||'米米小舖';
+            document.title=`⭐ ${newText||'米米小舖'}-Club MStar ⭐`;
+            if(activeBranchId==='main') syncBranchUI();
+          }
         }else{
           setEditableTextElement(elem,originalText);
           if(status) status.innerText='❌ 儲存失敗，內容已還原，請重試';
@@ -6625,6 +6731,11 @@ function setupCartPreferences() {
           
           allData = result.data.filter(item => !settingsIds.includes(String(item.id)) && item.category !== 'album_item');
           window._rawServerData = result.data;
+          // 只有正在載入主站時，才允許這份 settings_title 更新主站名稱。
+          // 分店資料的 settings_title 絕不拿來當「主站」名稱。
+          if(activeBranchId==='main'){
+            mainStoreTitle=getSettingValue(result.data,'settings_title')||mainStoreTitle||'米米小舖';
+          }
           window._settingsCloudLoaded=true;
 
           if (isInitial) {
@@ -6787,6 +6898,91 @@ function setupCartPreferences() {
     let galleryRenderPromise = Promise.resolve();
     let galleryRenderQueued = false;
 
+    const batchMoveSelectedIds = new Set();
+
+    function getBatchMoveOptionsHTML(){
+      const d=window._rawServerData||[];
+      const g=(key, fallback)=>getSettingValue(d,key)||fallback;
+      return `
+        <option value="" selected>📦 批量移動到...</option>
+        <option value="general_new">${g('settings_tab_furniture_name','🏠 家具')}｜${g('settings_subtab_general_new_name','✨ 本月新品')}</option>
+        <option value="general_misc">${g('settings_tab_furniture_name','🏠 家具')}｜${g('settings_subtab_general_misc_name','🖼️ 家具擺設')}</option>
+        <option value="general_consumable">${g('settings_tab_furniture_name','🏠 家具')}｜${g('settings_subtab_general_consumable_name','🧪 消耗品')}</option>
+        <option value="memes">${g('settings_tab_animal_name','🐾 小動物')}｜${g('settings_subtab_memes_name','🧸 熊熊')}</option>
+        <option value="animal_other">${g('settings_tab_animal_name','🐾 小動物')}｜${g('settings_subtab_animal_other_name','🐧 其他')}</option>
+        <option value="pot_new">${g('settings_tab_pot_name','🪴 花盆')}｜${g('settings_subtab_pot_new_name','🪴 新花盆')}</option>
+        <option value="ring_male">${g('settings_tab_ring_name','💍 戒指')}｜${g('settings_subtab_ring_male_name','👦 限男')}</option>
+        <option value="ring_female">${g('settings_tab_ring_name','💍 戒指')}｜${g('settings_subtab_ring_female_name','👧 限女')}</option>
+        <option value="crop_male">${g('settings_tab_crop_name','🌱 作物')}｜${g('settings_subtab_crop_male_name','👦 限男')}</option>
+        <option value="crop_female">${g('settings_tab_crop_name','🌱 作物')}｜${g('settings_subtab_crop_female_name','👧 限女')}</option>
+        <option value="gift">${g('settings_tab_gift_name','🎁 甩賣區')}</option>`;
+    }
+
+    function updateBatchMoveToolbar(){
+      const bar=document.getElementById('batchMoveToolbar');
+      const count=document.getElementById('batchMoveCount');
+      const target=document.getElementById('batchMoveTarget');
+      const selectAll=document.getElementById('batchMoveSelectAll');
+      if(!bar) return;
+      bar.classList.toggle('show', !!isAdmin && !!currentCategory && currentCategory!=='cart' && currentCategory!=='schedule');
+      if(target) target.innerHTML=getBatchMoveOptionsHTML();
+      if(count) count.textContent=`已選 ${batchMoveSelectedIds.size} 件`;
+      if(selectAll){
+        const boxes=[...document.querySelectorAll('.batch-move-checkbox')];
+        selectAll.checked=boxes.length>0 && boxes.every(x=>x.checked);
+        selectAll.indeterminate=boxes.some(x=>x.checked) && !selectAll.checked;
+      }
+    }
+
+    function clearBatchMoveSelection(){
+      batchMoveSelectedIds.clear();
+      updateBatchMoveToolbar();
+      document.querySelectorAll('.batch-move-checkbox').forEach(x=>x.checked=false);
+    }
+
+    async function batchMoveItems(){
+      const target=document.getElementById('batchMoveTarget')?.value;
+      const ids=[...batchMoveSelectedIds];
+      const status=document.getElementById('status');
+      if(!target) return;
+      if(!ids.length){ alert('請先選擇要移動的商品'); return; }
+      if(!confirm(`確定要將 ${ids.length} 件商品批量移動嗎？`)) return;
+      status.innerText=`正在批量移動 ${ids.length} 件商品...`;
+      const results=await Promise.all(ids.map(id=>updateItem(id,'category',target)));
+      let successCount=0;
+      results.forEach((ok,i)=>{
+        if(ok){
+          const item=allData.find(x=>String(x.id)===String(ids[i]));
+          if(item) item.category=target;
+          successCount++;
+        }
+      });
+      status.innerText=`批量移動完成：${successCount}/${ids.length} 件成功`;
+      batchMoveSelectedIds.clear();
+      renderGallery();
+      setTimeout(()=>{status.innerText='';},1800);
+    }
+
+    function setupBatchMoveToolbar(){
+      const btn=document.getElementById('batchMoveBtn');
+      const clear=document.getElementById('batchMoveClearBtn');
+      const selectAll=document.getElementById('batchMoveSelectAll');
+      if(btn && btn.dataset.bound!=='1'){btn.dataset.bound='1';btn.addEventListener('click',batchMoveItems);}
+      if(clear && clear.dataset.bound!=='1'){clear.dataset.bound='1';clear.addEventListener('click',clearBatchMoveSelection);}
+      if(selectAll && selectAll.dataset.bound!=='1'){
+        selectAll.dataset.bound='1';
+        selectAll.addEventListener('change',()=>{
+          document.querySelectorAll('.batch-move-checkbox').forEach(box=>{
+            box.checked=selectAll.checked;
+            const id=String(box.dataset.id);
+            if(selectAll.checked) batchMoveSelectedIds.add(id); else batchMoveSelectedIds.delete(id);
+          });
+          updateBatchMoveToolbar();
+        });
+      }
+      updateBatchMoveToolbar();
+    }
+
     function renderGallery() {
       if (galleryRenderQueued) return galleryRenderPromise;
       galleryRenderQueued = true;
@@ -6810,6 +7006,7 @@ function setupCartPreferences() {
       }
 
       gallery.innerHTML = '';
+      setupBatchMoveToolbar();
 
       if (!currentCategory && !keyword) {
         const welcomeDiv = document.createElement('div');
@@ -6959,20 +7156,23 @@ function setupCartPreferences() {
           if (isAdmin && currentCategory && currentCategory !== 'cart' && currentCategory !== 'schedule') {
             moveSelectHTML = `
               <div class="interact-col">
-                <select class="move-category-select" id="move-${item.id}">
+                <div class="batch-move-control">
+                  ${isAdmin && currentCategory && currentCategory !== 'cart' && currentCategory !== 'schedule' ? `<input type="checkbox" class="batch-move-checkbox" data-id="${item.id}" ${batchMoveSelectedIds.has(String(item.id)) ? 'checked' : ''} title="勾選商品以批量移動">` : ''}
+                  <select class="move-category-select" id="move-${item.id}">
                   <option value="" disabled selected>📦 移動到...</option>
-                  <option value="general_new">✨ 本月新品</option>
-                  <option value="general_misc">📦 哩哩摳摳</option>
-                  <option value="general_consumable">🧪 消耗品</option>
-                  <option value="memes">🧸 熊熊</option>
-                  <option value="animal_other">📦 其他 (小動物)</option>
-                  <option value="pot_new">🪴 花盆（第一分頁）</option>
-                  <option value="ring_male">💍 戒指 (限男)</option>
-                  <option value="ring_female">💍 戒指 (限女)</option>
-                  <option value="crop_male">🌱 作物 (限男)</option>
-                  <option value="crop_female">🌱 作物 (限女)</option>
-                  <option value="gift">🎁 贈品區</option>
+                  <option value="general_new">${getSettingValue(window._rawServerData||[],'settings_tab_furniture_name') || '🏠 家具'}｜${getSettingValue(window._rawServerData||[],'settings_subtab_general_new_name') || '✨ 本月新品'}</option>
+                  <option value="general_misc">${getSettingValue(window._rawServerData||[],'settings_tab_furniture_name') || '🏠 家具'}｜${getSettingValue(window._rawServerData||[],'settings_subtab_general_misc_name') || '🖼️ 家具擺設'}</option>
+                  <option value="general_consumable">${getSettingValue(window._rawServerData||[],'settings_tab_furniture_name') || '🏠 家具'}｜${getSettingValue(window._rawServerData||[],'settings_subtab_general_consumable_name') || '🧪 消耗品'}</option>
+                  <option value="memes">${getSettingValue(window._rawServerData||[],'settings_tab_animal_name') || '🐾 小動物'}｜${getSettingValue(window._rawServerData||[],'settings_subtab_memes_name') || '🧸 熊熊'}</option>
+                  <option value="animal_other">${getSettingValue(window._rawServerData||[],'settings_tab_animal_name') || '🐾 小動物'}｜${getSettingValue(window._rawServerData||[],'settings_subtab_animal_other_name') || '🐧 其他'}</option>
+                  <option value="pot_new">${getSettingValue(window._rawServerData||[],'settings_tab_pot_name') || '🪴 花盆'}｜${getSettingValue(window._rawServerData||[],'settings_subtab_pot_new_name') || '🪴 新花盆'}</option>
+                  <option value="ring_male">${getSettingValue(window._rawServerData||[],'settings_tab_ring_name') || '💍 戒指'}｜${getSettingValue(window._rawServerData||[],'settings_subtab_ring_male_name') || '👦 限男'}</option>
+                  <option value="ring_female">${getSettingValue(window._rawServerData||[],'settings_tab_ring_name') || '💍 戒指'}｜${getSettingValue(window._rawServerData||[],'settings_subtab_ring_female_name') || '👧 限女'}</option>
+                  <option value="crop_male">${getSettingValue(window._rawServerData||[],'settings_tab_crop_name') || '🌱 作物'}｜${getSettingValue(window._rawServerData||[],'settings_subtab_crop_male_name') || '👦 限男'}</option>
+                  <option value="crop_female">${getSettingValue(window._rawServerData||[],'settings_tab_crop_name') || '🌱 作物'}｜${getSettingValue(window._rawServerData||[],'settings_subtab_crop_female_name') || '👧 限女'}</option>
+                  <option value="gift">${getSettingValue(window._rawServerData||[],'settings_tab_gift_name') || '🎁 甩賣區'}</option>
                 </select>
+                </div>
               </div>
             `;
           }
@@ -7047,6 +7247,16 @@ function setupCartPreferences() {
           });
           if (imgEl.complete) {
             card.classList.add('loaded');
+          }
+
+          const batchBox = card.querySelector('.batch-move-checkbox');
+          if(batchBox){
+            batchBox.addEventListener('click', e=>e.stopPropagation());
+            batchBox.addEventListener('change', ()=>{
+              const id=String(batchBox.dataset.id);
+              if(batchBox.checked) batchMoveSelectedIds.add(id); else batchMoveSelectedIds.delete(id);
+              updateBatchMoveToolbar();
+            });
           }
 
           card.addEventListener('click', (e) => {
