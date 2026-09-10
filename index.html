@@ -7812,7 +7812,10 @@ function setupCartPreferences() {
       const deletePhotoBtn = document.getElementById('deleteCurrentPhotoBtn');
 
       if (currentAlbumList.length === 0) {
-        mainImg.src = '';
+        // 相簿沒有照片時，直接顯示商品原本的大圖，不留空白。
+        // 商品主圖通常存放在 activeModalItem.url。
+        mainImg.src = activeModalItem?.url || '';
+        mainImg.alt = activeModalItem?.name ? `${activeModalItem.name} 大圖` : '商品大圖';
         prevBtn.style.display = 'none';
         nextBtn.style.display = 'none';
         dotsContainer.innerHTML = '';
