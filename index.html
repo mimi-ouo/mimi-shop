@@ -4039,7 +4039,7 @@ body::after
 </head>
 <body>
   <div id="initialLoadingScreen" aria-hidden="true">
-    <div>正在載入網站資料…</div>
+    <div>正在載入店鋪資料…</div>
     <div class="initial-loading-dot"></div>
   </div>
   <div class="update-banner" id="updateBanner">
@@ -6799,11 +6799,11 @@ function setupCartPreferences() {
         loader=document.createElement('div');
         loader.id='initialLoadingScreen';
         loader.setAttribute('aria-hidden','true');
-        loader.innerHTML='<div>正在載入分店資料…</div><div class="initial-loading-dot"></div>';
+        loader.innerHTML='<div>正在載入店鋪資料…</div><div class="initial-loading-dot"></div>';
         document.body.prepend(loader);
       }else{
         const text=loader.querySelector('div:first-child');
-        if(text) text.textContent='正在載入分店資料…';
+        if(text) text.textContent='正在載入店鋪資料…';
       }
       document.documentElement.classList.remove('site-data-ready');
       loader.style.display='flex';
