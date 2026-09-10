@@ -3886,7 +3886,7 @@ body::after
 </head>
 <body>
   <div id="initialLoadingScreen" aria-hidden="true">
-    <div>正在載入網站資料…</div>
+    <div>正在載入店鋪資料…</div>
     <div class="initial-loading-dot"></div>
   </div>
   <div class="update-banner" id="updateBanner">
@@ -4688,29 +4688,11 @@ function setupCartPreferences() {
           }catch(e){console.error('讀取店鋪申請狀態失敗',e);}
         }
 
-        // 分店主登入後：只要 Firebase 帳號目前存在核准分店，就優先進入自己的店。
-        // 沒有核准分店但已有審核中的申請時，只提示審核中，不開啟申請表單。
+        // 登入後「留在目前所在的商店」。
+        // 不論使用者是否有自己的核准分店，都以目前網址的 branch 為準；
+        // 沒有 branch 就留在主店，絕不因登入帳號的 ownerBranch 而強制跳回自己的店。
         if(user && !isMainOwner && ownerBranch){
-          // 已有核准分店：只有在「沒有明確指定主站」的初次進站時才優先進自己的店。
-          // 使用者主動切換到主站後，網址沒有 branch 參數，必須允許留在主站，
-          // 避免 onAuthStateChanged／重新整理再次把人踢回自己的分店。
-          const ownerBranchCode=ownerBranch.code||ownerBranch.id;
-          const ownerBranchStorageKey='mimiOwnerBranchCode_'+user.uid;
-          let returnedFromMain=false;
-          try{ returnedFromMain=sessionStorage.getItem('mimiReturnToMain_'+user.uid)==='1'; }catch(e){}
-          if(branchParam){
-            activeBranchId=branchParam;
-          }else if(returnedFromMain){
-            activeBranchId='main';
-            try{ sessionStorage.removeItem('mimiReturnToMain_'+user.uid); }catch(e){}
-          }else{
-            // 第一次登入／沒有指定分店時，維持原本行為：優先進自己的店。
-            activeBranchId=ownerBranchCode;
-            try{ localStorage.setItem(ownerBranchStorageKey,activeBranchId); }catch(e){}
-            const u=new URL(location.href);
-            u.searchParams.set('branch',activeBranchId);
-            history.replaceState({},'',u.toString());
-          }
+          activeBranchId=branchParam||'main';
         }else if(user && !isMainOwner && !ownerBranch){
           // 沒有核准分店：若有審核中的申請，只在「尚未指定分店」時留在主店並提示一次；
           // 之後允許登入狀態下自由瀏覽其他分店，不因切換分店而重複跳提示。
@@ -4834,12 +4816,20 @@ function setupCartPreferences() {
       if(isNaN(d.getTime()))return '尚未記錄';
       return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日${String(d.getHours()).padStart(2,'0')}時${String(d.getMinutes()).padStart(2,'0')}分`;
     }
-    function switchStore(id){
+    async function switchStore(id){
+      id=String(id||'main');
+      const nextBranch = id==='main' ? null : branchRegistry[id] || null;
+      if(id!=='main' && (!nextBranch || nextBranch.status!=='approved')){
+        alert('此店鋪不存在或尚未核准。');
+        return;
+      }
+
+      // 切換商店屬於「資料來源切換」：要顯示 Loading，但不重新整理整個頁面。
+      // 登入/登出則維持無 Loading，只更新權限與 UI。
+      showBranchLoading();
       const u=new URL(location.href);
       if(id==='main'){
         u.searchParams.delete('branch');
-        // 記錄這是使用者主動切換主站，而不是登入後的預設進站。
-        // 重新載入後 onAuthStateChanged 會尊重此狀態，不再強制導回分店。
         if(branchAuthUser?.uid && !isMainOwner){
           try{ sessionStorage.setItem('mimiReturnToMain_'+branchAuthUser.uid,'1'); }catch(e){}
         }
@@ -4849,7 +4839,37 @@ function setupCartPreferences() {
           try{ sessionStorage.removeItem('mimiReturnToMain_'+branchAuthUser.uid); }catch(e){}
         }
       }
-      location.href=u.toString();
+      history.pushState({},'',u.toString());
+
+      activeBranchId=id;
+      activeBranch=nextBranch;
+      const ownerBranchForManage = branchAuthUser && !isMainOwner
+        ? Object.values(branchRegistry).find(b=>b.ownerUid===branchAuthUser.uid&&b.status==='approved')
+        : null;
+      const canOwnerManage=!!(ownerBranchForManage &&
+        (ownerBranchForManage.code||ownerBranchForManage.id)===activeBranchId &&
+        ownerBranchForManage.status==='approved' && ownerBranchForManage.spreadsheetId);
+      branchAdminApproved=canOwnerManage;
+      isAdmin=isMainOwner||branchAdminApproved;
+
+      initAuthUI();
+      syncBranchUI();
+
+      // 清掉上一間店的畫面資料，避免換店瞬間看到舊店內容。
+      allData=[];
+      window._rawServerData=[];
+      if(typeof renderGallery==='function' && currentCategory && currentCategory!=='schedule'){
+        try{ renderGallery(); }catch(e){ console.warn('切店清空畫面失敗',e); }
+      }
+      calculateTotal();
+
+      // 這次 fetch 一定使用切換後的 activeBranch，因此只讀取被點選分店的 Spreadsheet。
+      // fetchData(false) 完成後再解除分店 Loading。
+      try {
+        await fetchData(false);
+      } finally {
+        hideBranchLoading();
+      }
     }
     function updateBranchPendingBadge(apps){
       const btn=document.getElementById('branchManageBtn');
@@ -5227,7 +5247,7 @@ function setupCartPreferences() {
         const b=snap.val()||ownerBranch;
         if(b.approvalNoticeShown!==false)return;
         await ref.update({approvalNoticeShown:true,updatedAt:firebase.database.ServerValue.TIMESTAMP});
-        setTimeout(()=>alert('恭喜你~你的店鋪已經可以上傳商品與修改囉！！\n目前商店尚未對外開放，請在你準備好的時候從「準備中」裡面開幕💖'),500);
+        setTimeout(()=>alert('恭喜你~你的店鋪已經可以上傳商品與修改囉！！\n目前商店尚未對外開放，請在你準備好的時候從「店鋪狀態」裡面開幕💖'),500);
       }catch(e){
         console.error('首次登入審核通過通知失敗',e);
       }
@@ -5919,7 +5939,10 @@ function setupCartPreferences() {
         `;
         document.getElementById('logoutBtn').addEventListener('click', () => {
           auth.signOut().then(() => {
-            location.reload();
+            // Firebase onAuthStateChanged 會直接更新登入 UI；不重新整理頁面，避免再次觸發整頁 Loading。
+          }).catch(err => {
+            console.error('登出失敗：', err);
+            alert('登出失敗：' + (err.message || err));
           });
         });
       } else {
@@ -5940,7 +5963,12 @@ function setupCartPreferences() {
               sessionStorage.removeItem('mimiDeletedBranchNotice_'+branchAuthUser.uid);
             }catch(e){}
             try{ window._deletedBranchNoticeShown=false; }catch(e){}
-            auth.signOut().then(() => { location.reload(); });
+            auth.signOut().then(() => {
+              // Firebase onAuthStateChanged 會直接更新登入 UI；不重新整理頁面。
+            }).catch(err => {
+              console.error('登出失敗：', err);
+              alert('登出失敗：' + (err.message || err));
+            });
           });
         } else {
           authBox.innerHTML = `
@@ -6261,6 +6289,8 @@ function setupCartPreferences() {
     }
 
     function setupEditableSave(elem, id, field) {
+      if(!elem || elem.dataset.authSaveBound==='1') return;
+      elem.dataset.authSaveBound='1';
       let originalText = "";
       elem.addEventListener('focus', () => {
         if (!isAdmin) return;
@@ -6311,7 +6341,7 @@ function setupCartPreferences() {
         if (!email) { alert('請輸入 Email'); return; }
         auth.signInWithEmailAndPassword(email, pass)
           .then((userCredential) => {
-            location.reload();
+            // Firebase onAuthStateChanged 會接手更新登入狀態與管理 UI，不重新整理頁面。
           })
           .catch((error) => {
             alert('登入失敗：' + error.message);
@@ -6541,6 +6571,27 @@ function setupCartPreferences() {
       const loader=document.getElementById('initialLoadingScreen');
       if(loader) setTimeout(()=>loader.remove(),220);
     }
+    function showBranchLoading(){
+      let loader=document.getElementById('initialLoadingScreen');
+      if(!loader){
+        loader=document.createElement('div');
+        loader.id='initialLoadingScreen';
+        loader.setAttribute('aria-hidden','true');
+        loader.innerHTML='<div>正在載入店鋪資料…</div><div class="initial-loading-dot"></div>';
+        document.body.prepend(loader);
+      }else{
+        const text=loader.querySelector('div:first-child');
+        if(text) text.textContent='正在載入店鋪資料…';
+      }
+      document.documentElement.classList.remove('site-data-ready');
+      loader.style.display='flex';
+      loader.style.opacity='1';
+    }
+    function hideBranchLoading(){
+      document.documentElement.classList.add('site-data-ready');
+      const loader=document.getElementById('initialLoadingScreen');
+      if(loader) setTimeout(()=>loader.remove(),220);
+    }
     function waitNextFrame(){
       return new Promise(resolve=>requestAnimationFrame(resolve));
     }
@@ -6663,7 +6714,10 @@ function setupCartPreferences() {
             action: 'updateItem',
             id: String(id),
             field: String(field),
-            value: String(value ?? '')
+            value: String(value ?? ''),
+            // 分店更新時明確帶入目前分店資料庫識別碼，避免後端回退到主店。
+            spreadsheetId: activeBranchId!=='main' ? String(activeBranch?.spreadsheetId||'') : '',
+            folderId: activeBranchId!=='main' ? String(activeBranch?.folderId||'') : ''
           }).toString()
         });
 
