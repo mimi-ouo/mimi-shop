@@ -182,6 +182,9 @@ html.site-data-ready #initialLoadingScreen{opacity:0;}
 }
 .cart-summary
 {
+  position:sticky;
+  top:calc(var(--sticky-header-height, 120px) + 5px);
+  z-index:840;
   background:var(--card-bg);
   border:1px solid var(--cart-color);
   color:#ffffff;
@@ -743,6 +746,62 @@ html.site-data-ready #initialLoadingScreen{opacity:0;}
   transform:translateY(-50%);
   z-index:2;
 }
+/* 管理端固定操作區：往下滑仍可看到儲存提示、批量移動與排序 */
+body.is-admin #dropZone
+{
+  position:sticky;
+  top:calc(var(--sticky-header-height, 120px) + 5px);
+  z-index:850;
+  padding:7px 10px;
+  margin-top:8px;
+  margin-bottom:6px;
+  min-height:38px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  box-sizing:border-box;
+  background:rgba(30,30,30,0.96);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  box-shadow:0 2px 8px rgba(0,0,0,0.18)
+}
+body.is-admin #dropZone p:first-child
+{
+  margin:0!important;
+  font-size:13px!important;
+  line-height:1.25;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis
+}
+body.is-admin #dropZone #status
+{
+  flex:0 0 auto;
+  min-width:0;
+  max-width:38%;
+  min-height:18px;
+  padding:0;
+  border-radius:0;
+  background:transparent;
+  font-size:12px!important;
+  line-height:1.25;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis
+}
+body.is-admin #sectionSortContainer
+{
+  position:sticky;
+  top:calc(var(--sticky-header-height, 120px) + 55px);
+  z-index:840;
+  background:rgba(18,18,18,0.94);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  border-radius:8px;
+  padding-top:3px;
+  padding-bottom:3px
+}
 /* 批量移動靠左；價格排序固定靠右，不互相推動 */
 .section-sort-container > .batch-move-toolbar
 {
@@ -782,7 +841,42 @@ html.site-data-ready #initialLoadingScreen{opacity:0;}
   {
     white-space:nowrap;
   }
+  body.is-admin #dropZone
+  {
+    top:calc(var(--sticky-header-height, 120px) + 4px);
+    padding:6px 8px;
+    gap:6px;
+    min-height:36px;
+  }
+  body.is-admin #dropZone p:first-child
+  {
+    font-size:11px!important;
+  }
+  body.is-admin #dropZone #status
+  {
+    min-width:78px;
+    max-width:42%;
+    font-size:10px!important;
+    padding:2px 6px;
+  }
+  body.is-admin #sectionSortContainer
+  {
+    top:calc(var(--sticky-header-height, 120px) + 48px);
+  }
 }
+@media (max-width:430px)
+{
+  body.is-admin #dropZone p:first-child
+  {
+    font-size:10px!important;
+  }
+  body.is-admin #dropZone #status
+  {
+    min-width:66px;
+    max-width:45%;
+  }
+}
+
 .search-sort-wrapper
 {
   display:flex;
@@ -1433,7 +1527,7 @@ html.site-data-ready #initialLoadingScreen{opacity:0;}
   background-color:#9a3412!important;
   color:#fed7aa!important
 }
-.batch-move-toolbar{display:none;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin:0;padding:7px 10px;background:rgba(43,115,223,.10);border:1px solid rgba(43,115,223,.35);border-radius:8px;font-size:12px;z-index:20;box-shadow:0 4px 16px rgba(0,0,0,.25);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.batch-move-toolbar{display:none;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin:0;padding:7px 10px;background:transparent;border:0;border-radius:8px;font-size:12px;z-index:20;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
 .batch-move-toolbar.show{display:flex}
 .batch-move-toolbar select,.batch-move-toolbar button{font-size:12px;padding:5px 8px;border-radius:6px;border:1px solid rgba(43,115,223,.45);background:#1e1e1e;color:inherit}
 .batch-move-toolbar button{cursor:pointer;font-weight:bold}
@@ -5950,6 +6044,27 @@ function setupCartPreferences() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    function syncStickyHeaderHeight(){
+      const header=document.querySelector('.sticky-header-wrapper');
+      if(!header)return;
+      const h=Math.max(70,Math.ceil(header.getBoundingClientRect().height));
+      document.documentElement.style.setProperty('--sticky-header-height',`${h}px`);
+    }
+
+    function setupStickyHeaderHeight(){
+      syncStickyHeaderHeight();
+      const header=document.querySelector('.sticky-header-wrapper');
+      if(!header)return;
+      if(!header.dataset.stickyResizeBound){
+        header.dataset.stickyResizeBound='1';
+        if(window.ResizeObserver){
+          const ro=new ResizeObserver(syncStickyHeaderHeight);
+          ro.observe(header);
+        }
+        window.addEventListener('resize',syncStickyHeaderHeight,{passive:true});
+      }
+    }
+
     function setupHomeWelcomeButton() {
       const btn = document.getElementById('homeWelcomeBtn');
       if (!btn || btn.dataset.bound === '1') return;
@@ -6023,6 +6138,7 @@ function setupCartPreferences() {
     }
 
     function initAuthUI() {
+      setupStickyHeaderHeight();
       const authBox = document.getElementById('authBox');
       const dropZone = document.getElementById('dropZone');
       const giftDescElem = document.getElementById('giftDescription');
@@ -6031,7 +6147,7 @@ function setupCartPreferences() {
 
       if (isAdmin && (activeBranchId==='main' || branchAdminApproved)) {
         document.body.classList.add('is-admin');
-        dropZone.style.display = currentCategory ? 'block' : 'none';
+        dropZone.style.display = currentCategory ? 'flex' : 'none';
         giftDescElem.contentEditable = "true";
         ringDescElem.contentEditable = "true";
         cropDescElem.contentEditable = "true";
@@ -6507,7 +6623,7 @@ function setupCartPreferences() {
           }
           document.getElementById('scheduleContainer').style.display = (currentCategory === 'schedule') ? 'block' : 'none';
           document.getElementById('gallery').style.display = (currentCategory === 'schedule') ? 'none' : 'grid';
-          document.getElementById('dropZone').style.display = (isAdmin && currentCategory !== 'schedule') ? 'block' : 'none';
+          document.getElementById('dropZone').style.display = (isAdmin && currentCategory !== 'schedule') ? 'flex' : 'none';
 
           const sortContainer = document.getElementById('sectionSortContainer');
           if (!currentCategory || currentCategory === 'schedule') {
@@ -7756,15 +7872,42 @@ function setupCartPreferences() {
           const uploadUrl=apiUrl('addItem'); if(!uploadUrl) throw new Error('此店鋪尚未與網站共享資料庫');
           const result = await submitUploadRequest(uploadUrl, formData);
           if (result.status === 'success' || result.status === 'submitted') {
-            status.innerText = result.status === 'submitted' ? "圖片已送出，正在寫入店鋪資料夾..." : "相簿上傳成功！";
-            if (result.status === 'success') {
+            status.innerText = result.status === 'submitted' ? "圖片已送出，正在更新相簿..." : "相簿上傳成功，正在更新畫面...";
+
+            // 相簿圖片寫入 Google Drive / Sheet 可能比上傳回應慢。
+            // 這裡自動重新抓取多次，讓新照片不用 F5 就會出現在目前相簿。
+            const refreshAttempts = result.status === 'submitted' ? 5 : 2;
+            let foundNewPhoto = false;
+            for (let attempt = 0; attempt < refreshAttempts; attempt++) {
+              await new Promise(resolve => setTimeout(resolve, attempt === 0 ? 300 : 1000));
               await fetchData();
-              if (window._rawServerData) {
-                const updatedAlbumImages = window._rawServerData.filter(i => i.category === 'album_item' && String(i.note) === String(activeModalItem.id));
+
+              if (window._rawServerData && activeModalItem) {
+                const updatedAlbumImages = window._rawServerData.filter(i =>
+                  i.category === 'album_item' &&
+                  String(i.note) === String(activeModalItem.id)
+                );
                 currentAlbumList = updatedAlbumImages;
-                currentAlbumIndex = currentAlbumList.length - 1;
-                updateModalView();
+
+                if (updatedAlbumImages.length > 0) {
+                  // 新照片通常會排在最後，直接切到最新一張。
+                  currentAlbumIndex = updatedAlbumImages.length - 1;
+                  updateModalView();
+                }
+
+                if (updatedAlbumImages.length > 0) {
+                  foundNewPhoto = true;
+                  // submitted 的情況仍至少等待第一輪確認後才結束；
+                  // 確認到相簿資料後即可停止輪詢。
+                  break;
+                }
               }
+            }
+
+            if (foundNewPhoto) {
+              status.innerText = "✅ 相簿圖片已即時更新！";
+            } else {
+              status.innerText = "⚠️ 圖片已送出，正在等待相簿資料更新...";
             }
             setTimeout(() => status.innerText = "", 2200);
           } else { throw new Error(result.message || '上傳失敗'); }
@@ -7872,8 +8015,21 @@ function setupCartPreferences() {
           const uploadUrl=apiUrl('addItem'); if(!uploadUrl) throw new Error('此店鋪尚未與網站共享資料庫');
           const result = await submitUploadRequest(uploadUrl, formData);
           if (result.status === 'success' || result.status === 'submitted') {
-            status.innerText = result.status === 'submitted' ? "圖片已送出，正在寫入店鋪資料夾..." : "上傳成功！";
-            if (result.status === 'success') await fetchData();
+            status.innerText = result.status === 'submitted' ? "圖片已送出，正在寫入店鋪資料夾..." : "上傳成功，正在更新畫面...";
+            // 上傳成功後立即重新抓取目前分店資料，不需要 F5。
+            // Apps Script 若先回 submitted，等待寫入完成後自動重試幾次。
+            const attempts = result.status === 'submitted' ? 4 : 1;
+            for (let attempt = 0; attempt < attempts; attempt++) {
+              try {
+                await new Promise(resolve => setTimeout(resolve, attempt === 0 ? 350 : 1200));
+                await fetchData();
+                status.innerText = "✅ 上傳成功，圖片已更新！";
+                break;
+              } catch (refreshError) {
+                console.warn('上傳後自動更新失敗，將重試:', refreshError);
+                if (attempt === attempts - 1) status.innerText = "⚠️ 圖片已上傳，畫面更新失敗，請稍後再試";
+              }
+            }
             setTimeout(() => status.innerText = "", 2200);
           } else {
             status.innerText = "上傳失敗：" + (result.message || '未知錯誤');
