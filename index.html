@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- V3：以原始 index (6).html 為基礎，整合安全的 render / cart capture / loading 優化；不改資料結構。 -->
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
@@ -4786,7 +4787,7 @@ function setupCartPreferences() {
       setupDropZone();
       
       if (!isAdmin) {
-        setInterval(checkForUpdates, 10000);
+        setInterval(() => { if (!document.hidden) checkForUpdates(); }, 30000);
       }
 
       updateCartButtonBadge();
@@ -5253,10 +5254,22 @@ function setupCartPreferences() {
     }
 
     async function checkForUpdates() {
-      if (isAdmin) return;
+      // 首次資料尚未完成前，不要再額外打 getData；避免初始載入與更新檢查同時競爭。
+      if (isAdmin || !initialDataLoaded || document.hidden) return;
 
       try {
-        const dataUrl=apiUrl('getData'); if(!dataUrl) throw new Error('此店鋪尚未共享資料庫'); const response = await fetch(dataUrl);
+        const dataUrl=apiUrl('getData');
+        if(!dataUrl) throw new Error('此店鋪尚未共享資料庫');
+        const response = await fetch(dataUrl, { cache: 'no-store' });
+        if (!response.ok) {
+          const text = await response.text().catch(() => '');
+          throw new Error(`更新檢查 HTTP ${response.status}${text ? `：${text.slice(0,120)}` : ''}`);
+        }
+        const contentType = response.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+          const text = await response.text().catch(() => '');
+          throw new Error(`更新檢查收到非 JSON 回應${text ? `：${text.slice(0,120)}` : ''}`);
+        }
         const result = await response.json();
         if (result.status === 'success') {
           const settingsIds = SETTINGS_IDS;
@@ -5289,18 +5302,33 @@ function setupCartPreferences() {
       });
     }
 
+    // 商品索引：不改資料來源，只避免每個購物車商品都重新掃描 allData。
+    let itemIndex = new Map();
+    let itemIndexSource = null;
+    let itemIndexLength = -1;
+
+    function syncItemIndex() {
+      if (itemIndexSource === allData && itemIndexLength === allData.length) return;
+      itemIndex = new Map();
+      for (const item of allData) itemIndex.set(String(item.id), item);
+      itemIndexSource = allData;
+      itemIndexLength = allData.length;
+    }
+
     function calculateTotal() {
-        let total = 0;
-        cartItems.forEach((qtyStr, id) => {
-            const item = allData.find(i => String(i.id) === String(id));
-            if (item && item.category !== 'gift') {
-                const price = parseInt(item.price) || 0;
-                const qtyMatch = qtyStr.match(/\d+/);
-                const qty = qtyMatch ? parseInt(qtyMatch[0], 10) : 1;
-                total += (price * qty);
-            }
-        });
-        document.getElementById('totalAmount').innerText = total;
+      syncItemIndex();
+      let total = 0;
+      cartItems.forEach((qtyStr, id) => {
+        const item = itemIndex.get(String(id));
+        if (item && item.category !== 'gift') {
+          const price = parseInt(item.price, 10) || 0;
+          const qtyMatch = String(qtyStr || '').match(/\d+/);
+          const qty = qtyMatch ? parseInt(qtyMatch[0], 10) : 1;
+          total += price * qty;
+        }
+      });
+      const totalEl = document.getElementById('totalAmount');
+      if (totalEl) totalEl.innerText = total;
     }
 
     let cartCaptureStatusTimer = null;
@@ -5432,7 +5460,7 @@ function setupCartPreferences() {
       return true;
     }
 
-    function buildCartCaptureStage() {
+    async function buildCartCaptureStage() {
       const existing = document.getElementById('cartCaptureStage');
       if (existing) existing.remove();
 
@@ -5451,7 +5479,8 @@ function setupCartPreferences() {
       // 截圖前先重新渲染一次購物車商品格，避免畫面上的 gallery 尚未完成更新，
       // 導致 clone 出來的截圖副本只有上方摘要、沒有商品。
       if (currentCategory === 'cart') {
-        renderGallery();
+        // renderGallery() 會分批建立商品 DOM；截圖前一定等完整 render 結束。
+        await ensureCartGalleryComplete();
       }
 
       const summaryClone = summary.cloneNode(true);
@@ -5618,7 +5647,7 @@ function setupCartPreferences() {
       try {
         calculateTotal();
         applyCartPreferencesToUI();
-        stage = buildCartCaptureStage();
+        stage = await buildCartCaptureStage();
 
         /*
          * 先建立完整截圖 Promise。
@@ -5694,6 +5723,21 @@ function setupCartPreferences() {
         if (stage) stage.remove();
         button.disabled = false;
       }
+    }
+
+    // 截圖前的完整性檢查：DOM 商品數不足時，再等一輪最新 render，而不是截到半套購物車。
+    async function ensureCartGalleryComplete() {
+      if (currentCategory !== 'cart') return;
+      const expected = cartItems ? cartItems.size : 0;
+      if (!expected) return;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        await renderGallery();
+        const actual = document.querySelectorAll('#gallery .img-card[data-id]').length;
+        if (actual >= expected) return;
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      }
+      const actual = document.querySelectorAll('#gallery .img-card[data-id]').length;
+      if (actual < expected) throw new Error(`購物車商品尚未全部載入（${actual}/${expected}），請再試一次。`);
     }
 
     function setupCartCapture() {
@@ -6476,6 +6520,7 @@ function setupCartPreferences() {
 
     // ===== 首次載入與分批繪製 =====
     let galleryRenderToken = 0;
+    let initialDataLoaded = false;
     function markSiteDataReady(){
       document.documentElement.classList.add('site-data-ready');
       const loader=document.getElementById('initialLoadingScreen');
@@ -6487,7 +6532,27 @@ function setupCartPreferences() {
 
     async function fetchData(isInitial = false) {
       try {
-        const dataUrl=apiUrl('getData'); if(!dataUrl) throw new Error('此店鋪尚未與網站共享資料庫'); const response = await fetch(dataUrl);
+        const dataUrl=apiUrl('getData');
+        if(!dataUrl) throw new Error('此店鋪尚未與網站共享資料庫');
+        const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        // Apps Script 首次啟動可能需要較久時間；15 秒太容易把正常的 cold start 當成失敗。
+        const timeoutMs = isInitial ? 60000 : 30000;
+        const timeoutId = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
+        let response;
+        try {
+          response = await fetch(dataUrl, controller ? { signal: controller.signal } : undefined);
+        } finally {
+          if (timeoutId) clearTimeout(timeoutId);
+        }
+        if (!response.ok) {
+          const text = await response.text().catch(() => '');
+          throw new Error(`資料載入 HTTP ${response.status}${text ? `：${text.slice(0,160)}` : ''}`);
+        }
+        const contentType = response.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+          const text = await response.text().catch(() => '');
+          throw new Error(`資料載入收到非 JSON 回應${text ? `：${text.slice(0,160)}` : ''}`);
+        }
         const result = await response.json();
         if (result.status === 'success') {
           const settingsIds = SETTINGS_IDS;
@@ -6512,7 +6577,10 @@ function setupCartPreferences() {
 
           applyAllSiteSettings(result.data);
           // 設定已從雲端套用完成；現在才解除舊文字遮罩。商品圖片會另外分批加入。
-          if(isInitial) markSiteDataReady();
+          if(isInitial) {
+            initialDataLoaded = true;
+            markSiteDataReady();
+          }
           if(activeBranch && branchAdminApproved && activeBranch.discordUrl){
             const d=String(getSettingValue(result.data,'settings_contact_discord_url')||'');
             const t=String(getSettingValue(result.data,'settings_contact_tally_url')||'');
@@ -6539,7 +6607,15 @@ function setupCartPreferences() {
           }
         }
       } catch (err) {
-        console.error("載入資料失敗", err);
+        if (err && err.name === 'AbortError') {
+          console.warn(`資料載入逾時（${isInitial ? 60 : 30} 秒），請檢查 Google Apps Script 是否正常回應。`);
+        } else {
+          console.error("載入資料失敗", err);
+        }
+        if (isInitial) {
+          // Google Apps Script 暫時無回應時，不讓整個頁面永久卡在載入遮罩。
+          try { markSiteDataReady(); } catch (e) {}
+        }
       }
     }
 
@@ -6638,7 +6714,21 @@ function setupCartPreferences() {
       return optionsHTML;
     }
 
-    async function renderGallery() {
+    // Render 佇列：同一時間只讓最新一次 render 寫入 gallery，避免快速搜尋/切換/購物車操作互相覆蓋。
+    let galleryRenderPromise = Promise.resolve();
+    let galleryRenderQueued = false;
+
+    function renderGallery() {
+      if (galleryRenderQueued) return galleryRenderPromise;
+      galleryRenderQueued = true;
+      galleryRenderPromise = Promise.resolve().then(async () => {
+        galleryRenderQueued = false;
+        return renderGalleryNow();
+      });
+      return galleryRenderPromise;
+    }
+
+    async function renderGalleryNow() {
       const gallery = document.getElementById('gallery');
       const thisRenderToken = ++galleryRenderToken;
       const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
@@ -7072,7 +7162,7 @@ function setupCartPreferences() {
 
         for(const category of categoryOrder){
           const categoryItems = filtered.filter(item => String(item.category || '') === category);
-          if (!categoryItems.length) return;
+          if (!categoryItems.length) continue;
 
           if (cartSectionCount > 0) {
             const divider = document.createElement('hr');
