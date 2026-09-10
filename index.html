@@ -5227,7 +5227,7 @@ function setupCartPreferences() {
         const b=snap.val()||ownerBranch;
         if(b.approvalNoticeShown!==false)return;
         await ref.update({approvalNoticeShown:true,updatedAt:firebase.database.ServerValue.TIMESTAMP});
-        setTimeout(()=>alert('恭喜你~你的店鋪已經可以上傳商品與修改囉！！\n目前商店尚未對外開放，請在你準備好的時候從「店鋪狀態」裡面開幕💖'),500);
+        setTimeout(()=>alert('恭喜你~你的店鋪已經可以上傳商品與修改囉！！\n目前商店尚未對外開放，請在你準備好的時候從「準備中」裡面開幕💖'),500);
       }catch(e){
         console.error('首次登入審核通過通知失敗',e);
       }
