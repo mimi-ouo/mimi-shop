@@ -7446,20 +7446,58 @@ function setupCartPreferences() {
 
           const chkEl = card.querySelector(`#cart-chk-${item.id}`);
           if (chkEl) {
+            // 保留瀏覽器原生 checkbox 行為，避免手動 preventDefault 導致無法加入購物車。
+            // 只記住點擊前的位置，並在 change 後恢復，避免畫面往上跳。
+            let cartScrollX = 0;
+            let cartScrollY = 0;
+            let cartScrollLocked = false;
+
+            const restoreCartScroll = () => {
+              if (!cartScrollLocked) return;
+              window.scrollTo(cartScrollX, cartScrollY);
+              requestAnimationFrame(() => {
+                if (cartScrollLocked) window.scrollTo(cartScrollX, cartScrollY);
+              });
+              setTimeout(() => {
+                if (cartScrollLocked) window.scrollTo(cartScrollX, cartScrollY);
+              }, 50);
+            };
+
+            chkEl.addEventListener('pointerdown', () => {
+              cartScrollX = window.scrollX;
+              cartScrollY = window.scrollY;
+              cartScrollLocked = true;
+              // 關閉瀏覽器 scroll anchoring，只針對這次購物車操作。
+              document.documentElement.style.overflowAnchor = 'none';
+              document.body.style.overflowAnchor = 'none';
+            }, { passive: true });
+
             chkEl.addEventListener('change', () => {
               const status = document.getElementById('status');
               if (chkEl.checked) {
                 cartItems.set(String(item.id), '數量: 1');
-                status.innerText = "🛒 已加入購物車！";
+                if (status) status.innerText = "🛒 已加入購物車！";
               } else {
                 cartItems.delete(String(item.id));
-                status.innerText = "❌ 已從購物車移除";
+                if (status) status.innerText = "❌ 已從購物車移除";
               }
               saveCartToStorage();
-              setTimeout(() => { status.innerText = ""; }, 1500);
+              // 不重建商品列表，避免 renderGallery() 造成畫面位置改變。
               updateCartButtonBadge();
-              renderGallery();
               calculateTotal();
+              restoreCartScroll();
+
+              setTimeout(() => {
+                if (status) status.innerText = "";
+                restoreCartScroll();
+                cartScrollLocked = false;
+                document.documentElement.style.overflowAnchor = '';
+                document.body.style.overflowAnchor = '';
+              }, 1500);
+            });
+
+            chkEl.addEventListener('blur', () => {
+              restoreCartScroll();
             });
           }
 
