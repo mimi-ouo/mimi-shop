@@ -309,7 +309,7 @@ html.site-data-ready #initialLoadingScreen{opacity:0;}
   background-color:#3f3f46!important;
   color:#000000!important
 }
-#cartPaymentMethod option[value="💰 轉帳"]
+#cartPaymentMethod option[value="💰 現金"]
 {
   background-color:#f6e7a8!important;
   color:#000000!important
@@ -563,6 +563,30 @@ html.site-data-ready #initialLoadingScreen{opacity:0;}
   white-space:nowrap;
   box-sizing:border-box
 }
+ .tab-emoji{
+   display:inline-block;
+   font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;
+   font-style:normal;
+   font-weight:normal;
+   line-height:1;
+   color:initial;
+   -webkit-font-smoothing:antialiased;
+   transform:translateZ(0);
+   -webkit-transform:translateZ(0)
+ }
+ /* 手機首次載入時，分頁是固定的導覽 UI，不應被初始化遮罩隱藏。
+    特別保留 emoji 的獨立繪製，避免第一次 paint 後要點擊才 repaint。 */
+ html:not(.site-data-ready) #sideTabsPanel .tab-btn,
+ html:not(.site-data-ready) #sideTabsPanel .dropdown-toggle,
+ html:not(.site-data-ready) #sideTabsPanel .collapse-toggle-btn{
+   color:var(--text-color)!important;
+   text-shadow:none!important
+ }
+ html:not(.site-data-ready) #sideTabsPanel .tab-emoji{
+   color:initial!important;
+   visibility:visible!important;
+   opacity:1!important
+ }
 .tab-btn:hover,.dropdown-toggle:hover
 {
   background:#2a2a2a;
@@ -3732,43 +3756,43 @@ body::after
   </div>
   <button id="backToTopBtn" title="回到頂部">↑ 頂部</button>
   <div class="side-tabs-panel" id="sideTabsPanel">
-    <button class="collapse-toggle-btn" id="collapseToggleBtn">📂 收合 ▾</button>
+    <button class="collapse-toggle-btn" id="collapseToggleBtn"> <span class="tab-emoji" aria-hidden="true">📂</span> 收合 ▾</button>
     <button class="tab-btn" id="cartTabBtn" data-category="cart">
-      <span>🛒 購物車</span>
+      <span><span class="tab-emoji" aria-hidden="true">🛒</span> 購物車</span>
     </button>
     <div class="collapse-content" id="collapseContent">
       <div class="dropdown" id="dropdown-furniture">
-        <button class="dropdown-toggle" data-dropdown="dropdown-furniture" id="furnitureToggleBtn">🏠 家具 ▾</button>
+        <button class="dropdown-toggle" data-dropdown="dropdown-furniture" id="furnitureToggleBtn"> <span class="tab-emoji" aria-hidden="true">🏠</span> 家具 ▾</button>
         <div class="dropdown-menu">
-          <button class="dropdown-item tab-btn" data-category="general_new">✨ 本周信封</button>
-          <button class="dropdown-item tab-btn" data-category="general_misc">🖼️ 家具擺設</button>
-          <button class="dropdown-item tab-btn" data-category="general_consumable">🧪 消耗品</button>
+          <button class="dropdown-item tab-btn" data-category="general_new"> <span class="tab-emoji" aria-hidden="true">✨</span> 本周信封</button>
+          <button class="dropdown-item tab-btn" data-category="general_misc"> <span class="tab-emoji" aria-hidden="true">🖼️</span> 家具擺設</button>
+          <button class="dropdown-item tab-btn" data-category="general_consumable"> <span class="tab-emoji" aria-hidden="true">🧪</span> 消耗品</button>
         </div>
       </div>
       <div class="dropdown" id="dropdown-animal">
-        <button class="dropdown-toggle" data-dropdown="dropdown-animal">🐾 小動物 ▾</button>
+        <button class="dropdown-toggle" data-dropdown="dropdown-animal"> <span class="tab-emoji" aria-hidden="true">🐾</span> 小動物 ▾</button>
         <div class="dropdown-menu">
-          <button class="dropdown-item tab-btn" data-category="memes">🧸 熊熊</button>
-          <button class="dropdown-item tab-btn" data-category="animal_other">🐧 其他</button>
+          <button class="dropdown-item tab-btn" data-category="memes"> <span class="tab-emoji" aria-hidden="true">🧸</span> 熊熊</button>
+          <button class="dropdown-item tab-btn" data-category="animal_other"> <span class="tab-emoji" aria-hidden="true">🐧</span> 其他</button>
         </div>
       </div>
-      <button class="tab-btn" data-category="pot">🪴 花盆</button>
+      <button class="tab-btn" data-category="pot"> <span class="tab-emoji" aria-hidden="true">🪴</span> 花盆</button>
       <div class="dropdown" id="dropdown-ring">
-        <button class="dropdown-toggle" data-dropdown="dropdown-ring">💍 戒指 ▾</button>
+        <button class="dropdown-toggle" data-dropdown="dropdown-ring"> <span class="tab-emoji" aria-hidden="true">💍</span> 戒指 ▾</button>
         <div class="dropdown-menu">
-          <button class="dropdown-item tab-btn" data-category="ring_male">👦 限男</button>
-          <button class="dropdown-item tab-btn" data-category="ring_female">👧 限女</button>
+          <button class="dropdown-item tab-btn" data-category="ring_male"> <span class="tab-emoji" aria-hidden="true">👦</span> 限男</button>
+          <button class="dropdown-item tab-btn" data-category="ring_female"> <span class="tab-emoji" aria-hidden="true">👧</span> 限女</button>
         </div>
       </div>
       <div class="dropdown" id="dropdown-crop">
-        <button class="dropdown-toggle" data-dropdown="dropdown-crop">🌱 作物 ▾</button>
+        <button class="dropdown-toggle" data-dropdown="dropdown-crop"> <span class="tab-emoji" aria-hidden="true">🌱</span> 作物 ▾</button>
         <div class="dropdown-menu">
-          <button class="dropdown-item tab-btn" data-category="crop_male">👦 限男</button>
-          <button class="dropdown-item tab-btn" data-category="crop_female">👧 限女</button>
+          <button class="dropdown-item tab-btn" data-category="crop_male"> <span class="tab-emoji" aria-hidden="true">👦</span> 限男</button>
+          <button class="dropdown-item tab-btn" data-category="crop_female"> <span class="tab-emoji" aria-hidden="true">👧</span> 限女</button>
         </div>
       </div>
-      <button class="tab-btn" data-category="gift">🎁 甩賣區</button>
-      <button class="tab-btn" data-category="schedule">📅 米米班表</button>
+      <button class="tab-btn" data-category="gift"> <span class="tab-emoji" aria-hidden="true">🎁</span> 甩賣區</button>
+      <button class="tab-btn" data-category="schedule"> <span class="tab-emoji" aria-hidden="true">📅</span> 米米班表</button>
     </div>
     <div class="auth-section-wrapper">
       <div class="auth-box" id="authBox">
@@ -3831,7 +3855,7 @@ body::after
           <div class="cart-preference-group">
             <span class="cart-preference-label">💳 交易方式</span>
             <select id="cartPaymentMethod" class="cart-preference-select">
-              <option value="💰 轉帳">💰 轉帳</option>
+              <option value="💰 現金">💰 現金</option>
               <option value="🍭 糖果">🍭 糖果</option>
             </select>
           </div>
@@ -3977,7 +4001,7 @@ body::after
     let isAdmin = false;
     let allData = [];
     let cartItems = loadCartFromStorage();
-    let cartPaymentMethod = loadCartPreference('cartPaymentMethod', '💰 轉帳');
+    let cartPaymentMethod = loadCartPreference('cartPaymentMethod', '💰 現金');
     let cartCharacterGender = loadCartPreference('cartCharacterGender', '男號');
     let activeModalItem = null;
     let currentAlbumList = [];
@@ -4038,7 +4062,7 @@ body::after
       if (paymentEl) {
         paymentEl.value = cartPaymentMethod;
         if (paymentEl.value !== cartPaymentMethod) {
-          cartPaymentMethod = paymentEl.options[0]?.value || '💰 轉帳';
+          cartPaymentMethod = paymentEl.options[0]?.value || '💰 現金';
         }
       }
 
@@ -4632,9 +4656,9 @@ function setupCartPreferences() {
     function updateCartButtonBadge() {
       const cartBtn = document.getElementById('cartTabBtn');
       if (cartItems.size > 0) {
-        cartBtn.innerHTML = `<span>🛒 購物車</span><span class="cart-badge-count">${cartItems.size}</span>`;
+        cartBtn.innerHTML = `<span><span class="tab-emoji" aria-hidden="true">🛒</span> 購物車</span><span class="cart-badge-count">${cartItems.size}</span>`;
       } else {
-        cartBtn.innerHTML = `<span>🛒 購物車</span>`;
+        cartBtn.innerHTML = `<span><span class="tab-emoji" aria-hidden="true">🛒</span> 購物車</span>`;
       }
       calculateTotal();
     }
@@ -5296,10 +5320,10 @@ function setupCartPreferences() {
                   <option value="" disabled selected>📦 移動到...</option>
                   <option value="general_new">✨ 本月新品</option>
                   <option value="general_misc">📦 哩哩摳摳</option>
-                  <option value="general_consumable">🧪 消耗品</option>
-                  <option value="memes">🧸 熊熊</option>
+                  <option value="general_consumable"> <span class="tab-emoji" aria-hidden="true">🧪</span> 消耗品</option>
+                  <option value="memes"> <span class="tab-emoji" aria-hidden="true">🧸</span> 熊熊</option>
                   <option value="animal_other">📦 其他 (小動物)</option>
-                  <option value="pot">🪴 花盆</option>
+                  <option value="pot"> <span class="tab-emoji" aria-hidden="true">🪴</span> 花盆</option>
                   <option value="ring_male">💍 戒指 (限男)</option>
                   <option value="ring_female">💍 戒指 (限女)</option>
                   <option value="crop_male">🌱 作物 (限男)</option>
