@@ -1485,6 +1485,14 @@ html.site-data-ready #initialLoadingScreen{opacity:0;}
   max-height:50vh;
   object-fit:contain
 }
+.modal-main-img.main-product-photo
+{
+  width:210px;
+  height:210px;
+  max-width:calc(100vw - 80px);
+  max-height:50vh;
+  object-fit:contain
+}
 .modal-nav-btn
 {
   position:absolute;
@@ -1543,6 +1551,11 @@ html.site-data-ready #initialLoadingScreen{opacity:0;}
   width:100%;
   align-items:center
 }
+.tab-description-container{display:none;width:100%;margin:15px 0 0 0;text-align:center}
+.tab-description-box{display:flex;align-items:flex-start;gap:6px;background-color:var(--card-bg);border:1px solid var(--border-color);color:var(--text-color);padding:12px 16px;border-radius:8px;font-size:15px;line-height:1.5;text-align:left;box-sizing:border-box;width:100%}
+.tab-description-content{flex:1;min-width:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.editable-site-setting{white-space:pre-wrap;overflow-wrap:anywhere}
+.is-admin .editable-site-setting{outline:1px dashed rgba(255,255,255,.22);outline-offset:2px;cursor:text}
 .schedule-container
 {
   background:var(--card-bg);
@@ -3839,22 +3852,10 @@ body::after
     </div>
     <div id="cartCaptureStatus" class="cart-capture-status" aria-live="polite"></div>
   </div>
-  <div class="custom-notice-container" id="giftNoticeContainer">
-    <div class="custom-notice-box">
-      <span>🎁</span>
-      <span class="editable-text" id="giftDescription" contenteditable="false">本區一律2糖, 如有購買任一商品或本區滿五件, 可選本區一件免費贈送，單次滿百=本區隨便挑無上限!!!</span>
-    </div>
-  </div>
-  <div class="custom-notice-container" id="ringNoticeContainer">
-    <div class="custom-notice-box">
-      <span>💍</span>
-      <span class="editable-text" id="ringDescription" contenteditable="false">情侶等級由買家負擔</span>
-    </div>
-  </div>
-  <div class="custom-notice-container" id="cropNoticeContainer">
-    <div class="custom-notice-box">
-      <span>🌱</span>
-      <span class="editable-text" id="cropDescription" contenteditable="false">誕生作物只收T, 一律種植後付款<br>卡牌保S+不含基底，限男</span>
+  <div class="tab-description-container" id="tabDescriptionContainer" style="display:none;">
+    <div class="tab-description-box">
+      <span id="tabDescriptionEmoji">📌</span>
+      <span class="tab-description-content editable-site-setting" id="tabDescriptionText" contenteditable="false"></span>
     </div>
   </div>
   <div class="drop-zone" id="dropZone">
@@ -4641,16 +4642,10 @@ function setupCartPreferences() {
     function initAuthUI() {
       const authBox = document.getElementById('authBox');
       const dropZone = document.getElementById('dropZone');
-      const giftDescElem = document.getElementById('giftDescription');
-      const ringDescElem = document.getElementById('ringDescription');
-      const cropDescElem = document.getElementById('cropDescription');
 
       if (isAdmin) {
         document.body.classList.add('is-admin');
         dropZone.style.display = currentCategory ? 'block' : 'none';
-        giftDescElem.contentEditable = "true";
-        ringDescElem.contentEditable = "true";
-        cropDescElem.contentEditable = "true";
         authBox.innerHTML = `
           <div style="font-size:11px; font-weight:bold; color:var(--success-color); text-align:center; margin-bottom:4px;">已登入</div>
           <button class="auth-btn" id="logoutBtn" style="background:#333; color:var(--text-color);">登出</button>
@@ -4663,9 +4658,6 @@ function setupCartPreferences() {
       } else {
         document.body.classList.remove('is-admin');
         dropZone.style.display = 'none';
-        giftDescElem.contentEditable = "false";
-        ringDescElem.contentEditable = "false";
-        cropDescElem.contentEditable = "false";
         authBox.innerHTML = `
           <button class="auth-btn" id="showLoginBtn">登入</button>
           <div class="auth-inputs" id="authInputs">
@@ -4678,9 +4670,6 @@ function setupCartPreferences() {
         bindAuthEvents();
       }
 
-      setupEditableSave(giftDescElem, 'settings_gift', 'caption');
-      setupEditableSave(ringDescElem, 'settings_ring', 'caption');
-      setupEditableSave(cropDescElem, 'settings_crop', 'caption');
       if (currentCategory && currentCategory !== 'schedule') {
         renderGallery();
       }
@@ -4792,9 +4781,7 @@ function setupCartPreferences() {
           currentCategoryDisplayName = btn.getAttribute('data-category') === 'cart' ? '🛒 購物車' : btn.innerText.trim();
           document.getElementById('currentTabName').innerText = currentCategoryDisplayName;
           
-          document.getElementById('giftNoticeContainer').style.display = (currentCategory === 'gift') ? 'block' : 'none';
-          document.getElementById('ringNoticeContainer').style.display = (currentCategory === 'ring_male' || currentCategory === 'ring_female') ? 'block' : 'none';
-          document.getElementById('cropNoticeContainer').style.display = (currentCategory === 'crop_male' || currentCategory === 'crop_female') ? 'block' : 'none';
+          applyTabDescription(window._rawServerData || [], currentCategory);
 
           document.getElementById('cartSummary').style.display = (currentCategory === 'cart') ? 'flex' : 'none';
           if (currentCategory === 'cart') {
@@ -4948,10 +4935,13 @@ function setupCartPreferences() {
       settings_welcome_footer_tip: '謝謝寶貝看完~現在~',
       settings_welcome_footer_button: '❤ 點擊右側分頁開始選購 ❤',
       settings_cart_total: '購物車總金額(甩賣區另計):',
-      settings_gift: '本區一律2糖, 如有購買任一商品或本區滿五件, 可選本區一件免費贈送，單次滿百=本區隨便挑無上限!!!',
-      settings_ring: '情侶等級由買家負擔',
-      settings_crop: '誕生作物只收T, 一律種植後付款\
-卡牌保S+不含基底，限男'
+      // 商品頁／分頁共用的雲端說明欄（Google Sheet）
+      settings_tab_desc_furniture: '',
+      settings_tab_desc_animal: '',
+      settings_tab_desc_pot: '',
+      settings_tab_desc_ring: '',
+      settings_tab_desc_crop: '',
+      settings_tab_desc_gift: '',
     };
     const SETTINGS_IDS = Object.keys(SETTINGS_DEFAULTS);
     function getSettingValue(serverData,id){
@@ -4983,9 +4973,51 @@ function setupCartPreferences() {
       if(title){ const v=getSettingValue(serverData,'settings_title'); setEditableCloudText(title,v); title.contentEditable=isAdmin?'true':'false'; setupCloudEditable(title,'settings_title'); if(v) document.title=`⭐ ${v}-Club MStar ⭐`; }
       const cartLabel=document.getElementById('cartTotalLabel');
       if(cartLabel){ setEditableCloudText(cartLabel,getSettingValue(serverData,'settings_cart_total')); cartLabel.contentEditable=isAdmin?'true':'false'; setupCloudEditable(cartLabel,'settings_cart_total'); }
-      const mappings=[['settings_welcome_title','welcomeTitleText'],['settings_welcome_1','welcomeText1'],['settings_welcome_2','welcomeText2'],['settings_welcome_3','welcomeText3'],['settings_welcome_4','welcomeText4'],['settings_welcome_5','welcomeText5'],['settings_welcome_6','welcomeText6'],['settings_welcome_7','welcomeText7'],['settings_welcome_8','welcomeText8'],['settings_welcome_9','welcomeText9'],['settings_welcome_10','welcomeText10'],['settings_welcome_footer_tip','welcomeFooterTipText'],['settings_welcome_footer_button','welcomeFooterButtonText'],['settings_gift','giftDescription'],['settings_ring','ringDescription'],['settings_crop','cropDescription']];
+      const mappings=[['settings_welcome_title','welcomeTitleText'],['settings_welcome_1','welcomeText1'],['settings_welcome_2','welcomeText2'],['settings_welcome_3','welcomeText3'],['settings_welcome_4','welcomeText4'],['settings_welcome_5','welcomeText5'],['settings_welcome_6','welcomeText6'],['settings_welcome_7','welcomeText7'],['settings_welcome_8','welcomeText8'],['settings_welcome_9','welcomeText9'],['settings_welcome_10','welcomeText10'],['settings_welcome_footer_tip','welcomeFooterTipText'],['settings_welcome_footer_button','welcomeFooterButtonText']];
       mappings.forEach(([id,eid])=>{const e=document.getElementById(eid); if(e){setEditableCloudText(e,getSettingValue(serverData,id)); e.contentEditable=isAdmin?'true':'false'; setupCloudEditable(e,id);}});
+      applyTabDescription(serverData,currentCategory);
     }
+    // ===== 商品頁說明：只讀取 V4 的 settings_tab_desc_* 雲端欄位 =====
+    const TAB_SETTING_BY_CATEGORY = {
+      general_new:'settings_tab_desc_furniture',
+      general_misc:'settings_tab_desc_furniture',
+      general_consumable:'settings_tab_desc_furniture',
+      memes:'settings_tab_desc_animal',
+      animal_other:'settings_tab_desc_animal',
+      pot:'settings_tab_desc_pot',
+      ring_male:'settings_tab_desc_ring',
+      ring_female:'settings_tab_desc_ring',
+      crop_male:'settings_tab_desc_crop',
+      crop_female:'settings_tab_desc_crop',
+      gift:'settings_tab_desc_gift'
+    };
+    const TAB_DESCRIPTION_EMOJI = {
+      general_new:'🏠', general_misc:'🏠', general_consumable:'🏠',
+      memes:'🐾', animal_other:'🐾', pot:'🪴', ring_male:'💍', ring_female:'💍',
+      crop_male:'🌱', crop_female:'🌱', gift:'🎁'
+    };
+    function applyTabDescription(serverData, category){
+      const container=document.getElementById('tabDescriptionContainer');
+      const textElem=document.getElementById('tabDescriptionText');
+      const emojiElem=document.getElementById('tabDescriptionEmoji');
+      if(!container||!textElem||!emojiElem)return;
+      const settingId=TAB_SETTING_BY_CATEGORY[category];
+      if(!settingId){
+        container.style.display='none';
+        return;
+      }
+      const description=getSettingValue(serverData,settingId);
+      setEditableCloudText(textElem,description);
+      textElem.contentEditable=isAdmin?'true':'false';
+      setupCloudEditable(textElem,settingId);
+      textElem.dataset.settingId=settingId;
+      emojiElem.textContent=TAB_DESCRIPTION_EMOJI[category]||'📌';
+      const isBlank=String(description).trim()==='';
+      container.style.display=(!isAdmin&&isBlank)?'none':'block';
+      if(isAdmin&&isBlank) textElem.setAttribute('data-placeholder','目前沒有文字，此欄為隱藏狀態');
+      else textElem.removeAttribute('data-placeholder');
+    }
+
     function markSiteDataReady(){
       document.documentElement.classList.add('site-data-ready');
       const loader=document.getElementById('initialLoadingScreen');
@@ -5011,12 +5043,6 @@ function setupCartPreferences() {
           applyCloudSettings(result.data);
           // 雲端文字已套用後才解除首頁遮罩；底下版面／商品格可先建立。
           if(isInitial) markSiteDataReady();
-          const legacyGiftElem=document.getElementById('giftDescription');
-          const legacyRingElem=document.getElementById('ringDescription');
-          const legacyCropElem=document.getElementById('cropDescription');
-          if(legacyGiftElem) legacyGiftElem.textContent=getSettingValue(result.data,'settings_gift');
-          if(legacyRingElem) legacyRingElem.textContent=getSettingValue(result.data,'settings_ring');
-          if(legacyCropElem) legacyCropElem.textContent=getSettingValue(result.data,'settings_crop');
           if(currentCategory && currentCategory!=='schedule') renderGallery();
           calculateTotal();
           if(activeModalItem){const updated=window._rawServerData.find(i=>String(i.id)===String(activeModalItem.id)); if(updated)openAlbumModal(updated,currentAlbumIndex); else closeAlbumModal();}
@@ -5169,6 +5195,12 @@ function setupCartPreferences() {
         const q = String(qty || '');
         return q.includes('暫售') || q.includes('已售出');
       };
+
+      // 商品點擊：改為使用現有相簿浮窗顯示，不在頁內插入放大圖片。
+      function openProductOriginalImage(item) {
+        if (!item || !item.url) return;
+        openAlbumModal(item, 0);
+      }
 
       const renderItemCards = (itemsToRender) => {
         itemsToRender.forEach((item) => {
@@ -5354,7 +5386,7 @@ function setupCartPreferences() {
             if (e.target.closest('button') || e.target.closest('input') || e.target.closest('select') || e.target.closest('[contenteditable="true"]')) {
               return;
             }
-            openAlbumModal(item, 0);
+            openProductOriginalImage(item);
           });
 
           if (isAdmin) {
@@ -5758,9 +5790,13 @@ function setupCartPreferences() {
 
       const rawData = window._rawServerData || [];
       const albumImages = rawData.filter(i => i.category === 'album_item' && String(i.note) === String(activeModalItem.id));
-      
-      currentAlbumList = albumImages;
-      currentAlbumIndex = currentAlbumList.length > 0 ? Math.min(index, currentAlbumList.length - 1) : 0;
+      // 第一張固定使用商品原圖，後面才是雲端相簿照片。
+      currentAlbumList = [
+        { id: `main-${activeModalItem.id}`, url: activeModalItem.url, isMainProductImage: true },
+        ...albumImages
+      ];
+      currentAlbumIndex = Math.min(index, currentAlbumList.length - 1);
+      document.getElementById('modalTitle').innerText = activeModalItem.caption || '商品相簿';
 
       updateModalView();
     }
@@ -5790,6 +5826,7 @@ function setupCartPreferences() {
       }
 
       const currentPhoto = currentAlbumList[currentAlbumIndex];
+      mainImg.classList.toggle('main-product-photo', !!currentPhoto.isMainProductImage);
       mainImg.src = currentPhoto.url;
 
       if (currentAlbumList.length > 1) {
@@ -5811,8 +5848,10 @@ function setupCartPreferences() {
         dotsContainer.appendChild(dot);
       });
 
-      if (isAdmin) {
+      if (isAdmin && !currentPhoto.isMainProductImage) {
         deletePhotoBtn.style.display = 'block';
+      } else {
+        deletePhotoBtn.style.display = 'none';
       }
     }
 
@@ -5848,7 +5887,10 @@ function setupCartPreferences() {
             await fetchData();
             if (window._rawServerData) {
               const updatedAlbumImages = window._rawServerData.filter(i => i.category === 'album_item' && String(i.note) === String(activeModalItem.id));
-              currentAlbumList = updatedAlbumImages;
+              currentAlbumList = [
+                { id: `main-${activeModalItem.id}`, url: activeModalItem.url, isMainProductImage: true },
+                ...updatedAlbumImages
+              ];
               currentAlbumIndex = currentAlbumList.length - 1;
               updateModalView();
             }
