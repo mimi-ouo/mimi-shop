@@ -65,6 +65,9 @@ html:not(.site-data-ready) body img{
   pointer-events:none;
   transition:opacity .18s ease;
 }
+#initialLoadingScreen .initial-loading-content{
+  display:contents;
+}
 #initialLoadingScreen .initial-loading-dot{
   width:9px;height:9px;border-radius:50%;background:#888;
   animation:initialLoadingPulse 1s infinite ease-in-out;
@@ -75,6 +78,20 @@ html:not(.site-data-ready) #initialLoadingScreen *{
   color:var(--text-color) !important;
 }
 html.site-data-ready #initialLoadingScreen{opacity:0;}
+#initialLoadingScreen .initial-loading-error{display:none;color:var(--text-color) !important;line-height:1.6;text-align:center;}
+#initialLoadingScreen .initial-loading-error-title{font-size:20px;font-weight:900;color:var(--text-color) !important;}
+#initialLoadingScreen .initial-loading-error-message{font-size:14px;color:var(--text-color) !important;opacity:1;line-height:1.7;}
+#initialLoadingScreen .initial-loading-retry{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:40px;padding:8px 20px;border:1px solid var(--text-color);
+  border-radius:8px;background:transparent;color:#000000 !important;
+  font-size:14px;font-weight:700;cursor:pointer;touch-action:manipulation;
+}
+html.site-data-error #initialLoadingScreen .initial-loading-status,
+html.site-data-error #initialLoadingScreen .initial-loading-dot{display:none;}
+html.site-data-error #initialLoadingScreen .initial-loading-error{display:flex;flex-direction:column;align-items:center;gap:10px;}
+html.site-data-error #initialLoadingScreen{opacity:1;pointer-events:auto;}
+
 
 .online-counter-wrapper
 {
@@ -3749,7 +3766,17 @@ body::after
 
 </head>
 <body>
-  <div id="initialLoadingScreen" aria-hidden="true"><div>正在載入雲端資料…</div><div class="initial-loading-dot"></div></div>
+  <div id="initialLoadingScreen" aria-hidden="true">
+    <div class="initial-loading-content">
+      <div class="initial-loading-status">正在載入雲端資料…</div>
+      <div class="initial-loading-dot"></div>
+      <div class="initial-loading-error" role="alert">
+        <div class="initial-loading-error-title">⚠️ 載入失敗</div>
+        <div class="initial-loading-error-message">目前無法取得雲端資料<br>請確認網路連線後重新整理頁面</div>
+        <button type="button" class="initial-loading-retry" onclick="location.reload()">重新整理頁面</button>
+      </div>
+    </div>
+  </div>
   <div class="update-banner" id="updateBanner">
     ✨ 偵測到管理端有新的更新內容！
     <button onclick="location.reload()">立即重新整理</button>
@@ -5043,9 +5070,22 @@ function setupCartPreferences() {
     }
 
     function markSiteDataReady(){
+      document.documentElement.classList.remove('site-data-error');
       document.documentElement.classList.add('site-data-ready');
       const loader=document.getElementById('initialLoadingScreen');
       if(loader) setTimeout(()=>loader.remove(),220);
+    }
+
+    function markSiteDataFailed(error){
+      console.error('載入資料失敗',error);
+      document.documentElement.classList.remove('site-data-ready');
+      document.documentElement.classList.add('site-data-error');
+      const loader=document.getElementById('initialLoadingScreen');
+      if(loader){
+        loader.setAttribute('aria-hidden','false');
+        const retryButton=loader.querySelector('.initial-loading-retry');
+        if(retryButton) retryButton.focus({preventScroll:true});
+      }
     }
 
     async function fetchData(isInitial = false) {
@@ -5058,7 +5098,8 @@ function setupCartPreferences() {
         finally { if(timeoutId) clearTimeout(timeoutId); }
         if(!response.ok) throw new Error(`資料載入 HTTP ${response.status}`);
         const result = await response.json();
-        if(result.status==='success'){
+        if(result.status!=='success') throw new Error(result.message || '雲端資料回傳失敗');
+        {
           const settingsIds=SETTINGS_IDS;
           allData=result.data.filter(item=>!settingsIds.includes(String(item.id)) && item.category!=='album_item');
           window._rawServerData=result.data;
@@ -5072,8 +5113,8 @@ function setupCartPreferences() {
           if(activeModalItem){const updated=window._rawServerData.find(i=>String(i.id)===String(activeModalItem.id)); if(updated)openAlbumModal(updated,currentAlbumIndex); else closeAlbumModal();}
         }
       } catch(err) {
-        console.error('載入資料失敗',err);
-        if(isInitial) markSiteDataReady();
+        if(isInitial) markSiteDataFailed(err);
+        else console.error('載入資料失敗',err);
       }
     }
 
