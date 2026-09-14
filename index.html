@@ -472,20 +472,6 @@ html.site-data-error #initialLoadingScreen{opacity:1;pointer-events:auto;}
   text-shadow:0 1px 0 rgba(255,255,255,.45);
   animation:storageServiceGlow 2.2s ease-in-out infinite
 }
-.storage-service-badge::before
-{
-  content:"";
-  position:absolute;
-  left:-20px;
-  top:50%;
-  transform:translateY(-50%);
-  color:#ffd35a;
-  font-size:19px;
-  font-weight:900;
-  line-height:1;
-  text-shadow:0 1px 5px rgba(255,180,40,.35);
-  animation:storageServiceArrow 1.2s ease-in-out infinite
-}
 .storage-service-sparkle
 {
   font-size:12px;
@@ -496,9 +482,7 @@ html.site-data-error #initialLoadingScreen{opacity:1;pointer-events:auto;}
   0%,100%{box-shadow:0 3px 12px rgba(245,166,35,.25),inset 0 1px 0 rgba(255,255,255,.75)}
   50%{box-shadow:0 4px 18px rgba(245,166,35,.5),inset 0 1px 0 rgba(255,255,255,.9)}
 }
-@keyframes storageServiceArrow
-{
-  0%,100%{transform:translate(-2px,-50%);opacity:.75}
+
   50%{transform:translate(3px,-50%);opacity:1}
 }
 @media (max-width:768px)
@@ -522,11 +506,7 @@ html.site-data-error #initialLoadingScreen{opacity:1;pointer-events:auto;}
     font-size:12px;
     letter-spacing:0
   }
-  .storage-service-badge::before
-  {
-    left:-18px;
-    font-size:17px
-  }
+
 }
 .discord-icon
 {
@@ -3818,6 +3798,98 @@ body::after
 }
 </style>
 
+
+
+
+
+<style id="yh-storage-desktop-stack">
+@media (min-width: 769px) {
+  .discord-container {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+  .storage-service-badge {
+    margin-left: 0 !important;
+  }
+}
+</style>
+
+
+
+
+
+<style id="yh-storage-click-tip">
+.storage-service-badge {
+  cursor: pointer;
+}
+.storage-service-badge.yh-tip-active {
+  transform: none !important;
+}
+.yh-storage-click-tip {
+  position: fixed;
+  z-index: 100000;
+  left: 50%;
+  top: calc(50% + 0px);
+  transform: translate(-50%, 0);
+  background: rgba(25,25,25,.96);
+  color: #fff;
+  padding: 14px 22px;
+  border-radius: 12px;
+  font-size: 16px;
+  line-height: 1.4;
+  box-shadow: 0 10px 30px rgba(0,0,0,.28);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .18s ease;
+}
+.yh-storage-click-tip.show {
+  opacity: 1;
+}
+@media (max-width: 600px) {
+  .yh-storage-click-tip {
+    width: max-content;
+    max-width: calc(100vw - 40px);
+    text-align: center;
+    font-size: 14px;
+    padding: 12px 16px;
+  }
+}
+</style>
+<script id="yh-storage-click-tip-script">
+document.addEventListener('DOMContentLoaded', function () {
+  const badge = document.querySelector('.storage-service-badge');
+  if (!badge) return;
+
+  badge.addEventListener('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    let tip = document.querySelector('.yh-storage-click-tip');
+    if (!tip) {
+      tip = document.createElement('div');
+      tip.className = 'yh-storage-click-tip';
+      tip.textContent = '價格請DC詢問米米';
+      document.body.appendChild(tip);
+    }
+
+    const rect = badge.getBoundingClientRect();
+    tip.style.left = Math.min(
+      Math.max(rect.left + rect.width / 2, 20),
+      window.innerWidth - 20
+    ) + 'px';
+    tip.style.top = (rect.bottom + 8) + 'px';
+    tip.style.transform = 'translateX(-50%)';
+
+    tip.classList.add('show');
+    clearTimeout(window.__yhStorageTipTimer);
+    window.__yhStorageTipTimer = setTimeout(function () {
+      tip.classList.remove('show');
+    }, 2200);
+  });
+});
+</script>
+
 </head>
 <body>
   <div id="initialLoadingScreen" aria-hidden="true">
@@ -3915,7 +3987,7 @@ body::after
                     </svg>
                     <span>聯絡米米</span>
                   </a>
-                  <div class="storage-service-badge" aria-label="提供代儲服務">
+                  <div class="storage-service-badge" aria-label="提供代儲服務" title="價格請DC詢問米米">
                     <span class="storage-service-sparkle">✦</span>
                     <span>提供代儲服務</span>
                     <span class="storage-service-sparkle">✦</span>
