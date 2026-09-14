@@ -449,30 +449,84 @@ html.site-data-error #initialLoadingScreen{opacity:1;pointer-events:auto;}
   box-shadow:0 4px 12px rgba(88,101,242,0.55);
   transform:translateY(-1px)
 }
-.tally-badge
+.storage-service-badge
 {
+  position:relative;
   display:inline-flex;
   align-items:center;
-  gap:8px;
-  background:linear-gradient(135deg,#a855f7,#ec4899);
-  border:1px solid rgba(255,255,255,0.15);
-  color:#ffffff;
-  padding:7px 14px;
-  border-radius:20px;
+  justify-content:center;
+  gap:6px;
+  margin-left:16px;
+  padding:8px 15px;
+  min-height:34px;
+  box-sizing:border-box;
+  border:1px solid rgba(255,215,100,0.7);
+  border-radius:999px;
+  background:linear-gradient(135deg,#fff4c2 0%,#ffd76a 45%,#f5a623 100%);
+  color:#5a3500;
   font-size:13px;
-  font-weight:600;
-  width:fit-content;
-  cursor:pointer;
-  text-decoration:none;
-  box-shadow:0 2px 8px rgba(168,85,247,0.25);
-  transition:all 0.2s ease-in-out
+  font-weight:800;
+  letter-spacing:.3px;
+  white-space:nowrap;
+  box-shadow:0 3px 12px rgba(245,166,35,.28),inset 0 1px 0 rgba(255,255,255,.75);
+  text-shadow:0 1px 0 rgba(255,255,255,.45);
+  animation:storageServiceGlow 2.2s ease-in-out infinite
 }
-.tally-badge:hover
+.storage-service-badge::before
 {
-  background:linear-gradient(135deg,#b875f8,#f472b6);
-  border-color:rgba(255,255,255,0.3);
-  box-shadow:0 4px 12px rgba(168,85,247,0.45);
-  transform:translateY(-1px)
+  content:"";
+  position:absolute;
+  left:-20px;
+  top:50%;
+  transform:translateY(-50%);
+  color:#ffd35a;
+  font-size:19px;
+  font-weight:900;
+  line-height:1;
+  text-shadow:0 1px 5px rgba(255,180,40,.35);
+  animation:storageServiceArrow 1.2s ease-in-out infinite
+}
+.storage-service-sparkle
+{
+  font-size:12px;
+  color:#8a5200
+}
+@keyframes storageServiceGlow
+{
+  0%,100%{box-shadow:0 3px 12px rgba(245,166,35,.25),inset 0 1px 0 rgba(255,255,255,.75)}
+  50%{box-shadow:0 4px 18px rgba(245,166,35,.5),inset 0 1px 0 rgba(255,255,255,.9)}
+}
+@keyframes storageServiceArrow
+{
+  0%,100%{transform:translate(-2px,-50%);opacity:.75}
+  50%{transform:translate(3px,-50%);opacity:1}
+}
+@media (max-width:768px)
+{
+  .discord-container
+  {
+    width:100%;
+    gap:8px;
+    align-items:center
+  }
+  .discord-badge
+  {
+    padding:8px 12px;
+    font-size:12px
+  }
+  .storage-service-badge
+  {
+    margin-left:16px;
+    padding:7px 11px;
+    min-height:32px;
+    font-size:12px;
+    letter-spacing:0
+  }
+  .storage-service-badge::before
+  {
+    left:-18px;
+    font-size:17px
+  }
 }
 .discord-icon
 {
@@ -3861,9 +3915,11 @@ body::after
                     </svg>
                     <span>聯絡米米</span>
                   </a>
-                  <a class="tally-badge" href="https://yhmy.netlify.app/ms-shop" target="_blank" rel="noopener noreferrer">
-                    <span>💬 YH代儲</span>
-                  </a>
+                  <div class="storage-service-badge" aria-label="提供代儲服務">
+                    <span class="storage-service-sparkle">✦</span>
+                    <span>提供代儲服務</span>
+                    <span class="storage-service-sparkle">✦</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -3915,10 +3971,10 @@ body::after
   </div>
   <div class="section-sort-container" id="sectionSortContainer" style="display: none;">
     <select id="sortSelect" class="sort-select">
-      <option value="price_asc" selected>📈 價格：低 → 高</option>
-      <option value="price_desc">📉 價格：高 → 低</option>
-      <option value="time_desc">⏱️ 上傳時間：新 → 舊</option>
-      <option value="time_asc">⏳ 上傳時間：舊 → 新</option>
+      <option value="price_asc" selected>📈 價格：低  高</option>
+      <option value="price_desc">📉 價格：高  低</option>
+      <option value="time_desc">⏱️ 上傳時間：新  舊</option>
+      <option value="time_asc">⏳ 上傳時間：舊  新</option>
     </select>
   </div>
   <div class="gallery" id="gallery"></div>
